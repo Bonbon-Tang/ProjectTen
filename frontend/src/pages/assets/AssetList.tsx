@@ -118,6 +118,21 @@ export default function AssetList() {
   const typeIconMap: Record<string, React.ReactNode> = {
     toolset: <ToolOutlined />,
     model: <ExperimentOutlined />,
+    operator: <ExperimentOutlined />,
+  };
+
+  // Category-specific sub-labels
+  const getCategoryTag = (record: AssetItem) => {
+    if (record.asset_type === 'toolset') {
+      if (record.category === '算子测试工具') return <Tag color="volcano">算子测试专用</Tag>;
+      if (record.category === '模型部署测试工具') return <Tag color="cyan">模型部署专用</Tag>;
+      return <Tag>通用</Tag>;
+    }
+    if (record.asset_type === 'operator') {
+      if (record.category === '算子库') return <Tag color="purple">算子库</Tag>;
+      return <Tag>{record.category || '其他'}</Tag>;
+    }
+    return record.category ? <Tag>{record.category}</Tag> : null;
   };
 
   const columns: ColumnsType<AssetItem> = [
@@ -145,11 +160,10 @@ export default function AssetList() {
       },
     },
     {
-      title: '分类',
-      dataIndex: 'category',
+      title: '分类/用途',
       key: 'category',
-      width: 120,
-      render: (val: string | null) => val || '-',
+      width: 140,
+      render: (_: any, record: AssetItem) => getCategoryTag(record),
     },
     { title: '版本', dataIndex: 'version', key: 'version', width: 90 },
     {

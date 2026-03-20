@@ -448,40 +448,81 @@ class EvaluationService:
 
     @staticmethod
     def _generate_model_metrics(task_type) -> dict:
-        """Generate simulated model test metrics."""
-        base_metrics = {
-            "tgs": round(random.uniform(50.0, 500.0), 1),
-            "first_token_latency": round(random.uniform(10.0, 200.0), 1),
-            "inference_accuracy": round(random.uniform(85.0, 99.0), 2),
-            "throughput": round(random.uniform(100.0, 2000.0), 1),
-            "memory_usage": round(random.uniform(8.0, 60.0), 1),
-        }
+        """Generate simulated model deployment test metrics.
 
+        Core metrics for model deployment testing:
+        - 吞吐量 (throughput)
+        - 延迟 (latency)
+        - 准确率 (accuracy)
+        - 能效比 (energy_efficiency)
+        - 软件功能完备性 (software_completeness)
+        - 性能 (performance_score)
+        """
         task_type_val = task_type.value if hasattr(task_type, 'value') else str(task_type)
 
-        # Add type-specific metrics
+        # Universal deployment metrics
+        base_metrics = {
+            # 吞吐量
+            "throughput": round(random.uniform(100.0, 2000.0), 1),
+            "throughput_unit": "tokens/s" if task_type_val in ("llm", "text_generation", "code_generation", "machine_translation", "text_summarization") else "samples/s",
+            # 延迟
+            "avg_latency_ms": round(random.uniform(5.0, 200.0), 1),
+            "p50_latency_ms": round(random.uniform(3.0, 150.0), 1),
+            "p99_latency_ms": round(random.uniform(10.0, 500.0), 1),
+            "first_token_latency_ms": round(random.uniform(10.0, 300.0), 1),
+            # 准确率
+            "accuracy": round(random.uniform(85.0, 99.5), 2),
+            "accuracy_metric": "top1" if task_type_val in ("image_classification",) else ("mAP" if task_type_val in ("object_detection",) else ("WER" if task_type_val in ("speech_recognition",) else "pass_rate")),
+            # 能效比
+            "energy_efficiency": round(random.uniform(50.0, 500.0), 1),
+            "energy_efficiency_unit": "tokens/J" if task_type_val in ("llm", "text_generation", "code_generation") else "samples/J",
+            "power_consumption_w": round(random.uniform(80.0, 400.0), 0),
+            "gpu_utilization_pct": round(random.uniform(60.0, 98.0), 1),
+            # 软件功能完备性
+            "software_completeness": {
+                "framework_support": random.choice([True, True, True, False]),
+                "mixed_precision_support": random.choice([True, True, False]),
+                "dynamic_batching": random.choice([True, True, False]),
+                "model_parallelism": random.choice([True, False]),
+                "quantization_support": random.choice([True, True, True, False]),
+                "streaming_output": random.choice([True, True, False]) if task_type_val in ("llm", "text_generation", "code_generation") else None,
+                "multi_instance": random.choice([True, True, False]),
+                "hot_update": random.choice([True, False]),
+                "score": round(random.uniform(60.0, 100.0), 1),
+            },
+            # 综合性能评分
+            "performance_score": round(random.uniform(65.0, 98.0), 1),
+            # 显存
+            "memory_usage_gb": round(random.uniform(4.0, 60.0), 1),
+            "memory_utilization_pct": round(random.uniform(40.0, 95.0), 1),
+        }
+
+        # Task-type specific additional metrics
         extra = {}
-        if task_type_val == "llm":
+        if task_type_val in ("llm", "text_generation", "code_generation"):
             extra = {
+                "tokens_per_second": round(random.uniform(30.0, 300.0), 1),
                 "perplexity": round(random.uniform(3.0, 15.0), 2),
-                "bleu_score": round(random.uniform(20.0, 45.0), 1),
-                "tokens_per_second": round(random.uniform(30.0, 200.0), 1),
+                "context_length_tested": random.choice([2048, 4096, 8192, 16384, 32768]),
+                "batch_size_tested": random.choice([1, 4, 8, 16, 32]),
             }
         elif task_type_val == "multimodal":
             extra = {
                 "image_text_alignment": round(random.uniform(70.0, 95.0), 1),
                 "visual_qa_accuracy": round(random.uniform(60.0, 90.0), 1),
             }
-        elif task_type_val in ("image_classification", "object_detection"):
+        elif task_type_val in ("image_classification", "object_detection", "semantic_segmentation"):
             extra = {
                 "top1_accuracy": round(random.uniform(75.0, 95.0), 1),
                 "top5_accuracy": round(random.uniform(90.0, 99.0), 1),
                 "map50": round(random.uniform(50.0, 85.0), 1),
+                "fps": round(random.uniform(20.0, 200.0), 1),
             }
         elif task_type_val in ("speech_recognition", "speech_synthesis"):
             extra = {
                 "wer": round(random.uniform(2.0, 15.0), 1),
                 "cer": round(random.uniform(1.0, 10.0), 1),
+                "rtf": round(random.uniform(0.01, 0.5), 3),
             }
         elif task_type_val == "ocr":
             extra = {

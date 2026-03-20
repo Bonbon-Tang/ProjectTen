@@ -1,7 +1,7 @@
 // 评测大类
 export const EVAL_CATEGORIES = [
   { label: '算子测试', value: 'operator_test', icon: '🔧' },
-  { label: '模型测试', value: 'model_test', icon: '🤖' },
+  { label: '模型部署测试', value: 'model_test', icon: '🤖' },
 ];
 
 // 算子测试子类型
@@ -88,7 +88,7 @@ export const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
 export const ASSET_TYPES = [
   { label: '模型', value: 'model', key: 'model' },
   { label: '数据集', value: 'dataset', key: 'dataset' },
-  { label: '算子', value: 'operator', key: 'operator' },
+  { label: '算子库', value: 'operator', key: 'operator' },
   { label: '脚本', value: 'script', key: 'script' },
   { label: '模板', value: 'template', key: 'template' },
   { label: '工具集', value: 'toolset', key: 'toolset' },

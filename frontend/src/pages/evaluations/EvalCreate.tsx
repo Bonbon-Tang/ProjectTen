@@ -47,10 +47,11 @@ export default function EvalCreate() {
   // Step 3: 参数 (form driven)
   // Step 4: 确认
 
-  // 工具集列表
-  const [toolsets, setToolsets] = useState<{ id: number; name: string }[]>([]);
+  // 工具集列表 — 分两类: 算子测试工具 vs 模型部署测试工具
+  const [operatorToolsets, setOperatorToolsets] = useState<{ id: number; name: string }[]>([]);
+  const [modelToolsets, setModelToolsets] = useState<{ id: number; name: string }[]>([]);
   const [toolsetsLoading, setToolsetsLoading] = useState(false);
-  // 算子库列表
+  // 算子库列表（独立于工具集）
   const [operatorLibs, setOperatorLibs] = useState<{ id: number; name: string; description?: string }[]>([]);
   const [operatorLibsLoading, setOperatorLibsLoading] = useState(false);
   // Cache form values before leaving step 2 so they survive unmount
@@ -108,22 +109,32 @@ export default function EvalCreate() {
     }
   }, []);
 
-  // 从 GET /api/v1/assets?asset_type=toolset 获取工具集
+  // 从 GET /api/v1/assets?asset_type=toolset 获取工具集, 按category分组
   const fetchToolsets = () => {
     setToolsetsLoading(true);
     getAssets({ type: 'toolset', page_size: 100 })
       .then((res: any) => {
         const list = res?.data?.items || res?.items || res?.data || [];
         if (Array.isArray(list)) {
-          setToolsets(list.map((item: any) => ({ id: item.id, name: item.name })));
+          const opTools: { id: number; name: string }[] = [];
+          const modelTools: { id: number; name: string }[] = [];
+          list.forEach((item: any) => {
+            if (item.category === '算子测试工具') {
+              opTools.push({ id: item.id, name: item.name });
+            } else if (item.category === '模型部署测试工具') {
+              modelTools.push({ id: item.id, name: item.name });
+            } else {
+              // Legacy or uncategorized — show in both
+              opTools.push({ id: item.id, name: item.name });
+              modelTools.push({ id: item.id, name: item.name });
+            }
+          });
+          setOperatorToolsets(opTools);
+          setModelToolsets(modelTools);
         }
       })
-      .catch(() => {
-        // 静默失败
-      })
-      .finally(() => {
-        setToolsetsLoading(false);
-      });
+      .catch(() => {})
+      .finally(() => { setToolsetsLoading(false); });
   };
 
   // 从 GET /api/v1/assets?asset_type=operator&category=算子库 获取算子库列表
@@ -216,7 +227,7 @@ export default function EvalCreate() {
 
       // 算子测试默认选中工具集 Deeplink_op_test
       if (isOperatorTest) {
-        const defaultToolset = toolsets.find(
+        const defaultToolset = operatorToolsets.find(
           (t) => t.name === 'Deeplink_op_test' || t.name.includes('Deeplink_op_test'),
         );
         if (defaultToolset) {
@@ -489,19 +500,19 @@ export default function EvalCreate() {
 
         <Form.Item
           name="toolset_id"
-          label={isOperatorTest ? '选择工具集（必选）' : '选择工具集（可选）'}
+          label={isOperatorTest ? '算子评测工具（必选）' : '模型部署测试工具（可选）'}
           rules={
             isOperatorTest
-              ? [{ required: true, message: '算子测试必须选择工具集' }]
+              ? [{ required: true, message: '算子测试必须选择评测工具' }]
               : []
           }
         >
           <Select
-            placeholder="选择工具集"
+            placeholder={isOperatorTest ? '选择算子评测工具' : '选择模型部署测试工具'}
             allowClear={!isOperatorTest}
             loading={toolsetsLoading}
-            options={toolsets.map((t) => ({ label: t.name, value: t.id }))}
-            notFoundContent="暂无可用工具集"
+            options={(isOperatorTest ? operatorToolsets : modelToolsets).map((t) => ({ label: t.name, value: t.id }))}
+            notFoundContent={isOperatorTest ? '暂无算子评测工具' : '暂无模型部署测试工具'}
           />
         </Form.Item>
 
@@ -605,7 +616,8 @@ export default function EvalCreate() {
   const renderStep3 = () => {
     const values = { ...cachedFormValues, ...form.getFieldsValue() };
     const device = deviceList.find((d) => d.device_type === values.device_type);
-    const toolset = toolsets.find((t) => t.id === values.toolset_id);
+    const allToolsets = [...operatorToolsets, ...modelToolsets];
+    const toolset = allToolsets.find((t) => t.id === values.toolset_id);
     const priorityInfo = PRIORITY_MAP[values.priority];
     const deviceCount = values.device_count ?? 1;
     const exceedsAvailable = device ? deviceCount > device.available_count : false;
@@ -639,7 +651,7 @@ export default function EvalCreate() {
                 </span>
               )}
             </Descriptions.Item>
-            <Descriptions.Item label="工具集">
+            <Descriptions.Item label={isOperatorTest ? '算子评测工具' : '模型部署测试工具'}>
               {toolset?.name || '未选择'}
             </Descriptions.Item>
             {taskCategory === 'operator_test' && (

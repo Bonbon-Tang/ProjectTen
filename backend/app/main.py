@@ -18,26 +18,86 @@ Base.metadata.create_all(bind=engine)
 
 
 def _init_default_toolset(db):
-    """Initialize the default Deeplink_op_test toolset if it doesn't exist."""
+    """Initialize the default Deeplink_op_test toolset (算子测试专用) if it doesn't exist."""
     from app.models.asset import DigitalAsset
     existing = db.query(DigitalAsset).filter(DigitalAsset.name == "Deeplink_op_test").first()
-    if existing:
-        return
-    asset = DigitalAsset(
-        name="Deeplink_op_test",
-        description="DeepLink算子测试工具集，支持精度验证和性能Benchmark，内置100个常用算子的H100参考基线数据",
-        asset_type="toolset",
-        category="算子测试工具",
-        tags=["算子测试", "精度验证", "性能benchmark", "H100基线"],
-        version="v1.0.0",
-        file_path="/tools/deeplink_op_test",
-        file_size=0,
-        status="active",
-        creator_id=None,
-        is_shared=True,
-        share_scope="platform",
-    )
-    db.add(asset)
+    if not existing:
+        asset = DigitalAsset(
+            name="Deeplink_op_test",
+            description="DeepLink算子测试工具集，支持精度验证和性能Benchmark，内置100个常用算子的H100参考基线数据",
+            asset_type="toolset",
+            category="算子测试工具",
+            tags=["算子测试", "精度验证", "性能benchmark", "H100基线"],
+            version="v1.0.0",
+            file_path="/tools/deeplink_op_test",
+            file_size=0,
+            status="active",
+            creator_id=None,
+            is_shared=True,
+            share_scope="platform",
+        )
+        db.add(asset)
+    else:
+        # Ensure existing toolset has correct category
+        if existing.category != "算子测试工具":
+            existing.category = "算子测试工具"
+    db.commit()
+
+
+def _init_model_deploy_toolsets(db):
+    """Initialize model deployment test toolsets."""
+    from app.models.asset import DigitalAsset
+
+    model_toolsets = [
+        {
+            "name": "LLM-Inference-Bench",
+            "description": "大语言模型推理部署测试工具集，支持吞吐量、延迟、准确率、能效比和软件功能完备性测试，兼容vLLM/TGI/TensorRT-LLM等推理框架",
+            "tags": ["模型部署", "LLM推理", "吞吐量", "延迟", "能效比", "vLLM", "TGI"],
+            "version": "v1.0.0",
+            "file_path": "/tools/llm_inference_bench",
+        },
+        {
+            "name": "CV-Deploy-Bench",
+            "description": "视觉模型部署测试工具集，支持图像分类/检测/分割模型的推理性能、准确率、能效比和软件功能完备性测试",
+            "tags": ["模型部署", "CV推理", "目标检测", "图像分类", "ONNX", "TensorRT"],
+            "version": "v1.0.0",
+            "file_path": "/tools/cv_deploy_bench",
+        },
+        {
+            "name": "MultiModal-Deploy-Bench",
+            "description": "多模态模型部署测试工具集，支持图文/音视频多模态模型的推理吞吐量、延迟、准确率和能效比测试",
+            "tags": ["模型部署", "多模态", "图文理解", "语音", "视频"],
+            "version": "v1.0.0",
+            "file_path": "/tools/multimodal_deploy_bench",
+        },
+        {
+            "name": "Speech-Deploy-Bench",
+            "description": "语音模型部署测试工具集，支持ASR/TTS模型推理性能、准确率(WER/CER)、实时率(RTF)和能效比测试",
+            "tags": ["模型部署", "语音识别", "语音合成", "ASR", "TTS"],
+            "version": "v1.0.0",
+            "file_path": "/tools/speech_deploy_bench",
+        },
+    ]
+
+    for ts_data in model_toolsets:
+        existing = db.query(DigitalAsset).filter(DigitalAsset.name == ts_data["name"]).first()
+        if existing:
+            continue
+        asset = DigitalAsset(
+            name=ts_data["name"],
+            description=ts_data["description"],
+            asset_type="toolset",
+            category="模型部署测试工具",
+            tags=ts_data["tags"],
+            version=ts_data["version"],
+            file_path=ts_data["file_path"],
+            file_size=0,
+            status="active",
+            creator_id=None,
+            is_shared=True,
+            share_scope="platform",
+        )
+        db.add(asset)
     db.commit()
 
 
@@ -265,6 +325,7 @@ async def lifespan(app: FastAPI):
     try:
         ResourceService.init_preset_devices(db)
         _init_default_toolset(db)
+        _init_model_deploy_toolsets(db)
         _init_operator_libraries(db)
         _init_operators(db)
     finally:

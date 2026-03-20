@@ -619,7 +619,7 @@ export default function EvalDetail() {
           <Descriptions.Item label="设备数量">
             {detail.device_count} 台
           </Descriptions.Item>
-          <Descriptions.Item label="工具集">
+          <Descriptions.Item label={isOperatorTest ? '算子评测工具' : '模型部署测试工具'}>
             {detail.toolset_name || '未选择'}
           </Descriptions.Item>
           {isOperatorTest && (
@@ -657,120 +657,115 @@ export default function EvalDetail() {
         </Descriptions>
       </Card>
 
-      {/* 评测结果 - 模型测试 */}
+      {/* 评测结果 - 模型部署测试 */}
       {isCompleted && !isOperatorTest && modelResults && (
         <Card
-          title="评测结果 - 模型测试"
+          title="评测结果 - 模型部署测试"
           style={{ marginBottom: 16, borderRadius: 8 }}
         >
-          <Row gutter={[16, 16]}>
+          {/* 核心指标 */}
+          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
             <Col xs={12} sm={8} md={4}>
-              <Card
-                size="small"
-                style={{
-                  textAlign: 'center',
-                  borderRadius: 8,
-                  background: '#f6f9ff',
-                }}
-              >
+              <Card size="small" style={{ textAlign: 'center', borderRadius: 8, background: '#f6f9ff' }}>
                 <Statistic
-                  title="TGS (tokens/s)"
-                  value={modelResults.tgs || modelResults.tokens_per_second}
-                  precision={1}
-                  valueStyle={{
-                    color: '#1B3A6B',
-                    fontSize: 28,
-                    fontWeight: 700,
-                  }}
-                />
-              </Card>
-            </Col>
-            <Col xs={12} sm={8} md={4}>
-              <Card
-                size="small"
-                style={{
-                  textAlign: 'center',
-                  borderRadius: 8,
-                  background: '#f6f9ff',
-                }}
-              >
-                <Statistic
-                  title="首字延迟 (ms)"
-                  value={modelResults.first_token_latency}
-                  precision={1}
-                  valueStyle={{
-                    color: '#2196F3',
-                    fontSize: 28,
-                    fontWeight: 700,
-                  }}
-                />
-              </Card>
-            </Col>
-            <Col xs={12} sm={8} md={4}>
-              <Card
-                size="small"
-                style={{
-                  textAlign: 'center',
-                  borderRadius: 8,
-                  background: '#f6f9ff',
-                }}
-              >
-                <Statistic
-                  title="推理精度"
-                  value={modelResults.inference_accuracy || modelResults.inference_score}
-                  precision={1}
-                  suffix="%"
-                  valueStyle={{
-                    color: '#52c41a',
-                    fontSize: 28,
-                    fontWeight: 700,
-                  }}
-                />
-              </Card>
-            </Col>
-            <Col xs={12} sm={8} md={4}>
-              <Card
-                size="small"
-                style={{
-                  textAlign: 'center',
-                  borderRadius: 8,
-                  background: '#f6f9ff',
-                }}
-              >
-                <Statistic
-                  title="吞吐量"
+                  title={`吞吐量 (${modelResults.throughput_unit || 'samples/s'})`}
                   value={modelResults.throughput}
                   precision={1}
-                  valueStyle={{
-                    color: '#fa8c16',
-                    fontSize: 28,
-                    fontWeight: 700,
-                  }}
+                  valueStyle={{ color: '#1B3A6B', fontSize: 24, fontWeight: 700 }}
                 />
               </Card>
             </Col>
             <Col xs={12} sm={8} md={4}>
-              <Card
-                size="small"
-                style={{
-                  textAlign: 'center',
-                  borderRadius: 8,
-                  background: '#f6f9ff',
-                }}
-              >
+              <Card size="small" style={{ textAlign: 'center', borderRadius: 8, background: '#f6f9ff' }}>
                 <Statistic
-                  title="显存占用 (GB)"
-                  value={modelResults.memory_usage}
+                  title="平均延迟 (ms)"
+                  value={modelResults.avg_latency_ms}
                   precision={1}
-                  valueStyle={{
-                    color: '#722ed1',
-                    fontSize: 24,
-                    fontWeight: 600,
-                  }}
+                  valueStyle={{ color: '#2196F3', fontSize: 24, fontWeight: 700 }}
+                />
+              </Card>
+            </Col>
+            <Col xs={12} sm={8} md={4}>
+              <Card size="small" style={{ textAlign: 'center', borderRadius: 8, background: '#f6f9ff' }}>
+                <Statistic
+                  title="准确率"
+                  value={modelResults.accuracy}
+                  precision={2}
+                  suffix="%"
+                  valueStyle={{ color: '#52c41a', fontSize: 24, fontWeight: 700 }}
+                />
+              </Card>
+            </Col>
+            <Col xs={12} sm={8} md={4}>
+              <Card size="small" style={{ textAlign: 'center', borderRadius: 8, background: '#f6f9ff' }}>
+                <Statistic
+                  title={`能效比 (${modelResults.energy_efficiency_unit || 'samples/J'})`}
+                  value={modelResults.energy_efficiency}
+                  precision={1}
+                  valueStyle={{ color: '#fa8c16', fontSize: 24, fontWeight: 700 }}
+                />
+              </Card>
+            </Col>
+            <Col xs={12} sm={8} md={4}>
+              <Card size="small" style={{ textAlign: 'center', borderRadius: 8, background: '#f6f9ff' }}>
+                <Statistic
+                  title="综合性能"
+                  value={modelResults.performance_score}
+                  precision={1}
+                  suffix="分"
+                  valueStyle={{ color: '#722ed1', fontSize: 24, fontWeight: 700 }}
                 />
               </Card>
             </Col>
           </Row>
+
+          {/* 详细指标 */}
+          <Descriptions bordered size="small" column={{ xs: 1, sm: 2 }} style={{ marginBottom: 24 }}>
+            <Descriptions.Item label="P50 延迟">{modelResults.p50_latency_ms?.toFixed(1) ?? '-'} ms</Descriptions.Item>
+            <Descriptions.Item label="P99 延迟">{modelResults.p99_latency_ms?.toFixed(1) ?? '-'} ms</Descriptions.Item>
+            <Descriptions.Item label="首Token延迟">{modelResults.first_token_latency_ms?.toFixed(1) ?? '-'} ms</Descriptions.Item>
+            <Descriptions.Item label="功耗">{modelResults.power_consumption_w ?? '-'} W</Descriptions.Item>
+            <Descriptions.Item label="GPU利用率">{modelResults.gpu_utilization_pct?.toFixed(1) ?? '-'}%</Descriptions.Item>
+            <Descriptions.Item label="显存占用">{modelResults.memory_usage_gb?.toFixed(1) ?? '-'} GB</Descriptions.Item>
+            <Descriptions.Item label="显存利用率">{modelResults.memory_utilization_pct?.toFixed(1) ?? '-'}%</Descriptions.Item>
+            <Descriptions.Item label="准确率指标类型">{modelResults.accuracy_metric || '-'}</Descriptions.Item>
+            {modelResults.tokens_per_second && (
+              <Descriptions.Item label="Tokens/s">{modelResults.tokens_per_second}</Descriptions.Item>
+            )}
+            {modelResults.fps && (
+              <Descriptions.Item label="FPS">{modelResults.fps}</Descriptions.Item>
+            )}
+          </Descriptions>
+
+          {/* 软件功能完备性 */}
+          {modelResults.software_completeness && (
+            <Card title="软件功能完备性" size="small" style={{ borderRadius: 8 }}>
+              <Row gutter={[16, 8]}>
+                <Col span={24} style={{ marginBottom: 12 }}>
+                  <Statistic
+                    title="完备性评分"
+                    value={modelResults.software_completeness.score}
+                    suffix="/ 100"
+                    precision={1}
+                    valueStyle={{
+                      color: modelResults.software_completeness.score >= 80 ? '#52c41a' : '#fa8c16',
+                      fontSize: 20,
+                      fontWeight: 700,
+                    }}
+                  />
+                </Col>
+                {Object.entries(modelResults.software_completeness)
+                  .filter(([k, v]) => k !== 'score' && v !== null)
+                  .map(([key, val]) => (
+                    <Col xs={12} sm={8} md={6} key={key}>
+                      <Tag color={val ? 'green' : 'red'} style={{ marginBottom: 4 }}>
+                        {val ? '✓' : '✗'} {key.replace(/_/g, ' ')}
+                      </Tag>
+                    </Col>
+                  ))}
+              </Row>
+            </Card>
+          )}
         </Card>
       )}
 
