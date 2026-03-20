@@ -84,9 +84,28 @@ def download_report(report_id: int, current_user: User = Depends(get_current_use
     report = ReportService.get_by_id(db, report_id)
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
-    if not report.file_path:
-        raise HTTPException(status_code=400, detail="Report file not generated yet")
-    return FileResponse(report.file_path, filename=f"report_{report.id}.pdf")
+    # Return report content as downloadable JSON
+    import json
+    from fastapi.responses import Response
+    content = report.content or "{}"
+    try:
+        parsed = json.loads(content) if isinstance(content, str) else content
+    except (json.JSONDecodeError, TypeError):
+        parsed = {"raw": content}
+    report_data = {
+        "report_id": report.id,
+        "title": report.title,
+        "report_type": report.report_type,
+        "status": report.status,
+        "created_at": str(report.created_at),
+        **parsed,
+    }
+    json_bytes = json.dumps(report_data, ensure_ascii=False, indent=2).encode("utf-8")
+    return Response(
+        content=json_bytes,
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="report_{report.id}.json"'},
+    )
 
 
 @router.post("/{report_id}/share")

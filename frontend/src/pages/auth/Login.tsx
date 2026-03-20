@@ -59,10 +59,10 @@ export default function Login() {
           AI
         </div>
         <Title level={3} style={{ color: '#fff', marginBottom: 16 }}>
-          人工智能软硬件验证平台
+          上海人工智能实验室-AGI4Sci适配&验证基地
         </Title>
         <Paragraph style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, lineHeight: 1.8 }}>
-          专业的 AI 模型与硬件评测平台，提供全面的性能测试、精度验证和兼容性评估服务。
+          面向科学智能的软硬件适配与验证平台，提供全面的算子精度验证、性能测试和芯片兼容性评估服务。
         </Paragraph>
         <div style={{ marginTop: 32 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>

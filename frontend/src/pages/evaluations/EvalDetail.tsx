@@ -261,12 +261,16 @@ export default function EvalDetail() {
     }
     try {
       const res: any = await downloadReport(detail.report_id);
-      const url = window.URL.createObjectURL(new Blob([res]));
+      // Response is JSON (from updated backend)
+      const data = typeof res === 'string' ? res : (res?.data ? JSON.stringify(res.data, null, 2) : JSON.stringify(res, null, 2));
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `评测报告-${detail.name}.pdf`;
+      link.download = `评测报告-${detail.name}.json`;
       link.click();
       window.URL.revokeObjectURL(url);
+      message.success('报告已下载');
     } catch {
       message.error('下载失败');
     }

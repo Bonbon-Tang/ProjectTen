@@ -209,7 +209,7 @@ export default function Sidebar() {
           </div>
           {!collapsed && (
             <span style={{ color: '#fff', fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>
-              AI验证平台
+              AGI4Sci适配&验证基地
             </span>
           )}
         </div>

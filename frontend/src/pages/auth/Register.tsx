@@ -169,7 +169,7 @@ export default function Register() {
         <Title level={3} style={{ color: '#1B3A6B', marginBottom: 8 }}>
           注册账号
         </Title>
-        <Text type="secondary">创建您的 AI 验证平台账号</Text>
+        <Text type="secondary">创建您的 AGI4Sci适配&验证基地 账号</Text>
       </div>
 
       <Steps current={current} items={steps} style={{ marginBottom: 32 }} size="small" />

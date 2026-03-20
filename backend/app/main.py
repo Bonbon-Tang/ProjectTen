@@ -274,7 +274,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="ProjectTen Evaluation Platform API",
+    title="上海人工智能实验室-AGI4Sci适配&验证基地 API",
     description="Backend API for the AI chip/model evaluation platform",
     version="1.0.0",
     docs_url="/docs",
@@ -347,7 +347,7 @@ app.include_router(api_router)
 
 @app.get("/", tags=["Health"])
 def root():
-    return {"code": 0, "message": "ProjectTen API is running", "data": {"version": "1.0.0"}}
+    return {"code": 0, "message": "AGI4Sci适配&验证基地 API is running", "data": {"version": "1.0.0"}}
 
 
 @app.get("/health", tags=["Health"])

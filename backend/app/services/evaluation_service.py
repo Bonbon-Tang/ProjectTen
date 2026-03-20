@@ -16,6 +16,7 @@ from app.models.evaluation import EvaluationTask, TaskStatus, TaskType, TaskCate
 from app.models.report import EvaluationReport
 from app.models.resource import ComputeDevice
 from app.models.operator import Operator
+from app.models.operator_benchmark import OperatorBenchmark
 from app.utils.pagination import PaginationParams
 
 
@@ -375,7 +376,7 @@ class EvaluationService:
 
             operator_results.append(op_result)
 
-            # ── Write results back to Operator benchmark table ──
+            # ── Write results back to Operator table (latest) ──
             op.tested_device_type = task.device_type
             op.tested_accuracy_fp32 = fp32_acc
             op.tested_accuracy_fp16 = fp16_acc
@@ -391,7 +392,38 @@ class EvaluationService:
                 op.tested_throughput = perf.get("tested_throughput_gops")
             db.add(op)
 
-        # Commit all operator updates
+            # ── Write per-chip per-shape results to OperatorBenchmark ──
+            input_shape = op.input_shape or "default"
+            device_type = task.device_type or "unknown"
+            bench = db.query(OperatorBenchmark).filter(
+                OperatorBenchmark.operator_id == op.id,
+                OperatorBenchmark.device_type == device_type,
+                OperatorBenchmark.input_shape == input_shape,
+            ).first()
+            if not bench:
+                bench = OperatorBenchmark(
+                    operator_id=op.id,
+                    device_type=device_type,
+                    input_shape=input_shape,
+                )
+            bench.fp32_accuracy = fp32_acc
+            bench.fp16_accuracy = fp16_acc
+            bench.int8_accuracy = int8_acc
+            bench.fp16_loss_rate = op_result["accuracy"]["fp16_loss_rate"]
+            bench.int8_loss_rate = op_result["accuracy"]["int8_loss_rate"]
+            bench.accuracy_pass = 1 if op_result["accuracy"]["pass"] else 0
+            bench.operator_lib = operator_lib_name
+            bench.task_id = task.id
+            bench.tested_at = datetime.utcnow()
+            if task_type_val in ("accuracy_and_performance", "performance_benchmark") and "performance" in op_result:
+                perf = op_result["performance"]
+                bench.fp32_latency = perf.get("tested_fp32_latency_us")
+                bench.fp16_latency = perf.get("tested_fp16_latency_us")
+                bench.int8_latency = perf.get("tested_int8_latency_us")
+                bench.throughput = perf.get("tested_throughput_gops")
+            db.add(bench)
+
+        # Commit all updates
         db.commit()
 
         # Summary

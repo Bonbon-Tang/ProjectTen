@@ -1,5 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Card, Table, Input, Select, Row, Col, Tag, Spin, Statistic, Typography } from 'antd';
+import {
+  Card,
+  Table,
+  Input,
+  Select,
+  Row,
+  Col,
+  Tag,
+  Spin,
+  Statistic,
+  Typography,
+  Collapse,
+  Empty,
+} from 'antd';
 import { ThunderboltOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '@/components/PageHeader';
@@ -7,7 +20,9 @@ import {
   getBenchmarkOperators,
   getBenchmarkCategories,
   getBenchmarkSummary,
+  getOperatorBenchmarks,
 } from '@/api/benchmark';
+import { DEVICE_TYPES } from '@/utils/constants';
 
 const { Text } = Typography;
 
@@ -22,18 +37,8 @@ interface BenchmarkOperator {
   memory_mb: number;
   input_shape: string;
   description?: string;
-  specs?: string;
-  // Tested results
   tested_device_type?: string;
-  tested_fp32_latency?: number;
-  tested_fp16_latency?: number;
-  tested_int8_latency?: number;
-  tested_throughput?: number;
-  tested_accuracy_fp32?: number;
-  tested_accuracy_fp16?: number;
-  tested_accuracy_int8?: number;
   tested_operator_lib?: string;
-  tested_task_id?: number;
   tested_at?: string;
 }
 
@@ -41,6 +46,113 @@ interface BenchmarkSummary {
   total_operators: number;
   total_categories: number;
 }
+
+interface ShapeResult {
+  id: number;
+  input_shape: string;
+  fp32_accuracy: number | null;
+  fp16_accuracy: number | null;
+  int8_accuracy: number | null;
+  fp16_loss_rate: number | null;
+  int8_loss_rate: number | null;
+  accuracy_pass: number;
+  fp32_latency: number | null;
+  fp16_latency: number | null;
+  int8_latency: number | null;
+  throughput: number | null;
+  operator_lib: string | null;
+  task_id: number | null;
+  tested_at: string | null;
+}
+
+interface DeviceBenchmarkGroup {
+  device_type: string;
+  results: ShapeResult[];
+}
+
+function getDeviceLabel(deviceType: string) {
+  return DEVICE_TYPES.find((d) => d.value === deviceType);
+}
+
+// Shape results table columns
+const shapeColumns: ColumnsType<ShapeResult> = [
+  {
+    title: '输入Shape',
+    dataIndex: 'input_shape',
+    key: 'input_shape',
+    width: 160,
+    render: (val: string) => <Text code style={{ fontSize: 12 }}>{val}</Text>,
+  },
+  {
+    title: 'FP32精度',
+    dataIndex: 'fp32_accuracy',
+    key: 'fp32_accuracy',
+    width: 100,
+    render: (val: number | null) => val != null ? val.toFixed(4) : '-',
+  },
+  {
+    title: 'FP16精度',
+    dataIndex: 'fp16_accuracy',
+    key: 'fp16_accuracy',
+    width: 100,
+    render: (val: number | null) => val != null ? val.toFixed(4) : '-',
+  },
+  {
+    title: 'INT8精度',
+    dataIndex: 'int8_accuracy',
+    key: 'int8_accuracy',
+    width: 100,
+    render: (val: number | null) => val != null ? val.toFixed(4) : '-',
+  },
+  {
+    title: '损失率',
+    dataIndex: 'int8_loss_rate',
+    key: 'int8_loss_rate',
+    width: 90,
+    render: (val: number | null) => {
+      if (val == null) return '-';
+      let color = '#fa8c16';
+      if (val < 1) color = '#52c41a';
+      if (val > 5) color = '#ff4d4f';
+      return <span style={{ color, fontWeight: 600 }}>{val.toFixed(2)}%</span>;
+    },
+  },
+  {
+    title: '通过',
+    dataIndex: 'accuracy_pass',
+    key: 'accuracy_pass',
+    width: 60,
+    render: (val: number) => val ? <Tag color="green">✓</Tag> : <Tag color="red">✗</Tag>,
+  },
+  {
+    title: 'FP16延迟(μs)',
+    dataIndex: 'fp16_latency',
+    key: 'fp16_latency',
+    width: 110,
+    render: (val: number | null) => val != null ? val.toFixed(1) : '-',
+  },
+  {
+    title: '吞吐量(GOPS)',
+    dataIndex: 'throughput',
+    key: 'throughput',
+    width: 120,
+    render: (val: number | null) => val != null ? val.toFixed(1) : '-',
+  },
+  {
+    title: '算子库',
+    dataIndex: 'operator_lib',
+    key: 'operator_lib',
+    width: 120,
+    render: (val: string | null) => val ? <Tag color="purple">{val}</Tag> : '-',
+  },
+  {
+    title: '测试时间',
+    dataIndex: 'tested_at',
+    key: 'tested_at',
+    width: 160,
+    render: (val: string | null) => val ? <Text type="secondary" style={{ fontSize: 12 }}>{val.slice(0, 19)}</Text> : '-',
+  },
+];
 
 export default function BenchmarkList() {
   const [loading, setLoading] = useState(false);
@@ -52,23 +164,22 @@ export default function BenchmarkList() {
   const [summary, setSummary] = useState<BenchmarkSummary>({ total_operators: 0, total_categories: 0 });
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [expandedRowKeys, setExpandedRowKeys] = useState<number[]>([]);
+  // Cache for per-operator benchmark data
+  const [benchmarkCache, setBenchmarkCache] = useState<Record<number, DeviceBenchmarkGroup[]>>({});
+  const [benchmarkLoading, setBenchmarkLoading] = useState<Record<number, boolean>>({});
 
-  // 获取分类列表
   const fetchCategories = useCallback(async () => {
     try {
       const res: any = await getBenchmarkCategories();
       const list = res?.data || res;
       if (Array.isArray(list)) {
-        setCategories(list);
+        setCategories(list.map((c: any) => (typeof c === 'string' ? c : c.category)));
       } else if (list?.categories && Array.isArray(list.categories)) {
-        setCategories(list.categories);
+        setCategories(list.categories.map((c: any) => (typeof c === 'string' ? c : c.category)));
       }
-    } catch {
-      // 静默
-    }
+    } catch { /* silent */ }
   }, []);
 
-  // 获取摘要
   const fetchSummary = useCallback(async () => {
     setSummaryLoading(true);
     try {
@@ -80,14 +191,10 @@ export default function BenchmarkList() {
           total_categories: d.total_categories ?? d.categories_count ?? 0,
         });
       }
-    } catch {
-      // 静默
-    } finally {
-      setSummaryLoading(false);
-    }
+    } catch { /* silent */ }
+    finally { setSummaryLoading(false); }
   }, []);
 
-  // 获取算子数据
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -101,26 +208,35 @@ export default function BenchmarkList() {
       const items = resData?.items || resData?.list || [];
       if (Array.isArray(items)) {
         setData(items);
-        setPagination((prev) => ({
-          ...prev,
-          total: resData?.total ?? items.length,
-        }));
+        setPagination((prev) => ({ ...prev, total: resData?.total ?? items.length }));
       }
-    } catch {
-      // 静默
-    } finally {
-      setLoading(false);
-    }
+    } catch { /* silent */ }
+    finally { setLoading(false); }
   }, [pagination.current, pagination.pageSize, selectedCategory, keyword]);
 
-  useEffect(() => {
-    fetchCategories();
-    fetchSummary();
-  }, [fetchCategories, fetchSummary]);
+  useEffect(() => { fetchCategories(); fetchSummary(); }, [fetchCategories, fetchSummary]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  // Fetch per-operator benchmarks when expanding
+  const fetchOperatorBenchmarks = async (operatorId: number) => {
+    if (benchmarkCache[operatorId]) return; // already cached
+    setBenchmarkLoading((prev) => ({ ...prev, [operatorId]: true }));
+    try {
+      const res: any = await getOperatorBenchmarks(operatorId);
+      const groups: DeviceBenchmarkGroup[] = res?.data || res || [];
+      setBenchmarkCache((prev) => ({ ...prev, [operatorId]: groups }));
+    } catch { /* silent */ }
+    finally { setBenchmarkLoading((prev) => ({ ...prev, [operatorId]: false })); }
+  };
+
+  const handleExpand = (expanded: boolean, record: BenchmarkOperator) => {
+    if (expanded) {
+      setExpandedRowKeys((prev) => [...prev, record.id]);
+      fetchOperatorBenchmarks(record.id);
+    } else {
+      setExpandedRowKeys((prev) => prev.filter((k) => k !== record.id));
+    }
+  };
 
   const handleSearch = () => {
     setPagination((prev) => ({ ...prev, current: 1 }));
@@ -138,20 +254,7 @@ export default function BenchmarkList() {
       dataIndex: 'name',
       key: 'name',
       width: 160,
-      render: (text: string, record) => (
-        <a
-          onClick={() =>
-            setExpandedRowKeys((prev) =>
-              prev.includes(record.id)
-                ? prev.filter((k) => k !== record.id)
-                : [...prev, record.id],
-            )
-          }
-          style={{ fontWeight: 500 }}
-        >
-          {text}
-        </a>
-      ),
+      render: (text: string) => <Text strong>{text}</Text>,
     },
     {
       title: '分类',
@@ -161,44 +264,28 @@ export default function BenchmarkList() {
       render: (val: string) => <Tag color="blue">{val}</Tag>,
     },
     {
-      title: 'FP32延迟(μs)',
+      title: 'H100 FP32(μs)',
       dataIndex: 'fp32_latency',
       key: 'fp32_latency',
       width: 120,
       sorter: (a, b) => (a.fp32_latency ?? 0) - (b.fp32_latency ?? 0),
-      render: (val: number) => (val != null ? val.toFixed(1) : '-'),
+      render: (val: number) => val != null ? val.toFixed(1) : '-',
     },
     {
-      title: 'FP16延迟(μs)',
+      title: 'H100 FP16(μs)',
       dataIndex: 'fp16_latency',
       key: 'fp16_latency',
-      width: 130,
+      width: 120,
       sorter: (a, b) => (a.fp16_latency ?? 0) - (b.fp16_latency ?? 0),
-      render: (val: number, record) => {
-        if (val == null) return '-';
-        const speedup =
-          record.fp32_latency && record.fp32_latency > val
-            ? (record.fp32_latency / val).toFixed(2)
-            : null;
-        return (
-          <span>
-            {val.toFixed(1)}
-            {speedup && (
-              <span style={{ color: '#52c41a', fontSize: 11, marginLeft: 4 }}>
-                ↑{speedup}x
-              </span>
-            )}
-          </span>
-        );
-      },
+      render: (val: number) => val != null ? val.toFixed(1) : '-',
     },
     {
-      title: 'INT8延迟(μs)',
+      title: 'H100 INT8(μs)',
       dataIndex: 'int8_latency',
       key: 'int8_latency',
       width: 120,
       sorter: (a, b) => (a.int8_latency ?? 0) - (b.int8_latency ?? 0),
-      render: (val: number) => (val != null ? val.toFixed(1) : '-'),
+      render: (val: number) => val != null ? val.toFixed(1) : '-',
     },
     {
       title: '吞吐量(GOPS)',
@@ -206,15 +293,7 @@ export default function BenchmarkList() {
       key: 'throughput',
       width: 120,
       sorter: (a, b) => (a.throughput ?? 0) - (b.throughput ?? 0),
-      render: (val: number) => (val != null ? val.toFixed(1) : '-'),
-    },
-    {
-      title: '显存(MB)',
-      dataIndex: 'memory_mb',
-      key: 'memory_mb',
-      width: 100,
-      sorter: (a, b) => (a.memory_mb ?? 0) - (b.memory_mb ?? 0),
-      render: (val: number) => (val != null ? val.toFixed(0) : '-'),
+      render: (val: number) => val != null ? val.toFixed(1) : '-',
     },
     {
       title: '输入Shape',
@@ -222,37 +301,102 @@ export default function BenchmarkList() {
       key: 'input_shape',
       width: 160,
       ellipsis: true,
-      render: (val: string) => (
-        <Text type="secondary" style={{ fontSize: 12 }}>
-          {val || '-'}
-        </Text>
-      ),
-    },
-    {
-      title: '测试算子库',
-      dataIndex: 'tested_operator_lib',
-      key: 'tested_operator_lib',
-      width: 130,
-      render: (val: string) =>
-        val ? <Tag color="purple">{val}</Tag> : <Text type="secondary">-</Text>,
+      render: (val: string) => <Text type="secondary" style={{ fontSize: 12 }}>{val || '-'}</Text>,
     },
     {
       title: '测试状态',
       key: 'tested_status',
       width: 100,
       render: (_: any, record: BenchmarkOperator) =>
-        record.tested_at ? (
-          <Tag color="green">已测试</Tag>
-        ) : (
-          <Tag>未测试</Tag>
-        ),
+        record.tested_at ? <Tag color="green">已测试</Tag> : <Tag>未测试</Tag>,
     },
   ];
+
+  // Render expanded row: first level = chips, second level = shapes (table)
+  const renderExpandedRow = (record: BenchmarkOperator) => {
+    const groups = benchmarkCache[record.id];
+    const isLoading = benchmarkLoading[record.id];
+
+    if (isLoading) {
+      return <div style={{ padding: 24, textAlign: 'center' }}><Spin tip="加载测试数据..." /></div>;
+    }
+
+    if (!groups || groups.length === 0) {
+      return (
+        <div style={{ padding: '16px 24px', background: '#fafafa', borderRadius: 8 }}>
+          <Row gutter={[24, 12]}>
+            <Col span={8}><Text strong>算子：</Text>{record.name}</Col>
+            <Col span={8}><Text strong>分类：</Text>{record.category}</Col>
+            <Col span={8}><Text strong>默认Shape：</Text>{record.input_shape || '-'}</Col>
+            {record.description && <Col span={24}><Text strong>说明：</Text>{record.description}</Col>}
+          </Row>
+          <div style={{ marginTop: 16, color: '#999', textAlign: 'center' }}>
+            暂无芯片测试数据，运行算子测试任务后将自动填充
+          </div>
+        </div>
+      );
+    }
+
+    // Build Collapse panels: one per device type
+    const collapseItems = groups.map((group) => {
+      const deviceInfo = getDeviceLabel(group.device_type);
+      const deviceLabel = deviceInfo?.label || group.device_type;
+      const deviceColor = deviceInfo?.color || '#333';
+      const passCount = group.results.filter((r) => r.accuracy_pass).length;
+      const totalCount = group.results.length;
+
+      return {
+        key: group.device_type,
+        label: (
+          <span>
+            <span style={{ color: deviceColor, fontWeight: 600, marginRight: 8 }}>
+              {deviceLabel}
+            </span>
+            <Tag>{totalCount} 个Shape</Tag>
+            <Tag color={passCount === totalCount ? 'green' : 'orange'}>
+              通过 {passCount}/{totalCount}
+            </Tag>
+            {group.results[0]?.operator_lib && (
+              <Tag color="purple">算子库: {group.results[0].operator_lib}</Tag>
+            )}
+          </span>
+        ),
+        children: (
+          <Table
+            columns={shapeColumns}
+            dataSource={group.results}
+            rowKey="id"
+            size="small"
+            scroll={{ x: 1200 }}
+            pagination={group.results.length > 10 ? { pageSize: 10, size: 'small' } : false}
+          />
+        ),
+      };
+    });
+
+    return (
+      <div style={{ padding: '8px 0' }}>
+        <div style={{ marginBottom: 12, padding: '0 16px' }}>
+          <Row gutter={[24, 8]}>
+            <Col><Text strong>算子：</Text>{record.name}</Col>
+            <Col><Text strong>分类：</Text><Tag>{record.category}</Tag></Col>
+            <Col><Text strong>默认Shape：</Text><Text code>{record.input_shape}</Text></Col>
+            {record.description && <Col span={24}><Text strong>说明：</Text>{record.description}</Col>}
+          </Row>
+        </div>
+        <Collapse
+          defaultActiveKey={groups.length === 1 ? [groups[0].device_type] : []}
+          items={collapseItems}
+          style={{ background: '#fff' }}
+        />
+      </div>
+    );
+  };
 
   return (
     <div>
       <PageHeader
-        title="算子性能 Benchmark（H100基线）"
+        title="算子性能 Benchmark"
         breadcrumbs={[{ title: 'Benchmark', path: '/benchmark/operators' }, { title: '算子Benchmark' }]}
       />
 
@@ -270,11 +414,7 @@ export default function BenchmarkList() {
           </Col>
           <Col xs={12} sm={8} md={6}>
             <Card style={{ borderRadius: 8 }}>
-              <Statistic
-                title="分类数"
-                value={summary.total_categories}
-                valueStyle={{ color: '#2196F3' }}
-              />
+              <Statistic title="分类数" value={summary.total_categories} valueStyle={{ color: '#2196F3' }} />
             </Card>
           </Col>
         </Row>
@@ -287,10 +427,7 @@ export default function BenchmarkList() {
           style={{ width: 200 }}
           allowClear
           value={selectedCategory}
-          onChange={(val) => {
-            setSelectedCategory(val);
-            setPagination((prev) => ({ ...prev, current: 1 }));
-          }}
+          onChange={(val) => { setSelectedCategory(val); setPagination((prev) => ({ ...prev, current: 1 })); }}
           options={categories.map((c) => ({ label: c, value: c }))}
         />
         <Input
@@ -304,14 +441,7 @@ export default function BenchmarkList() {
         />
         <button
           onClick={handleSearch}
-          style={{
-            padding: '4px 16px',
-            background: '#1B3A6B',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            cursor: 'pointer',
-          }}
+          style={{ padding: '4px 16px', background: '#1B3A6B', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}
         >
           搜索
         </button>
@@ -324,109 +454,11 @@ export default function BenchmarkList() {
           dataSource={data}
           rowKey="id"
           loading={loading}
-          scroll={{ x: 1400 }}
+          scroll={{ x: 1200 }}
           expandable={{
             expandedRowKeys,
-            onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as number[]),
-            expandedRowRender: (record) => (
-              <div style={{ padding: '8px 16px', background: '#fafafa', borderRadius: 8 }}>
-                <Row gutter={[24, 12]}>
-                  <Col span={24}>
-                    <Text strong>算子名称：</Text>
-                    <Text>{record.name}</Text>
-                  </Col>
-                  <Col span={8}>
-                    <Text strong>分类：</Text>
-                    <Text>{record.category}</Text>
-                  </Col>
-                  <Col span={8}>
-                    <Text strong>输入Shape：</Text>
-                    <Text>{record.input_shape || '-'}</Text>
-                  </Col>
-                  <Col span={8}>
-                    <Text strong>显存占用：</Text>
-                    <Text>{record.memory_mb != null ? `${record.memory_mb} MB` : '-'}</Text>
-                  </Col>
-                  <Col span={8}>
-                    <Text strong>FP32延迟：</Text>
-                    <Text>{record.fp32_latency?.toFixed(1) ?? '-'} μs</Text>
-                  </Col>
-                  <Col span={8}>
-                    <Text strong>FP16延迟：</Text>
-                    <Text>{record.fp16_latency?.toFixed(1) ?? '-'} μs</Text>
-                  </Col>
-                  <Col span={8}>
-                    <Text strong>INT8延迟：</Text>
-                    <Text>{record.int8_latency?.toFixed(1) ?? '-'} μs</Text>
-                  </Col>
-                  <Col span={8}>
-                    <Text strong>吞吐量：</Text>
-                    <Text>{record.throughput?.toFixed(1) ?? '-'} GOPS</Text>
-                  </Col>
-                  {record.description && (
-                    <Col span={24}>
-                      <Text strong>说明：</Text>
-                      <Text>{record.description}</Text>
-                    </Col>
-                  )}
-                  {record.specs && (
-                    <Col span={24}>
-                      <Text strong>完整规格：</Text>
-                      <Text>{record.specs}</Text>
-                    </Col>
-                  )}
-                  {record.tested_at && (
-                    <>
-                      <Col span={24} style={{ marginTop: 12, borderTop: '1px solid #e8e8e8', paddingTop: 12 }}>
-                        <Text strong style={{ color: '#722ed1' }}>📊 最近测试结果</Text>
-                        {record.tested_operator_lib && (
-                          <Tag color="purple" style={{ marginLeft: 8 }}>
-                            来源: {record.tested_operator_lib}
-                          </Tag>
-                        )}
-                        {record.tested_device_type && (
-                          <Tag color="blue" style={{ marginLeft: 4 }}>
-                            设备: {record.tested_device_type}
-                          </Tag>
-                        )}
-                      </Col>
-                      <Col span={8}>
-                        <Text strong>测试FP32精度：</Text>
-                        <Text>{record.tested_accuracy_fp32?.toFixed(4) ?? '-'}</Text>
-                      </Col>
-                      <Col span={8}>
-                        <Text strong>测试FP16精度：</Text>
-                        <Text>{record.tested_accuracy_fp16?.toFixed(4) ?? '-'}</Text>
-                      </Col>
-                      <Col span={8}>
-                        <Text strong>测试INT8精度：</Text>
-                        <Text>{record.tested_accuracy_int8?.toFixed(4) ?? '-'}</Text>
-                      </Col>
-                      {record.tested_fp16_latency != null && (
-                        <>
-                          <Col span={8}>
-                            <Text strong>测试FP32延迟：</Text>
-                            <Text>{record.tested_fp32_latency?.toFixed(1) ?? '-'} μs</Text>
-                          </Col>
-                          <Col span={8}>
-                            <Text strong>测试FP16延迟：</Text>
-                            <Text>{record.tested_fp16_latency?.toFixed(1) ?? '-'} μs</Text>
-                          </Col>
-                          <Col span={8}>
-                            <Text strong>测试吞吐量：</Text>
-                            <Text>{record.tested_throughput?.toFixed(1) ?? '-'} GOPS</Text>
-                          </Col>
-                        </>
-                      )}
-                      <Col span={8}>
-                        <Text strong>测试时间：</Text>
-                        <Text type="secondary">{record.tested_at}</Text>
-                      </Col>
-                    </>
-                  )}
-                </Row>
-              </div>
-            ),
+            onExpand: handleExpand,
+            expandedRowRender: renderExpandedRow,
             rowExpandable: () => true,
           }}
           pagination={{
@@ -434,8 +466,7 @@ export default function BenchmarkList() {
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total) => `共 ${total} 条`,
-            onChange: (page, pageSize) =>
-              setPagination({ ...pagination, current: page, pageSize }),
+            onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize }),
           }}
         />
       </Card>

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_current_user
 from app.models.operator import Operator
+from app.models.operator_benchmark import OperatorBenchmark
 from app.models.user import User
 from app.schemas.operator import OperatorOut, BenchmarkSummary, OperatorCategoryOut
 
@@ -109,3 +110,55 @@ def get_operator(
     if not op:
         raise HTTPException(status_code=404, detail="Operator not found")
     return _ok(OperatorOut.model_validate(op).model_dump())
+
+
+@router.get("/operators/{operator_id}/benchmarks")
+def get_operator_benchmarks(
+    operator_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get per-device per-shape benchmark results for an operator.
+
+    Returns results grouped by device_type, then by input_shape.
+    """
+    op = db.query(Operator).filter(Operator.id == operator_id).first()
+    if not op:
+        raise HTTPException(status_code=404, detail="Operator not found")
+
+    benchmarks = (
+        db.query(OperatorBenchmark)
+        .filter(OperatorBenchmark.operator_id == operator_id)
+        .order_by(OperatorBenchmark.device_type, OperatorBenchmark.input_shape)
+        .all()
+    )
+
+    # Group by device_type
+    grouped: dict = {}
+    for b in benchmarks:
+        if b.device_type not in grouped:
+            grouped[b.device_type] = []
+        grouped[b.device_type].append({
+            "id": b.id,
+            "input_shape": b.input_shape,
+            "fp32_accuracy": b.fp32_accuracy,
+            "fp16_accuracy": b.fp16_accuracy,
+            "int8_accuracy": b.int8_accuracy,
+            "fp16_loss_rate": b.fp16_loss_rate,
+            "int8_loss_rate": b.int8_loss_rate,
+            "accuracy_pass": b.accuracy_pass,
+            "fp32_latency": b.fp32_latency,
+            "fp16_latency": b.fp16_latency,
+            "int8_latency": b.int8_latency,
+            "throughput": b.throughput,
+            "operator_lib": b.operator_lib,
+            "task_id": b.task_id,
+            "tested_at": str(b.tested_at) if b.tested_at else None,
+        })
+
+    result = [
+        {"device_type": device, "results": items}
+        for device, items in grouped.items()
+    ]
+
+    return _ok(result)

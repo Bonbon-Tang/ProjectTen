@@ -7,6 +7,7 @@ from app.models.report import EvaluationReport, UserReportArchive
 from app.models.asset import DigitalAsset, AuditLog
 from app.models.resource import ComputeDevice
 from app.models.operator import Operator
+from app.models.operator_benchmark import OperatorBenchmark
 
 __all__ = [
     "User",
@@ -20,4 +21,5 @@ __all__ = [
     "AuditLog",
     "ComputeDevice",
     "Operator",
+    "OperatorBenchmark",
 ]

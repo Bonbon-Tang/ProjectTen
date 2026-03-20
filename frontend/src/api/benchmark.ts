@@ -20,3 +20,7 @@ export function getBenchmarkCategories() {
 export function getBenchmarkSummary() {
   return api.get('/benchmark/summary');
 }
+
+export function getOperatorBenchmarks(operatorId: number) {
+  return api.get(`/benchmark/operators/${operatorId}/benchmarks`);
+}
