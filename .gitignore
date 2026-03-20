@@ -1,0 +1,10 @@
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+dist/
+.vite/
+data/*.db
+.env

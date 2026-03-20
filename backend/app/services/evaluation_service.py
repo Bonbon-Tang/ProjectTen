@@ -1,0 +1,452 @@
+from __future__ import annotations
+
+import json
+import math
+import random
+import threading
+import time
+from datetime import datetime
+from typing import List, Optional, Tuple
+
+from sqlalchemy import func as sa_func
+from sqlalchemy.orm import Session
+
+from app.database import SessionLocal
+from app.models.evaluation import EvaluationTask, TaskStatus, TaskType, TaskCategory, CreateMode, Priority
+from app.models.report import EvaluationReport
+from app.models.resource import ComputeDevice
+from app.models.operator import Operator
+from app.utils.pagination import PaginationParams
+
+
+class EvaluationService:
+
+    @staticmethod
+    def create(db: Session, *, creator_id: int, tenant_id: Optional[int] = None, **kwargs) -> EvaluationTask:
+        task_category = kwargs.get("task_category")
+
+        # Validate: operator_test requires toolset_id
+        if task_category == "operator_test" and not kwargs.get("toolset_id"):
+            raise ValueError("算子评测任务必须关联工具集(toolset_id)，请选择 Deeplink_op_test 或其他算子测试工具")
+
+        # Validate device availability at creation time
+        device_type = kwargs.get("device_type")
+        device_count = kwargs.get("device_count") or 1
+        if device_type:
+            device = db.query(ComputeDevice).filter(ComputeDevice.device_type == device_type).first()
+            if not device:
+                raise ValueError(f"设备类型 '{device_type}' 不存在")
+            if device_count > device.available_count:
+                raise ValueError(
+                    f"设备数量不足：需要 {device_count} 台 {device.name}，当前空闲仅 {device.available_count} 台"
+                )
+
+        task = EvaluationTask(
+            name=kwargs["name"],
+            description=kwargs.get("description"),
+            task_category=TaskCategory(task_category) if task_category else None,
+            task_type=TaskType(kwargs["task_type"]),
+            create_mode=CreateMode(kwargs.get("create_mode", "template")),
+            priority=Priority(kwargs.get("priority", "medium")),
+            config=kwargs.get("config", {}),
+            resource_spec=kwargs.get("resource_spec"),
+            is_custom_billing=kwargs.get("is_custom_billing", False),
+            max_retries=kwargs.get("max_retries", 3),
+            device_type=kwargs.get("device_type"),
+            device_count=kwargs.get("device_count") or 1,
+            toolset_id=kwargs.get("toolset_id"),
+            operator_count=kwargs.get("operator_count"),
+            operator_categories=kwargs.get("operator_categories"),
+            creator_id=creator_id,
+            tenant_id=tenant_id,
+        )
+        db.add(task)
+        db.commit()
+        db.refresh(task)
+        return task
+
+    @staticmethod
+    def list_tasks(
+        db: Session,
+        pagination: PaginationParams,
+        *,
+        status: Optional[str] = None,
+        task_type: Optional[str] = None,
+        creator_id: Optional[int] = None,
+        tenant_id: Optional[int] = None,
+    ) -> Tuple[List[EvaluationTask], int]:
+        q = db.query(EvaluationTask)
+        if status:
+            q = q.filter(EvaluationTask.status == status)
+        if task_type:
+            q = q.filter(EvaluationTask.task_type == task_type)
+        if creator_id:
+            q = q.filter(EvaluationTask.creator_id == creator_id)
+        if tenant_id:
+            q = q.filter(EvaluationTask.tenant_id == tenant_id)
+        total = q.count()
+        items = q.order_by(EvaluationTask.created_at.desc()).offset(pagination.offset).limit(pagination.limit).all()
+        return items, total
+
+    @staticmethod
+    def get_by_id(db: Session, task_id: int) -> Optional[EvaluationTask]:
+        return db.query(EvaluationTask).filter(EvaluationTask.id == task_id).first()
+
+    @staticmethod
+    def get_stats(db: Session, tenant_id: Optional[int] = None) -> dict:
+        """Return real task count statistics from database."""
+        q = db.query(EvaluationTask)
+        if tenant_id:
+            q = q.filter(EvaluationTask.tenant_id == tenant_id)
+
+        total = q.count()
+        running = q.filter(EvaluationTask.status == TaskStatus.running).count()
+        queued = q.filter(EvaluationTask.status == TaskStatus.queued).count()
+        pending = q.filter(EvaluationTask.status == TaskStatus.pending).count()
+        completed = q.filter(EvaluationTask.status == TaskStatus.completed).count()
+        failed = q.filter(EvaluationTask.status == TaskStatus.failed).count()
+        terminated = q.filter(EvaluationTask.status == TaskStatus.terminated).count()
+
+        return {
+            "total": total,
+            "running": running,
+            "queued": queued,
+            "pending": pending,
+            "completed": completed,
+            "failed": failed,
+            "terminated": terminated,
+        }
+
+    @staticmethod
+    def start(db: Session, task: EvaluationTask) -> EvaluationTask:
+        if task.status not in (TaskStatus.pending, TaskStatus.queued):
+            raise ValueError(f"Cannot start task in '{task.status.value}' status")
+
+        # Check device availability and allocate
+        if task.device_type:
+            device = db.query(ComputeDevice).filter(
+                ComputeDevice.device_type == task.device_type
+            ).first()
+            if not device:
+                raise ValueError(f"设备类型 '{task.device_type}' 不存在")
+            needed = task.device_count or 1
+            if device.available_count < needed:
+                raise ValueError(
+                    f"设备 '{device.name}' 可用数量不足: 需要 {needed} 台，当前可用 {device.available_count} 台"
+                )
+            # Allocate devices
+            device.available_count -= needed
+            db.add(device)
+
+        task.status = TaskStatus.running
+        task.started_at = datetime.utcnow()
+        task.progress = 0
+        db.commit()
+        db.refresh(task)
+        return task
+
+    @staticmethod
+    def _release_devices(db: Session, task: EvaluationTask) -> None:
+        """Release devices allocated to a task."""
+        if task.device_type:
+            device = db.query(ComputeDevice).filter(
+                ComputeDevice.device_type == task.device_type
+            ).first()
+            if device:
+                needed = task.device_count or 1
+                device.available_count = min(device.available_count + needed, device.total_count)
+                db.add(device)
+
+    @staticmethod
+    def stop(db: Session, task: EvaluationTask) -> EvaluationTask:
+        if task.status != TaskStatus.running:
+            raise ValueError("Task is not running")
+        task.status = TaskStatus.terminated
+        task.completed_at = datetime.utcnow()
+        # Release devices
+        EvaluationService._release_devices(db, task)
+        db.commit()
+        db.refresh(task)
+        return task
+
+    @staticmethod
+    def retry(db: Session, task: EvaluationTask) -> EvaluationTask:
+        if task.status not in (TaskStatus.failed, TaskStatus.terminated):
+            raise ValueError("Can only retry failed or terminated tasks")
+        if task.retry_count >= task.max_retries:
+            raise ValueError("Max retries reached")
+        task.retry_count += 1
+        task.status = TaskStatus.pending
+        task.started_at = None
+        task.completed_at = None
+        task.progress = 0
+        db.commit()
+        db.refresh(task)
+        return task
+
+    @staticmethod
+    def delete(db: Session, task: EvaluationTask) -> None:
+        if task.status == TaskStatus.running:
+            raise ValueError("不能删除运行中的任务，请先停止任务")
+        db.delete(task)
+        db.commit()
+
+    @staticmethod
+    def batch_delete(db: Session, task_ids: List[int]) -> dict:
+        """Batch delete tasks. Skip running tasks."""
+        deleted = 0
+        skipped = 0
+        skipped_ids = []
+        for tid in task_ids:
+            task = db.query(EvaluationTask).filter(EvaluationTask.id == tid).first()
+            if not task:
+                continue
+            if task.status == TaskStatus.running:
+                skipped += 1
+                skipped_ids.append(tid)
+                continue
+            db.delete(task)
+            deleted += 1
+        db.commit()
+        return {
+            "deleted": deleted,
+            "skipped": skipped,
+            "skipped_ids": skipped_ids,
+            "message": f"成功删除 {deleted} 个任务" + (f"，跳过 {skipped} 个运行中的任务" if skipped else ""),
+        }
+
+    @staticmethod
+    def simulate_task_execution(task_id: int) -> None:
+        """Launch a background thread to simulate task execution."""
+        thread = threading.Thread(
+            target=EvaluationService._run_simulation,
+            args=(task_id,),
+            daemon=True,
+        )
+        thread.start()
+
+    @staticmethod
+    def _run_simulation(task_id: int) -> None:
+        """Background simulation: update progress every 10s, then generate metrics + report."""
+        db = SessionLocal()
+        try:
+            task = db.query(EvaluationTask).filter(EvaluationTask.id == task_id).first()
+            if not task:
+                return
+
+            # Simulate 60-120 seconds of execution
+            total_duration = random.randint(60, 120)
+            elapsed = 0
+            step = 10
+
+            while elapsed < total_duration:
+                time.sleep(step)
+                elapsed += step
+
+                # Re-read task to check if it was terminated externally
+                db.refresh(task)
+                if task.status != TaskStatus.running:
+                    return
+
+                # Progress can only increase, never decrease
+                new_progress = min(math.ceil(elapsed / total_duration * 100), 99)
+                if new_progress > task.progress:
+                    task.progress = new_progress
+                    db.commit()
+
+            # Generate metrics based on task category
+            task_category = task.task_category
+            if task_category == TaskCategory.operator_test:
+                metrics = EvaluationService._generate_operator_metrics(db, task)
+            else:
+                metrics = EvaluationService._generate_model_metrics(task.task_type)
+
+            task.metrics = metrics
+            task.result = {"status": "success", "metrics": metrics}
+            task.progress = 100
+            task.status = TaskStatus.completed
+            task.completed_at = datetime.utcnow()
+
+            # Release devices
+            EvaluationService._release_devices(db, task)
+            db.commit()
+
+            # Auto-generate evaluation report
+            EvaluationService._create_auto_report(db, task)
+
+        except Exception as e:
+            # On error, mark task as failed and release devices
+            try:
+                task = db.query(EvaluationTask).filter(EvaluationTask.id == task_id).first()
+                if task:
+                    task.status = TaskStatus.failed
+                    task.completed_at = datetime.utcnow()
+                    task.result = {"status": "error", "message": str(e)}
+                    EvaluationService._release_devices(db, task)
+                    db.commit()
+            except Exception:
+                pass
+        finally:
+            db.close()
+
+    @staticmethod
+    def _generate_operator_metrics(db: Session, task: EvaluationTask) -> dict:
+        """Generate simulated operator test metrics with real operator data."""
+        task_type_val = task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type)
+
+        # Build query with optional category filter
+        q = db.query(Operator)
+        op_categories = task.operator_categories
+        if op_categories and isinstance(op_categories, list) and len(op_categories) > 0:
+            q = q.filter(Operator.category.in_(op_categories))
+        all_operators = q.all()
+
+        # Determine how many operators to test
+        if task.operator_count and task.operator_count > 0:
+            sample_count = min(task.operator_count, len(all_operators))
+        else:
+            sample_count = min(random.randint(5, 10), len(all_operators))
+
+        if all_operators:
+            selected_ops = random.sample(all_operators, sample_count)
+        else:
+            selected_ops = []
+
+        operator_results = []
+        for op in selected_ops:
+            op_result = {
+                "operator_id": op.id,
+                "operator_name": op.name,
+                "category": op.category,
+                "input_shape": op.input_shape,
+            }
+
+            # Always include accuracy data
+            fp32_acc = round(random.uniform(99.5, 99.99), 4)
+            fp16_acc = round(random.uniform(98.5, 99.9), 4)
+            int8_acc = round(random.uniform(96.0, 99.5), 4)
+            op_result["accuracy"] = {
+                "fp32_accuracy": fp32_acc,
+                "fp16_accuracy": fp16_acc,
+                "int8_accuracy": int8_acc,
+                "fp16_loss_rate": round((fp32_acc - fp16_acc) / fp32_acc * 100, 4),
+                "int8_loss_rate": round((fp32_acc - int8_acc) / fp32_acc * 100, 4),
+                "pass": int8_acc >= 96.0,
+            }
+
+            # If accuracy_and_performance, also include performance vs H100 baseline
+            if task_type_val in ("accuracy_and_performance", "performance_benchmark"):
+                ratio_fp32 = round(random.uniform(0.6, 1.4), 3)
+                ratio_fp16 = round(random.uniform(0.65, 1.5), 3)
+                ratio_int8 = round(random.uniform(0.7, 1.6), 3)
+                throughput_ratio = round(random.uniform(0.5, 1.3), 3)
+                op_result["performance"] = {
+                    "h100_fp32_latency_us": op.h100_fp32_latency,
+                    "h100_fp16_latency_us": op.h100_fp16_latency,
+                    "h100_int8_latency_us": op.h100_int8_latency,
+                    "h100_throughput_gops": op.h100_throughput,
+                    "tested_fp32_latency_us": round(op.h100_fp32_latency / ratio_fp32, 2) if op.h100_fp32_latency else None,
+                    "tested_fp16_latency_us": round(op.h100_fp16_latency / ratio_fp16, 2) if op.h100_fp16_latency else None,
+                    "tested_int8_latency_us": round(op.h100_int8_latency / ratio_int8, 2) if op.h100_int8_latency else None,
+                    "tested_throughput_gops": round(op.h100_throughput * throughput_ratio, 1) if op.h100_throughput else None,
+                    "fp32_latency_ratio": ratio_fp32,
+                    "fp16_latency_ratio": ratio_fp16,
+                    "int8_latency_ratio": ratio_int8,
+                    "throughput_ratio": throughput_ratio,
+                }
+
+            operator_results.append(op_result)
+
+        # Summary
+        all_pass = all(r["accuracy"]["pass"] for r in operator_results) if operator_results else False
+        avg_fp16_loss = round(sum(r["accuracy"]["fp16_loss_rate"] for r in operator_results) / len(operator_results), 4) if operator_results else 0
+        avg_int8_loss = round(sum(r["accuracy"]["int8_loss_rate"] for r in operator_results) / len(operator_results), 4) if operator_results else 0
+
+        result = {
+            "test_type": task_type_val,
+            "total_ops_tested": len(operator_results),
+            "passed_ops": sum(1 for r in operator_results if r["accuracy"]["pass"]),
+            "pass_rate": round(sum(1 for r in operator_results if r["accuracy"]["pass"]) / len(operator_results) * 100, 1) if operator_results else 0,
+            "avg_fp16_loss_rate": avg_fp16_loss,
+            "avg_int8_loss_rate": avg_int8_loss,
+            "all_pass": all_pass,
+            "operator_results": operator_results,
+        }
+
+        return result
+
+    @staticmethod
+    def _generate_model_metrics(task_type) -> dict:
+        """Generate simulated model test metrics."""
+        base_metrics = {
+            "tgs": round(random.uniform(50.0, 500.0), 1),
+            "first_token_latency": round(random.uniform(10.0, 200.0), 1),
+            "inference_accuracy": round(random.uniform(85.0, 99.0), 2),
+            "throughput": round(random.uniform(100.0, 2000.0), 1),
+            "memory_usage": round(random.uniform(8.0, 60.0), 1),
+        }
+
+        task_type_val = task_type.value if hasattr(task_type, 'value') else str(task_type)
+
+        # Add type-specific metrics
+        extra = {}
+        if task_type_val == "llm":
+            extra = {
+                "perplexity": round(random.uniform(3.0, 15.0), 2),
+                "bleu_score": round(random.uniform(20.0, 45.0), 1),
+                "tokens_per_second": round(random.uniform(30.0, 200.0), 1),
+            }
+        elif task_type_val == "multimodal":
+            extra = {
+                "image_text_alignment": round(random.uniform(70.0, 95.0), 1),
+                "visual_qa_accuracy": round(random.uniform(60.0, 90.0), 1),
+            }
+        elif task_type_val in ("image_classification", "object_detection"):
+            extra = {
+                "top1_accuracy": round(random.uniform(75.0, 95.0), 1),
+                "top5_accuracy": round(random.uniform(90.0, 99.0), 1),
+                "map50": round(random.uniform(50.0, 85.0), 1),
+            }
+        elif task_type_val in ("speech_recognition", "speech_synthesis"):
+            extra = {
+                "wer": round(random.uniform(2.0, 15.0), 1),
+                "cer": round(random.uniform(1.0, 10.0), 1),
+            }
+        elif task_type_val == "ocr":
+            extra = {
+                "character_accuracy": round(random.uniform(95.0, 99.5), 1),
+                "word_accuracy": round(random.uniform(90.0, 98.0), 1),
+            }
+
+        base_metrics.update(extra)
+        return base_metrics
+
+    @staticmethod
+    def _create_auto_report(db: Session, task: EvaluationTask) -> None:
+        """Auto-create an evaluation report after task completion."""
+        category_label = "算子测试" if task.task_category == TaskCategory.operator_test else "模型测试"
+        task_type_val = task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type)
+
+        report = EvaluationReport(
+            task_id=task.id,
+            title=f"{task.name} - {category_label}报告",
+            report_type="basic",
+            content=json.dumps({
+                "task_name": task.name,
+                "task_category": task.task_category.value if task.task_category else None,
+                "task_type": task_type_val,
+                "device_type": task.device_type,
+                "device_count": task.device_count,
+                "metrics": task.metrics,
+                "started_at": str(task.started_at),
+                "completed_at": str(task.completed_at),
+                "duration_seconds": (task.completed_at - task.started_at).total_seconds() if task.started_at and task.completed_at else None,
+                "conclusion": "评测任务已完成，各项指标正常。",
+            }, ensure_ascii=False),
+            status="published",
+            creator_id=task.creator_id,
+            tenant_id=task.tenant_id,
+            is_public=False,
+        )
+        db.add(report)
+        db.commit()
