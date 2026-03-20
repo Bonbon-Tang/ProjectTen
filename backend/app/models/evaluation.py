@@ -110,6 +110,8 @@ class EvaluationTask(Base):
     operator_categories = Column(JSON, nullable=True, comment="List of operator categories to test (None = all)")
     operator_lib_id = Column(Integer, ForeignKey("digital_assets.id", ondelete="SET NULL"), nullable=True,
                              comment="Operator library asset (e.g. FlagGems, DIOPI)")
+    image_id = Column(Integer, ForeignKey("digital_assets.id", ondelete="SET NULL"), nullable=True,
+                      comment="Model deployment image (chip+framework+model)")
 
     config = Column(JSON, default=dict, comment="Evaluation parameter configuration")
     result = Column(JSON, nullable=True, comment="Evaluation result")

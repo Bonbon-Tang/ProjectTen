@@ -59,6 +59,7 @@ class EvaluationService:
             operator_count=kwargs.get("operator_count"),
             operator_categories=kwargs.get("operator_categories"),
             operator_lib_id=kwargs.get("operator_lib_id"),
+            image_id=kwargs.get("image_id"),
             creator_id=creator_id,
             tenant_id=tenant_id,
         )
@@ -272,6 +273,10 @@ class EvaluationService:
             # Release devices
             EvaluationService._release_devices(db, task)
             db.commit()
+
+            # Write model benchmark if model_test with image
+            if task_category == TaskCategory.model_test and task.image_id:
+                EvaluationService._write_model_benchmark(db, task, metrics)
 
             # Auto-generate evaluation report
             EvaluationService._create_auto_report(db, task)
@@ -573,4 +578,56 @@ class EvaluationService:
             is_public=False,
         )
         db.add(report)
+        db.commit()
+
+    @staticmethod
+    def _write_model_benchmark(db: Session, task: EvaluationTask, metrics: dict) -> None:
+        """Write model deployment test results to ModelBenchmark table."""
+        from app.models.model_benchmark import ModelBenchmark
+        from app.models.asset import DigitalAsset
+
+        if not task.image_id:
+            return
+
+        # Get image asset info
+        image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
+        if not image:
+            return
+
+        # Parse image description to extract chip/framework/model
+        desc = image.description or ""
+        parts = desc.split(" + ")
+        chip_name = parts[0] if len(parts) > 0 else image.name
+        framework_name = parts[1] if len(parts) > 1 else ""
+        model_name = parts[2] if len(parts) > 2 else image.name
+
+        # Create benchmark entry
+        bench = ModelBenchmark(
+            image_id=task.image_id,
+            task_type=task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type),
+            device_type=task.device_type or "unknown",
+            eval_method="standard",
+            # Core metrics
+            throughput=metrics.get("throughput"),
+            throughput_unit=metrics.get("throughput_unit"),
+            avg_latency_ms=metrics.get("avg_latency_ms"),
+            p50_latency_ms=metrics.get("p50_latency_ms"),
+            p99_latency_ms=metrics.get("p99_latency_ms"),
+            first_token_latency_ms=metrics.get("first_token_latency_ms"),
+            accuracy=metrics.get("accuracy"),
+            accuracy_metric=metrics.get("accuracy_metric"),
+            energy_efficiency=metrics.get("energy_efficiency"),
+            energy_efficiency_unit=metrics.get("energy_efficiency_unit"),
+            power_consumption_w=metrics.get("power_consumption_w"),
+            performance_score=metrics.get("performance_score"),
+            software_completeness_score=metrics.get("software_completeness", {}).get("score"),
+            memory_usage_gb=metrics.get("memory_usage_gb"),
+            # Image metadata
+            image_name=image.name,
+            chip_name=chip_name,
+            framework_name=framework_name,
+            model_name=model_name,
+            task_id=task.id,
+        )
+        db.add(bench)
         db.commit()

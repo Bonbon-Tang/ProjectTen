@@ -27,6 +27,7 @@ class AssetType(str, enum.Enum):
     script = "script"
     template = "template"
     toolset = "toolset"
+    image = "image"  # 镜像: chip+framework+model combination
 
 
 class AssetStatus(str, enum.Enum):

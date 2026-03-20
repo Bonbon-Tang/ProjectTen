@@ -170,6 +170,58 @@ def _init_operator_libraries(db):
     db.commit()
 
 
+def _init_model_images(db):
+    """Initialize preset model deployment images (chip+framework+model)."""
+    from app.models.asset import DigitalAsset
+
+    images = [
+        # LLM images
+        {"name": "Ascend910C-MindSpore-Qwen2-72B", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "Qwen2-72B", "tags": ["llm", "text_generation", "code_generation"], "device": "huawei_910c"},
+        {"name": "Ascend910C-PyTorch-LLaMA3-70B", "chip": "华为昇腾910C", "framework": "PyTorch", "model": "LLaMA3-70B", "tags": ["llm", "text_generation"], "device": "huawei_910c"},
+        {"name": "Ascend910B-MindSpore-ChatGLM4-9B", "chip": "华为昇腾910B", "framework": "MindSpore", "model": "ChatGLM4-9B", "tags": ["llm", "text_generation", "question_answering"], "device": "huawei_910b"},
+        {"name": "MLU590-PyTorch-Qwen2-7B", "chip": "寒武纪MLU590", "framework": "PyTorch", "model": "Qwen2-7B", "tags": ["llm", "text_generation"], "device": "cambrian_590"},
+        {"name": "P800-PaddlePaddle-ERNIE-Bot", "chip": "昆仑芯P800", "framework": "PaddlePaddle", "model": "ERNIE-Bot", "tags": ["llm", "text_generation", "question_answering"], "device": "kunlun_p800"},
+        {"name": "BW1000-ROCm-LLaMA3-8B", "chip": "海光DCU BW1000", "framework": "ROCm/PyTorch", "model": "LLaMA3-8B", "tags": ["llm", "text_generation"], "device": "hygon_bw1000"},
+        # Multimodal
+        {"name": "Ascend910C-MindSpore-InternVL2-26B", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "InternVL2-26B", "tags": ["multimodal"], "device": "huawei_910c"},
+        {"name": "MLU590-PyTorch-Qwen-VL-Chat", "chip": "寒武纪MLU590", "framework": "PyTorch", "model": "Qwen-VL-Chat", "tags": ["multimodal"], "device": "cambrian_590"},
+        # CV
+        {"name": "Ascend910C-MindSpore-YOLOv8", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "YOLOv8-X", "tags": ["object_detection", "image_classification"], "device": "huawei_910c"},
+        {"name": "MLU590-PyTorch-ResNet152", "chip": "寒武纪MLU590", "framework": "PyTorch", "model": "ResNet152", "tags": ["image_classification"], "device": "cambrian_590"},
+        {"name": "P800-PaddlePaddle-PP-YOLOE", "chip": "昆仑芯P800", "framework": "PaddlePaddle", "model": "PP-YOLOE+", "tags": ["object_detection"], "device": "kunlun_p800"},
+        # Speech
+        {"name": "Ascend910B-MindSpore-Paraformer", "chip": "华为昇腾910B", "framework": "MindSpore", "model": "Paraformer-Large", "tags": ["speech_recognition"], "device": "huawei_910b"},
+        {"name": "MLU590-PyTorch-Whisper-Large", "chip": "寒武纪MLU590", "framework": "PyTorch", "model": "Whisper-Large-v3", "tags": ["speech_recognition", "speech_synthesis"], "device": "cambrian_590"},
+        # Image generation
+        {"name": "Ascend910C-MindSpore-SDXL", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "Stable-Diffusion-XL", "tags": ["image_generation"], "device": "huawei_910c"},
+        # OCR
+        {"name": "P800-PaddlePaddle-PaddleOCR", "chip": "昆仑芯P800", "framework": "PaddlePaddle", "model": "PaddleOCR-v4", "tags": ["ocr"], "device": "kunlun_p800"},
+        # Segmentation
+        {"name": "Ascend910C-MindSpore-SAM", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "SAM-ViT-H", "tags": ["semantic_segmentation"], "device": "huawei_910c"},
+    ]
+
+    for img in images:
+        existing = db.query(DigitalAsset).filter(DigitalAsset.name == img["name"]).first()
+        if existing:
+            continue
+        asset = DigitalAsset(
+            name=img["name"],
+            description=f"{img['chip']} + {img['framework']} + {img['model']}",
+            asset_type="image",
+            category="模型部署镜像",
+            tags=img["tags"],
+            version="v1.0",
+            file_path=f"/images/{img['name'].lower().replace(' ', '_')}",
+            file_size=0,
+            status="active",
+            creator_id=None,
+            is_shared=True,
+            share_scope="platform",
+        )
+        db.add(asset)
+    db.commit()
+
+
 def _init_operators(db):
     """Initialize 100 common operators with H100 benchmark baseline data."""
     from app.models.operator import Operator
@@ -327,6 +379,7 @@ async def lifespan(app: FastAPI):
         _init_default_toolset(db)
         _init_model_deploy_toolsets(db)
         _init_operator_libraries(db)
+        _init_model_images(db)
         _init_operators(db)
     finally:
         db.close()
