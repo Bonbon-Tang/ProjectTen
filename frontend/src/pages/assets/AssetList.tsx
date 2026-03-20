@@ -74,7 +74,7 @@ export default function AssetList() {
     setLoading(true);
     try {
       const params: any = { page, page_size: pageSize };
-      if (activeTab !== 'all') params.type = activeTab;
+      if (activeTab !== 'all') params.asset_type = activeTab;
       if (keyword) params.keyword = keyword;
       const res: any = await getAssets(params);
       const d = res?.data || res;

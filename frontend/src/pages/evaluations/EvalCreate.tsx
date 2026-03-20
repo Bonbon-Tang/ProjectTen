@@ -116,7 +116,7 @@ export default function EvalCreate() {
   // 从 GET /api/v1/assets?asset_type=toolset 获取工具集, 按category分组
   const fetchToolsets = () => {
     setToolsetsLoading(true);
-    getAssets({ type: 'toolset', page_size: 100 })
+    getAssets({ asset_type: 'toolset', page_size: 100 })
       .then((res: any) => {
         const list = res?.data?.items || res?.items || res?.data || [];
         if (Array.isArray(list)) {
