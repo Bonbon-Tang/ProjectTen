@@ -1,0 +1,1 @@
+import{aU as e}from"./index-CvpJdrSi.js";function r(){return e.get("/model-benchmark/scenarios")}function m(a){return e.get("/model-benchmark/ranking",{params:a})}function t(){return e.get("/model-benchmark/summary")}function o(a){return e.get("/model-benchmark/images",{params:{task_type:a}})}export{r as a,t as b,m as c,o as g};

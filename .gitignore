@@ -1,10 +1,7 @@
-node_modules/
-__pycache__/
-*.pyc
-venv/
-.venv/
-*.egg-info/
-dist/
-.vite/
-data/*.db
-.env
+# 允许所有文件上传（包括依赖）
+# 仅排除敏感文件
+*.log
+.env.local
+.env.production
+*.pem
+*.key
