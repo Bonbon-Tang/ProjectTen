@@ -22,6 +22,7 @@ class EvaluationCreate(BaseModel):
     toolset_id: Optional[int] = None
     operator_count: Optional[int] = None  # Number of operators to test (None = all matching)
     operator_categories: Optional[List[str]] = None  # Operator categories to test (None = all)
+    operator_lib_id: Optional[int] = None  # Operator library asset ID
 
 
 class EvaluationUpdate(BaseModel):
@@ -46,6 +47,7 @@ class EvaluationOut(BaseModel):
     toolset_id: Optional[int] = None
     operator_count: Optional[int] = None
     operator_categories: Optional[List[str]] = None
+    operator_lib_id: Optional[int] = None
     config: Dict[str, Any] = {}
     result: Optional[Dict[str, Any]] = None
     resource_spec: Optional[Dict[str, Any]] = None

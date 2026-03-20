@@ -24,6 +24,7 @@ export interface CreateEvalParams {
   config?: Record<string, any>;
   operator_count?: number;
   operator_categories?: string[];
+  operator_lib_id?: number;
 }
 
 export function getEvaluations(params: EvalQuery) {

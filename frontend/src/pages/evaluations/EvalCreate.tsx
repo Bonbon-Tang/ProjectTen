@@ -50,6 +50,9 @@ export default function EvalCreate() {
   // 工具集列表
   const [toolsets, setToolsets] = useState<{ id: number; name: string }[]>([]);
   const [toolsetsLoading, setToolsetsLoading] = useState(false);
+  // 算子库列表
+  const [operatorLibs, setOperatorLibs] = useState<{ id: number; name: string; description?: string }[]>([]);
+  const [operatorLibsLoading, setOperatorLibsLoading] = useState(false);
   // Cache form values before leaving step 2 so they survive unmount
   const [cachedFormValues, setCachedFormValues] = useState<any>({});
 
@@ -123,8 +126,31 @@ export default function EvalCreate() {
       });
   };
 
+  // 从 GET /api/v1/assets?asset_type=operator&category=算子库 获取算子库列表
+  const fetchOperatorLibs = () => {
+    setOperatorLibsLoading(true);
+    getAssets({ asset_type: 'operator', category: '算子库', page_size: 100 })
+      .then((res: any) => {
+        const list = res?.data?.items || res?.items || res?.data || [];
+        if (Array.isArray(list)) {
+          setOperatorLibs(list.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+          })));
+        }
+      })
+      .catch(() => {
+        // 静默失败
+      })
+      .finally(() => {
+        setOperatorLibsLoading(false);
+      });
+  };
+
   useEffect(() => {
     fetchToolsets();
+    fetchOperatorLibs();
     fetchDevices();
     fetchOperatorCategories();
   }, []);
@@ -265,6 +291,9 @@ export default function EvalCreate() {
         }
         if (values.operator_categories && values.operator_categories.length > 0) {
           params.operator_categories = values.operator_categories;
+        }
+        if (values.operator_lib_id) {
+          params.operator_lib_id = values.operator_lib_id;
         }
       }
       const res: any = await createEvaluation(params);
@@ -479,6 +508,22 @@ export default function EvalCreate() {
         {isOperatorTest && (
           <>
             <Form.Item
+              name="operator_lib_id"
+              label="选择算子库"
+              extra="选择算子的来源库，不同算子库实现可能影响测试结果"
+              rules={[{ required: true, message: '算子测试必须选择算子库' }]}
+            >
+              <Select
+                placeholder="选择算子库来源"
+                loading={operatorLibsLoading}
+                options={operatorLibs.map((lib) => ({
+                  label: `${lib.name}${lib.description ? ` — ${lib.description.substring(0, 40)}...` : ''}`,
+                  value: lib.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item
               name="operator_categories"
               label="选择算子分类"
               extra="不选则测试所有分类的算子"
@@ -518,16 +563,16 @@ export default function EvalCreate() {
                   const matchedCount = operatorCategories
                     .filter((c: OpCategoryInfo) => selectedCats.includes(c.category))
                     .reduce((sum: number, c: OpCategoryInfo) => sum + c.count, 0);
-                  return `已选分类共 ${matchedCount} 个算子，不填则随机抽取 5~10 个`;
+                  return `已选分类共 ${matchedCount} 个算子，不填则测试全部`;
                 }
-                return `共 ${totalOperatorCount} 个算子，不填则随机抽取 5~10 个`;
+                return `共 ${totalOperatorCount} 个算子，不填则测试全部`;
               })()}
             >
               <InputNumber
                 min={1}
                 max={totalOperatorCount || 100}
                 style={{ width: '100%' }}
-                placeholder="不填则随机抽取 5~10 个算子"
+                placeholder="不填则测试全部匹配算子"
               />
             </Form.Item>
           </>
@@ -599,6 +644,12 @@ export default function EvalCreate() {
             </Descriptions.Item>
             {taskCategory === 'operator_test' && (
               <>
+                <Descriptions.Item label="算子库">
+                  {(() => {
+                    const lib = operatorLibs.find((l) => l.id === values.operator_lib_id);
+                    return lib ? <Tag color="purple">{lib.name}</Tag> : <span style={{ color: '#999' }}>未选择</span>;
+                  })()}
+                </Descriptions.Item>
                 <Descriptions.Item label="算子分类">
                   {values.operator_categories && values.operator_categories.length > 0
                     ? values.operator_categories.map((c: string) => (
@@ -610,7 +661,7 @@ export default function EvalCreate() {
                 <Descriptions.Item label="测试算子数量">
                   {values.operator_count
                     ? `${values.operator_count} 个`
-                    : <span style={{ color: '#999' }}>随机抽取 5~10 个</span>
+                    : <span style={{ color: '#999' }}>全部匹配算子</span>
                   }
                 </Descriptions.Item>
               </>

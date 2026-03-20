@@ -57,6 +57,7 @@ class EvaluationService:
             toolset_id=kwargs.get("toolset_id"),
             operator_count=kwargs.get("operator_count"),
             operator_categories=kwargs.get("operator_categories"),
+            operator_lib_id=kwargs.get("operator_lib_id"),
             creator_id=creator_id,
             tenant_id=tenant_id,
         )
@@ -291,7 +292,14 @@ class EvaluationService:
 
     @staticmethod
     def _generate_operator_metrics(db: Session, task: EvaluationTask) -> dict:
-        """Generate simulated operator test metrics with real operator data."""
+        """Generate simulated operator test metrics with real operator data.
+        
+        Key behaviors:
+        - If operator_count is set, test exactly that many (random sample if more available)
+        - If operator_count is NOT set, test ALL matching operators
+        - If operator_categories is set, filter by those categories
+        - Write results back to Operator model in the benchmark table
+        """
         task_type_val = task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type)
 
         # Build query with optional category filter
@@ -302,15 +310,25 @@ class EvaluationService:
         all_operators = q.all()
 
         # Determine how many operators to test
+        # If operator_count is explicitly set, use it (sample if more available)
+        # If not set, test ALL matching operators
         if task.operator_count and task.operator_count > 0:
             sample_count = min(task.operator_count, len(all_operators))
+            if all_operators:
+                selected_ops = random.sample(all_operators, sample_count)
+            else:
+                selected_ops = []
         else:
-            sample_count = min(random.randint(5, 10), len(all_operators))
+            # No count specified = test ALL matching operators
+            selected_ops = all_operators
 
-        if all_operators:
-            selected_ops = random.sample(all_operators, sample_count)
-        else:
-            selected_ops = []
+        # Resolve operator library name
+        operator_lib_name = None
+        if task.operator_lib_id:
+            from app.models.asset import DigitalAsset
+            lib_asset = db.query(DigitalAsset).filter(DigitalAsset.id == task.operator_lib_id).first()
+            if lib_asset:
+                operator_lib_name = lib_asset.name
 
         operator_results = []
         for op in selected_ops:
@@ -357,6 +375,25 @@ class EvaluationService:
 
             operator_results.append(op_result)
 
+            # ── Write results back to Operator benchmark table ──
+            op.tested_device_type = task.device_type
+            op.tested_accuracy_fp32 = fp32_acc
+            op.tested_accuracy_fp16 = fp16_acc
+            op.tested_accuracy_int8 = int8_acc
+            op.tested_operator_lib = operator_lib_name
+            op.tested_task_id = task.id
+            op.tested_at = datetime.utcnow()
+            if task_type_val in ("accuracy_and_performance", "performance_benchmark") and "performance" in op_result:
+                perf = op_result["performance"]
+                op.tested_fp32_latency = perf.get("tested_fp32_latency_us")
+                op.tested_fp16_latency = perf.get("tested_fp16_latency_us")
+                op.tested_int8_latency = perf.get("tested_int8_latency_us")
+                op.tested_throughput = perf.get("tested_throughput_gops")
+            db.add(op)
+
+        # Commit all operator updates
+        db.commit()
+
         # Summary
         all_pass = all(r["accuracy"]["pass"] for r in operator_results) if operator_results else False
         avg_fp16_loss = round(sum(r["accuracy"]["fp16_loss_rate"] for r in operator_results) / len(operator_results), 4) if operator_results else 0
@@ -370,6 +407,8 @@ class EvaluationService:
             "avg_fp16_loss_rate": avg_fp16_loss,
             "avg_int8_loss_rate": avg_int8_loss,
             "all_pass": all_pass,
+            "operator_lib": operator_lib_name,
+            "device_type": task.device_type,
             "operator_results": operator_results,
         }
 
@@ -427,22 +466,34 @@ class EvaluationService:
         category_label = "算子测试" if task.task_category == TaskCategory.operator_test else "模型测试"
         task_type_val = task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type)
 
+        # Resolve operator library name for report
+        operator_lib_name = None
+        if task.operator_lib_id:
+            from app.models.asset import DigitalAsset
+            lib_asset = db.query(DigitalAsset).filter(DigitalAsset.id == task.operator_lib_id).first()
+            if lib_asset:
+                operator_lib_name = lib_asset.name
+
+        report_content = {
+            "task_name": task.name,
+            "task_category": task.task_category.value if task.task_category else None,
+            "task_type": task_type_val,
+            "device_type": task.device_type,
+            "device_count": task.device_count,
+            "operator_lib": operator_lib_name,
+            "operator_count": task.metrics.get("total_ops_tested") if task.metrics else None,
+            "metrics": task.metrics,
+            "started_at": str(task.started_at),
+            "completed_at": str(task.completed_at),
+            "duration_seconds": (task.completed_at - task.started_at).total_seconds() if task.started_at and task.completed_at else None,
+            "conclusion": "评测任务已完成，各项指标正常。",
+        }
+
         report = EvaluationReport(
             task_id=task.id,
             title=f"{task.name} - {category_label}报告",
             report_type="basic",
-            content=json.dumps({
-                "task_name": task.name,
-                "task_category": task.task_category.value if task.task_category else None,
-                "task_type": task_type_val,
-                "device_type": task.device_type,
-                "device_count": task.device_count,
-                "metrics": task.metrics,
-                "started_at": str(task.started_at),
-                "completed_at": str(task.completed_at),
-                "duration_seconds": (task.completed_at - task.started_at).total_seconds() if task.started_at and task.completed_at else None,
-                "conclusion": "评测任务已完成，各项指标正常。",
-            }, ensure_ascii=False),
+            content=json.dumps(report_content, ensure_ascii=False),
             status="published",
             creator_id=task.creator_id,
             tenant_id=task.tenant_id,

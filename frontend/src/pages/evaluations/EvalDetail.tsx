@@ -620,6 +620,12 @@ export default function EvalDetail() {
           </Descriptions.Item>
           {isOperatorTest && (
             <>
+              <Descriptions.Item label="算子库">
+                {detail.operator_lib_name
+                  ? <Tag color="purple">{detail.operator_lib_name}</Tag>
+                  : <span style={{ color: '#999' }}>未选择</span>
+                }
+              </Descriptions.Item>
               <Descriptions.Item label="算子分类">
                 {detail.operator_categories && detail.operator_categories.length > 0
                   ? detail.operator_categories.map((c: string) => (
@@ -631,7 +637,7 @@ export default function EvalDetail() {
               <Descriptions.Item label="测试算子数量">
                 {detail.operator_count
                   ? `${detail.operator_count} 个`
-                  : <span style={{ color: '#999' }}>随机抽取</span>
+                  : <span style={{ color: '#999' }}>全部匹配算子</span>
                 }
               </Descriptions.Item>
             </>

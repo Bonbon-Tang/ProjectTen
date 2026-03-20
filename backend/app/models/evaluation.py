@@ -108,6 +108,8 @@ class EvaluationTask(Base):
     # Operator test parameters
     operator_count = Column(Integer, nullable=True, comment="Number of operators to test (None = all matching)")
     operator_categories = Column(JSON, nullable=True, comment="List of operator categories to test (None = all)")
+    operator_lib_id = Column(Integer, ForeignKey("digital_assets.id", ondelete="SET NULL"), nullable=True,
+                             comment="Operator library asset (e.g. FlagGems, DIOPI)")
 
     config = Column(JSON, default=dict, comment="Evaluation parameter configuration")
     result = Column(JSON, nullable=True, comment="Evaluation result")
