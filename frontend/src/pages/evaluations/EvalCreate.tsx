@@ -584,6 +584,8 @@ export default function EvalCreate() {
           </Form.Item>
         )}
 
+        {isOperatorTest && (
+          <>
             <Form.Item
               name="operator_categories"
               label="选择算子分类"
@@ -598,18 +600,13 @@ export default function EvalCreate() {
                   value: c.category,
                 }))}
                 onChange={(vals: string[]) => {
-                  // Update max operator count hint based on selected categories
                   if (vals && vals.length > 0) {
                     const matchedCount = operatorCategories
                       .filter((c) => vals.includes(c.category))
                       .reduce((sum, c) => sum + c.count, 0);
-                    form.setFieldsValue({
-                      _availableOpCount: matchedCount,
-                    });
+                    form.setFieldsValue({ _availableOpCount: matchedCount });
                   } else {
-                    form.setFieldsValue({
-                      _availableOpCount: totalOperatorCount,
-                    });
+                    form.setFieldsValue({ _availableOpCount: totalOperatorCount });
                   }
                 }}
               />
@@ -728,6 +725,8 @@ export default function EvalCreate() {
                 })()}
               </Descriptions.Item>
             )}
+            {taskCategory === 'operator_test' && (
+              <>
                 <Descriptions.Item label="算子分类">
                   {values.operator_categories && values.operator_categories.length > 0
                     ? values.operator_categories.map((c: string) => (

@@ -637,6 +637,8 @@ export default function EvalDetail() {
               <Tag color="cyan">{detail.image_name}</Tag>
             </Descriptions.Item>
           )}
+          {isOperatorTest && (
+            <>
               <Descriptions.Item label="算子分类">
                 {detail.operator_categories && detail.operator_categories.length > 0
                   ? detail.operator_categories.map((c: string) => (
