@@ -22,6 +22,7 @@ const MyArchives = lazy(() => import('@/pages/reports/MyArchives'));
 const AssetList = lazy(() => import('@/pages/assets/AssetList'));
 const AssetUpload = lazy(() => import('@/pages/assets/AssetUpload'));
 const BenchmarkList = lazy(() => import('@/pages/benchmark/BenchmarkList'));
+const ModelBenchmarkList = lazy(() => import('@/pages/benchmark/ModelBenchmarkList'));
 const Profile = lazy(() => import('@/pages/settings/Profile'));
 
 const Loading = () => (
@@ -57,6 +58,7 @@ export default function AppRouter() {
 
           {/* Benchmark */}
           <Route path="/benchmark/operators" element={<BenchmarkList />} />
+          <Route path="/benchmark/models" element={<ModelBenchmarkList />} />
 
           {/* 报告管理 */}
           <Route path="/reports/list" element={<ReportList />} />

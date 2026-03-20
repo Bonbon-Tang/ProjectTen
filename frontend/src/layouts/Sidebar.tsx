@@ -15,6 +15,7 @@ import {
   SwapOutlined,
   FolderOpenOutlined,
   ThunderboltOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import useAuthStore from '@/stores/authStore';
@@ -63,7 +64,12 @@ export default function Sidebar() {
           {
             key: '/benchmark/operators',
             icon: <ThunderboltOutlined />,
-            label: '算子Benchmark',
+            label: '算子 Benchmark',
+          },
+          {
+            key: '/benchmark/models',
+            icon: <TrophyOutlined />,
+            label: '模型部署榜单',
           },
         ],
       },
@@ -209,7 +215,7 @@ export default function Sidebar() {
           </div>
           {!collapsed && (
             <span style={{ color: '#fff', fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>
-              AGI4Sci适配&验证基地
+              AGI4Sci 适配&验证基地
             </span>
           )}
         </div>
