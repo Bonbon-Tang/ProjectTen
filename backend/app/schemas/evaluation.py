@@ -24,6 +24,7 @@ class EvaluationCreate(BaseModel):
     operator_categories: Optional[List[str]] = None  # Operator categories to test (None = all)
     operator_lib_id: Optional[int] = None  # Operator library asset ID
     image_id: Optional[int] = None  # Model deployment image ID
+    image_name: Optional[str] = None  # Denormalized image name for display
 
 
 class EvaluationUpdate(BaseModel):

@@ -29,6 +29,7 @@ import { createEvaluation } from '@/api/evaluations';
 import { getAssets } from '@/api/assets';
 import { getResourceSummary } from '@/api/resources';
 import { getBenchmarkCategories, getBenchmarkSummary } from '@/api/benchmark';
+import { getAvailableImages } from '@/api/modelBenchmark';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -54,6 +55,9 @@ export default function EvalCreate() {
   // 算子库列表（独立于工具集）
   const [operatorLibs, setOperatorLibs] = useState<{ id: number; name: string; description?: string }[]>([]);
   const [operatorLibsLoading, setOperatorLibsLoading] = useState(false);
+  // 模型部署镜像列表
+  const [modelImages, setModelImages] = useState<{ id: number; name: string; description?: string; tags?: string[] }[]>([]);
+  const [modelImagesLoading, setModelImagesLoading] = useState(false);
   // Cache form values before leaving step 2 so they survive unmount
   const [cachedFormValues, setCachedFormValues] = useState<any>({});
 
@@ -151,17 +155,33 @@ export default function EvalCreate() {
           })));
         }
       })
-      .catch(() => {
-        // 静默失败
+      .catch(() => {})
+      .finally(() => { setOperatorLibsLoading(false); });
+  };
+
+  // 从 GET /api/v1/model-benchmark/images 获取模型部署镜像列表
+  const fetchModelImages = () => {
+    setModelImagesLoading(true);
+    getAvailableImages()
+      .then((res: any) => {
+        const list = res?.data || res || [];
+        if (Array.isArray(list)) {
+          setModelImages(list.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            tags: item.tags,
+          })));
+        }
       })
-      .finally(() => {
-        setOperatorLibsLoading(false);
-      });
+      .catch(() => {})
+      .finally(() => { setModelImagesLoading(false); });
   };
 
   useEffect(() => {
     fetchToolsets();
     fetchOperatorLibs();
+    fetchModelImages();
     fetchDevices();
     fetchOperatorCategories();
   }, []);
@@ -306,6 +326,11 @@ export default function EvalCreate() {
         if (values.operator_lib_id) {
           params.operator_lib_id = values.operator_lib_id;
         }
+      }
+
+      // Include image_id for model_test
+      if (taskCategory === 'model_test' && values.image_id) {
+        params.image_id = values.image_id;
       }
       const res: any = await createEvaluation(params);
       message.success('评测任务创建成功！');
@@ -533,6 +558,31 @@ export default function EvalCreate() {
                 }))}
               />
             </Form.Item>
+          </>
+        )}
+
+        {!isOperatorTest && (
+          <Form.Item
+            name="image_id"
+            label="选择部署镜像（芯片 + 框架 + 模型）"
+            extra="选择要测试的芯片 + 框架 + 模型组合镜像，镜像已预置子场景标签"
+            rules={[{ required: true, message: '模型部署测试必须选择镜像' }]}
+          >
+            <Select
+              placeholder="选择模型部署镜像"
+              loading={modelImagesLoading}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={modelImages.map((img) => ({
+                label: `${img.name}${img.tags?.length ? ` (${img.tags.join(', ')})` : ''}`,
+                value: img.id,
+              }))}
+              notFoundContent="暂无可用镜像"
+            />
+          </Form.Item>
+        )}
 
             <Form.Item
               name="operator_categories"
@@ -662,6 +712,22 @@ export default function EvalCreate() {
                     return lib ? <Tag color="purple">{lib.name}</Tag> : <span style={{ color: '#999' }}>未选择</span>;
                   })()}
                 </Descriptions.Item>
+              </>
+            )}
+            {taskCategory === 'model_test' && (
+              <Descriptions.Item label="部署镜像">
+                {(() => {
+                  const img = modelImages.find((m) => m.id === values.image_id);
+                  return img ? (
+                    <div>
+                      <Tag color="cyan">{img.name}</Tag>
+                      <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{img.description}</div>
+                      {img.tags?.slice(0, 3).map((tag) => <Tag key={tag} style={{ marginTop: 4 }}>{tag}</Tag>)}
+                    </div>
+                  ) : <span style={{ color: '#999' }}>未选择</span>;
+                })()}
+              </Descriptions.Item>
+            )}
                 <Descriptions.Item label="算子分类">
                   {values.operator_categories && values.operator_categories.length > 0
                     ? values.operator_categories.map((c: string) => (

@@ -630,6 +630,13 @@ export default function EvalDetail() {
                   : <span style={{ color: '#999' }}>未选择</span>
                 }
               </Descriptions.Item>
+            </>
+          )}
+          {!isOperatorTest && detail.image_name && (
+            <Descriptions.Item label="部署镜像">
+              <Tag color="cyan">{detail.image_name}</Tag>
+            </Descriptions.Item>
+          )}
               <Descriptions.Item label="算子分类">
                 {detail.operator_categories && detail.operator_categories.length > 0
                   ? detail.operator_categories.map((c: string) => (

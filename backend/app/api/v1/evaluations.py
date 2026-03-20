@@ -122,6 +122,13 @@ def get_evaluation(task_id: int, current_user: User = Depends(get_current_user),
         data["operator_lib_name"] = op_lib.name if op_lib else None
     else:
         data["operator_lib_name"] = None
+    # Attach image name
+    if task.image_id:
+        from app.models.asset import DigitalAsset
+        image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
+        data["image_name"] = image.name if image else None
+    else:
+        data["image_name"] = None
     return _ok(data)
 
 
