@@ -47,13 +47,42 @@ def list_reports(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    from app.models.evaluation import EvaluationTask
+    
     pagination = PaginationParams(page, page_size)
     reports, total = ReportService.list_reports(
         db, pagination,
         creator_id=current_user.id if current_user.user_type != "admin" else None,
         status=status,
     )
-    items = [ReportOut.model_validate(r).model_dump() for r in reports]
+    
+    # Build response with task info
+    items = []
+    for report in reports:
+        task = db.query(EvaluationTask).filter(EvaluationTask.id == report.task_id).first()
+        item = {
+            "id": report.id,
+            "task_id": report.task_id,
+            "title": report.title,
+            "report_type": report.report_type,
+            "content": report.content,
+            "version": report.version,
+            "status": report.status,
+            "file_path": report.file_path,
+            "creator_id": report.creator_id,
+            "tenant_id": report.tenant_id,
+            "is_public": report.is_public,
+            "created_at": report.created_at.isoformat() if report.created_at else None,
+            "updated_at": report.updated_at.isoformat() if report.updated_at else None,
+            # Task info
+            "eval_name": task.name if task else None,
+            "task_category": task.task_category if task else None,
+            "task_type": task.task_type if task else None,
+            "device_type": task.device_type if task else None,
+            "progress": task.progress if task else None,
+        }
+        items.append(item)
+    
     return _ok(paginate(items, total, page, page_size))
 
 

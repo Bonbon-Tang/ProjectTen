@@ -3,7 +3,6 @@ import api from './index';
 export interface ReportQuery {
   page?: number;
   page_size?: number;
-  type?: string;
   status?: string;
   keyword?: string;
 }
