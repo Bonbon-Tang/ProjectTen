@@ -59,14 +59,42 @@ def list_reports(
 
 @router.get("/archives")
 def list_archives(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    archives = db.query(UserReportArchive).filter(
+    from app.models.report import EvaluationReport
+    
+    # Query archives with joined report info
+    query = db.query(UserReportArchive).join(
+        EvaluationReport, UserReportArchive.report_id == EvaluationReport.id
+    ).filter(
         UserReportArchive.user_id == current_user.id
-    ).order_by(UserReportArchive.archived_at.desc()).all()
-    items = [ArchiveOut.model_validate(a).model_dump() for a in archives]
-    return _ok(items)
+    ).order_by(UserReportArchive.archived_at.desc())
+    
+    # Pagination
+    total = query.count()
+    archives = query.offset((page - 1) * page_size).limit(page_size).all()
+    
+    # Build response with report info
+    items = []
+    for archive in archives:
+        item = {
+            "id": archive.id,
+            "user_id": archive.user_id,
+            "report_id": archive.report_id,
+            "note": archive.note,
+            "archived_at": archive.archived_at.isoformat() if archive.archived_at else None,
+            # Report info
+            "report_title": archive.report.title if archive.report else None,
+            "report_type": archive.report.report_type if archive.report else None,
+            "report_status": archive.report.status if archive.report else None,
+            "task_id": archive.report.task_id if archive.report else None,
+        }
+        items.append(item)
+    
+    return _ok({"items": items, "total": total, "page": page, "page_size": page_size})
 
 
 @router.get("/{report_id}")
@@ -124,7 +152,8 @@ def share_report(report_id: int, body: ReportShare, request: Request,
 
 
 @router.post("/{report_id}/archive")
-def archive_report(report_id: int, body: ArchiveCreate,
+def archive_report(report_id: int, 
+                   body: Optional[ArchiveCreate] = None,
                    current_user: User = Depends(get_current_user),
                    db: Session = Depends(get_db)):
     report = ReportService.get_by_id(db, report_id)
@@ -142,7 +171,7 @@ def archive_report(report_id: int, body: ArchiveCreate,
     archive = UserReportArchive(
         user_id=current_user.id,
         report_id=report_id,
-        note=body.note,
+        note=body.note if body else None,
     )
     db.add(archive)
     db.commit()

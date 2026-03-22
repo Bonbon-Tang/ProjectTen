@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table, Card, Button, Space, Input, Select, Tag, Row, Col, Radio, Empty } from 'antd';
+import { Table, Card, Button, Space, Input, Select, Tag, Row, Col, Radio, Empty, message } from 'antd';
 import {
   SearchOutlined,
   AppstoreOutlined,
@@ -15,19 +15,29 @@ import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '@/components/PageHeader';
 import StatusTag from '@/components/StatusTag';
 import { EVAL_CATEGORIES, DEVICE_TYPES } from '@/utils/constants';
-import { getReports } from '@/api/reports';
+import { getReports, archiveReport, deleteReport, downloadReport } from '@/api/reports';
 import dayjs from 'dayjs';
 
 interface ReportItem {
-  id: string;
-  name: string;
-  task_category: string;
-  task_type: string;
-  device_type: string;
+  id: number;
+  task_id: number;
+  title: string;
+  report_type: string;
   status: string;
-  eval_name: string;
-  created_at: string;
-  creator: string;
+  content?: string;
+  version: number;
+  file_path?: string;
+  creator_id: number;
+  tenant_id?: number;
+  is_public: boolean;
+  created_at?: string;
+  updated_at?: string;
+  // 从 task 关联的数据（需要后端返回或前端关联）
+  task_category?: string;
+  task_type?: string;
+  device_type?: string;
+  eval_name?: string;
+  creator_name?: string;
   progress?: number;
 }
 
@@ -66,6 +76,17 @@ function getSubTypeLabel(val: string): string {
   return ALL_SUB_TYPES.find((t) => t.value === val)?.label || val;
 }
 
+// 报告类型映射
+const REPORT_TYPE_MAP: Record<string, { label: string; color?: string }> = {
+  basic: { label: '基础报告' },
+  advanced: { label: '高级报告' },
+  custom: { label: '自定义报告' },
+  performance: { label: '性能报告' },
+  accuracy: { label: '精度报告' },
+  comparison: { label: '对比报告' },
+  comprehensive: { label: '综合报告' },
+};
+
 export default function ReportList() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
@@ -74,8 +95,6 @@ export default function ReportList() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [filters, setFilters] = useState<{
     status?: string;
-    task_category?: string;
-    device_type?: string;
     keyword?: string;
   }>({});
 
@@ -83,12 +102,12 @@ export default function ReportList() {
     setLoading(true);
     try {
       const res: any = await getReports({
-        ...filters,
+        status: filters.status,
         page: pagination.current,
         page_size: pagination.pageSize,
       });
       const resData = res?.data || res;
-      const items = resData?.items || resData?.list || [];
+      const items = resData?.items || resData?.list || resData?.data || [];
       if (Array.isArray(items)) {
         setData(items);
         setPagination((prev) => ({
@@ -96,8 +115,8 @@ export default function ReportList() {
           total: resData?.total ?? items.length,
         }));
       }
-    } catch {
-      // 静默处理，使用空数据
+    } catch (error) {
+      console.error('Failed to fetch reports:', error);
     } finally {
       setLoading(false);
     }
@@ -105,45 +124,61 @@ export default function ReportList() {
 
   useEffect(() => {
     fetchReports();
-  }, [filters, pagination.current, pagination.pageSize]);
+  }, [filters.status, pagination.current, pagination.pageSize]);
+
+  // 处理存档操作
+  const handleArchive = async (record: ReportItem) => {
+    try {
+      await archiveReport(record.id, { note: `归档：${record.title}` });
+      message.success('已添加到我的存档');
+    } catch {
+      message.error('存档失败');
+    }
+  };
+
+  // 处理下载操作
+  const handleDownload = async (record: ReportItem) => {
+    try {
+      await downloadReport(record.id);
+      message.success('下载已开始');
+    } catch {
+      message.error('下载失败');
+    }
+  };
+
+  // 处理删除操作
+  const handleDelete = (record: ReportItem) => {
+    // TODO: 添加确认对话框
+    deleteReport(record.id)
+      .then(() => {
+        message.success('删除成功');
+        fetchReports();
+      })
+      .catch(() => {
+        message.error('删除失败');
+      });
+  };
 
   const columns: ColumnsType<ReportItem> = [
     {
       title: '报告名称',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'title',
+      key: 'title',
       ellipsis: true,
-      render: (text, record) => (
+      render: (text: string, record) => (
         <a onClick={() => navigate(`/reports/${record.id}`)} style={{ fontWeight: 500 }}>
-          {text}
+          {text || `报告 #${record.id}`}
         </a>
       ),
     },
     {
-      title: '评测大类',
-      dataIndex: 'task_category',
-      key: 'task_category',
-      width: 110,
+      title: '报告类型',
+      dataIndex: 'report_type',
+      key: 'report_type',
+      width: 120,
       render: (val: string) => {
-        const cat = EVAL_CATEGORIES.find((c) => c.value === val);
-        return cat ? <Tag>{cat.icon} {cat.label}</Tag> : <Tag>{val}</Tag>;
-      },
-    },
-    {
-      title: '子场景',
-      dataIndex: 'task_type',
-      key: 'task_type',
-      width: 140,
-      render: (val: string) => <Tag color="geekblue">{getSubTypeLabel(val)}</Tag>,
-    },
-    {
-      title: '设备类型',
-      dataIndex: 'device_type',
-      key: 'device_type',
-      width: 140,
-      render: (val: string) => {
-        const d = DEVICE_TYPES.find((dv) => dv.value === val);
-        return d ? <span style={{ color: d.color, fontWeight: 500 }}>{d.label}</span> : val;
+        const type = REPORT_TYPE_MAP[val] || { label: val };
+        return <Tag color={type.color}>{type.label}</Tag>;
       },
     },
     {
@@ -155,14 +190,19 @@ export default function ReportList() {
         <StatusTag status={status} progress={record.progress} />
       ),
     },
-    { title: '关联评测', dataIndex: 'eval_name', key: 'eval_name', ellipsis: true },
-    { title: '创建人', dataIndex: 'creator', key: 'creator' },
+    {
+      title: '关联评测',
+      dataIndex: 'eval_name',
+      key: 'eval_name',
+      ellipsis: true,
+      render: (text: string, record) => text || `Task #${record.task_id}`,
+    },
     {
       title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
       width: 160,
-      render: (text: string) => dayjs(text).format('YYYY-MM-DD HH:mm'),
+      render: (text: string) => (text ? dayjs(text).format('YYYY-MM-DD HH:mm') : '-'),
     },
     {
       title: '操作',
@@ -170,10 +210,39 @@ export default function ReportList() {
       width: 220,
       render: (_, record) => (
         <Space size={0}>
-          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => navigate(`/reports/${record.id}`)}>查看</Button>
-          <Button type="link" size="small" icon={<StarOutlined />}>存档</Button>
-          <Button type="link" size="small" icon={<DownloadOutlined />}>下载</Button>
-          <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
+          <Button 
+            type="link" 
+            size="small" 
+            icon={<EyeOutlined />} 
+            onClick={() => navigate(`/reports/${record.id}`)}
+          >
+            查看
+          </Button>
+          <Button 
+            type="link" 
+            size="small" 
+            icon={<StarOutlined />}
+            onClick={() => handleArchive(record)}
+          >
+            存档
+          </Button>
+          <Button 
+            type="link" 
+            size="small" 
+            icon={<DownloadOutlined />}
+            onClick={() => handleDownload(record)}
+          >
+            下载
+          </Button>
+          <Button 
+            type="link" 
+            size="small" 
+            danger 
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record)}
+          >
+            删除
+          </Button>
         </Space>
       ),
     },
@@ -204,31 +273,14 @@ export default function ReportList() {
           onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
         />
         <Select
-          placeholder="评测大类"
-          style={{ width: 140 }}
-          allowClear
-          onChange={(value) => setFilters({ ...filters, task_category: value })}
-          options={EVAL_CATEGORIES.map((c) => ({ label: `${c.icon} ${c.label}`, value: c.value }))}
-        />
-        <Select
-          placeholder="设备类型"
-          style={{ width: 160 }}
-          allowClear
-          onChange={(value) => setFilters({ ...filters, device_type: value })}
-          options={DEVICE_TYPES.map((d) => ({ label: d.label, value: d.value }))}
-        />
-        <Select
           placeholder="状态筛选"
           style={{ width: 140 }}
           allowClear
           onChange={(value) => setFilters({ ...filters, status: value })}
           options={[
-            { label: '待执行', value: 'pending' },
-            { label: '排队中', value: 'queued' },
-            { label: '运行中', value: 'running' },
-            { label: '已完成', value: 'completed' },
-            { label: '失败', value: 'failed' },
-            { label: '已终止', value: 'terminated' },
+            { label: '草稿', value: 'draft' },
+            { label: '已发布', value: 'published' },
+            { label: '已归档', value: 'archived' },
           ]}
         />
         <Button type="primary" icon={<SearchOutlined />} onClick={fetchReports}>
@@ -273,12 +325,12 @@ export default function ReportList() {
                 onClick={() => navigate(`/reports/${item.id}`)}
               >
                 <Card.Meta
-                  title={item.name}
+                  title={item.title || `报告 #${item.id}`}
                   description={
                     <Space direction="vertical" size={4}>
-                      <Tag>{EVAL_CATEGORIES.find((c) => c.value === item.task_category)?.label}</Tag>
+                      <Tag>{REPORT_TYPE_MAP[item.report_type]?.label || item.report_type}</Tag>
                       <span style={{ fontSize: 12, color: '#999' }}>
-                        {dayjs(item.created_at).format('YYYY-MM-DD')}
+                        {item.created_at ? dayjs(item.created_at).format('YYYY-MM-DD') : '-'}
                       </span>
                     </Space>
                   }
