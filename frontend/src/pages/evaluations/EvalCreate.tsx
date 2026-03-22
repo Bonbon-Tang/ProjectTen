@@ -29,7 +29,7 @@ import { createEvaluation } from '@/api/evaluations';
 import { getAssets } from '@/api/assets';
 import { getResourceSummary } from '@/api/resources';
 import { getBenchmarkCategories, getBenchmarkSummary } from '@/api/benchmark';
-import { getAvailableImages } from '@/api/modelBenchmark';
+import { getAvailableImages, getAvailableToolsets } from '@/api/modelBenchmark';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -114,9 +114,26 @@ export default function EvalCreate() {
   }, []);
 
   // 从 GET /api/v1/assets?asset_type=toolset 获取工具集, 按category分组
-  const fetchToolsets = () => {
+  const fetchToolsets = (scenarioType?: string) => {
     setToolsetsLoading(true);
-    getAssets({ asset_type: 'toolset', page_size: 100 })
+    if (scenarioType && taskCategory === 'model_test') {
+      // For model_test, use the new endpoint that filters by task_type
+      getAvailableToolsets(scenarioType)
+        .then((res: any) => {
+          const list = res?.data || res || [];
+          if (Array.isArray(list)) {
+            const modelTools: { id: number; name: string }[] = [];
+            list.forEach((item: any) => {
+              modelTools.push({ id: item.id, name: item.name });
+            });
+            setModelToolsets(modelTools);
+          }
+        })
+        .catch(() => {})
+        .finally(() => { setToolsetsLoading(false); });
+    } else {
+      // Legacy: fetch all toolsets
+      getAssets({ asset_type: 'toolset', page_size: 100 })
       .then((res: any) => {
         const list = res?.data?.items || res?.items || res?.data || [];
         if (Array.isArray(list)) {
@@ -139,6 +156,7 @@ export default function EvalCreate() {
       })
       .catch(() => {})
       .finally(() => { setToolsetsLoading(false); });
+    }
   };
 
   // 从 GET /api/v1/assets?asset_type=operator&category=算子库 获取算子库列表
@@ -160,9 +178,9 @@ export default function EvalCreate() {
   };
 
   // 从 GET /api/v1/model-benchmark/images 获取模型部署镜像列表
-  const fetchModelImages = () => {
+  const fetchModelImages = (scenarioType?: string) => {
     setModelImagesLoading(true);
-    getAvailableImages()
+    getAvailableImages(scenarioType)
       .then((res: any) => {
         const list = res?.data || res || [];
         if (Array.isArray(list)) {
@@ -179,12 +197,21 @@ export default function EvalCreate() {
   };
 
   useEffect(() => {
-    fetchToolsets();
     fetchOperatorLibs();
-    fetchModelImages();
     fetchDevices();
     fetchOperatorCategories();
+    // Don't fetch toolsets and images on mount - wait for taskType selection
   }, []);
+
+  // Fetch toolsets and images when taskType changes (for model_test)
+  useEffect(() => {
+    if (taskCategory === 'model_test' && taskType) {
+      fetchToolsets(taskType);
+      fetchModelImages(taskType);
+    } else if (taskCategory === 'operator_test') {
+      fetchToolsets();
+    }
+  }, [taskCategory, taskType]);
 
   const steps = [
     { title: '选择评测大类' },

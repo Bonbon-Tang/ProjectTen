@@ -142,3 +142,66 @@ def get_available_images(
         })
 
     return _ok(result)
+
+
+@router.get("/toolsets")
+def get_available_toolsets(
+    task_type: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Get available toolsets for model deployment test, optionally filtered by sub-scenario tag."""
+    q = db.query(DigitalAsset).filter(
+        DigitalAsset.asset_type == "toolset",
+        DigitalAsset.status == "active",
+    )
+    toolsets = q.all()
+
+    result = []
+    for ts in toolsets:
+        # Filter by category matching task_type (for model deployment toolsets)
+        # Category should be like "LLM 测试工具", "多模态测试工具" etc.
+        # Or use tags if available
+        tags = ts.tags or []
+        category = ts.category or ""
+        
+        # If task_type specified, filter toolsets that match
+        if task_type:
+            # Check if tags contain the task_type
+            if task_type in tags:
+                result.append({
+                    "id": ts.id,
+                    "name": ts.name,
+                    "description": ts.description,
+                    "category": category,
+                    "tags": tags,
+                })
+                continue
+            # Check if category matches common patterns
+            task_type_labels = {
+                "llm": ["LLM", "大语言模型", "文本生成"],
+                "multimodal": ["多模态", "Multimodal"],
+                "image_classification": ["图像分类", "Image Classification"],
+                "object_detection": ["目标检测", "Object Detection"],
+                "speech_recognition": ["语音识别", "Speech Recognition"],
+                "ocr": ["OCR", "文字识别"],
+            }
+            labels = task_type_labels.get(task_type, [])
+            if any(label in category for label in labels):
+                result.append({
+                    "id": ts.id,
+                    "name": ts.name,
+                    "description": ts.description,
+                    "category": category,
+                    "tags": tags,
+                })
+        else:
+            result.append({
+                "id": ts.id,
+                "name": ts.name,
+                "description": ts.description,
+                "category": category,
+                "tags": tags,
+            })
+
+    return _ok(result)

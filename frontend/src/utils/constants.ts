@@ -86,7 +86,7 @@ export const PRIORITY_MAP: Record<string, { label: string; color: string }> = {
 
 // 资产类型
 export const ASSET_TYPES = [
-  { label: '模型', value: 'model', key: 'model' },
+  { label: '模型镜像', value: 'image', key: 'image' },
   { label: '数据集', value: 'dataset', key: 'dataset' },
   { label: '算子库', value: 'operator', key: 'operator' },
   { label: '脚本', value: 'script', key: 'script' },

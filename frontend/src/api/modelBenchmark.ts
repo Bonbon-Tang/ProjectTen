@@ -23,3 +23,7 @@ export function getModelBenchmarkSummary() {
 export function getAvailableImages(task_type?: string) {
   return api.get('/model-benchmark/images', { params: { task_type } });
 }
+
+export function getAvailableToolsets(task_type?: string) {
+  return api.get('/model-benchmark/toolsets', { params: { task_type } });
+}

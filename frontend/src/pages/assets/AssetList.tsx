@@ -16,6 +16,8 @@ import {
   Col,
   Statistic,
   Badge,
+  Select,
+  Typography,
 } from 'antd';
 import {
   SearchOutlined,
@@ -28,6 +30,7 @@ import {
   InfoCircleOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+const { Text } = Typography;
 import PageHeader from '@/components/PageHeader';
 import { ASSET_TYPES } from '@/utils/constants';
 import { getAssets, deleteAsset } from '@/api/assets';
@@ -69,23 +72,87 @@ export default function AssetList() {
   const [pageSize, setPageSize] = useState(20);
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
+  
+  // 镜像筛选状态
+  const [selectedChip, setSelectedChip] = useState<string>('');
+  const [selectedScenario, setSelectedScenario] = useState<string>('');
+  
+  // 芯片选项
+  const CHIP_OPTIONS = [
+    { label: '全部芯片', value: 'all' },
+    { label: '华为昇腾 910C', value: 'Ascend910C' },
+    { label: '华为昇腾 910B', value: 'Ascend910B' },
+    { label: '寒武纪 MLU590', value: 'MLU590' },
+    { label: '昆仑芯 P800', value: 'P800' },
+    { label: '海光 DCU BW1000', value: 'BW1000' },
+  ];
+  
+  // 25 个子场景选项
+  const SCENARIO_OPTIONS = [
+    { label: '全部场景', value: 'all' },
+    { label: '大语言模型', value: 'llm' },
+    { label: '多模态', value: 'multimodal' },
+    { label: '语音识别', value: 'speech_recognition' },
+    { label: '图像分类', value: 'image_classification' },
+    { label: '目标检测', value: 'object_detection' },
+    { label: '语义分割', value: 'semantic_segmentation' },
+    { label: '文本生成', value: 'text_generation' },
+    { label: '机器翻译', value: 'machine_translation' },
+    { label: '情感分析', value: 'sentiment_analysis' },
+    { label: '问答系统', value: 'question_answering' },
+    { label: '文本摘要', value: 'text_summarization' },
+    { label: '语音合成', value: 'speech_synthesis' },
+    { label: '图像生成', value: 'image_generation' },
+    { label: '视频理解', value: 'video_understanding' },
+    { label: '文字识别 (OCR)', value: 'ocr' },
+    { label: '推荐系统', value: 'recommendation' },
+    { label: '异常检测', value: 'anomaly_detection' },
+    { label: '时序预测', value: 'time_series' },
+    { label: '强化学习', value: 'reinforcement_learning' },
+    { label: '图神经网络', value: 'graph_neural_network' },
+    { label: '医学影像', value: 'medical_imaging' },
+    { label: '自动驾驶', value: 'autonomous_driving' },
+    { label: '机器人控制', value: 'robot_control' },
+    { label: '代码生成', value: 'code_generation' },
+    { label: '知识图谱', value: 'knowledge_graph' },
+  ];
 
   const fetchAssets = useCallback(async () => {
     setLoading(true);
     try {
-      const params: any = { page, page_size: pageSize };
+      const params: any = { page: 1, page_size: 100 };  // 始终获取全部数据
       if (activeTab !== 'all') params.asset_type = activeTab;
       if (keyword) params.keyword = keyword;
+      
       const res: any = await getAssets(params);
       const d = res?.data || res;
-      setData(d?.items || []);
-      setTotal(d?.total || 0);
-    } catch {
-      // silent
+      let items = d?.items || [];
+      
+      // 前端筛选：模型镜像 Tab 支持按芯片和场景筛选
+      if (activeTab === 'image') {
+        if (selectedChip && selectedChip !== 'all') {
+          items = items.filter((item: AssetItem) => 
+            item.tags && item.tags.includes(selectedChip)
+          );
+        }
+        if (selectedScenario && selectedScenario !== 'all') {
+          items = items.filter((item: AssetItem) => 
+            item.tags && item.tags.includes(selectedScenario)
+          );
+        }
+      }
+      
+      setData(items);
+      setTotal(items.length);
+    } catch (error) {
+      console.error('获取资产失败:', error);
+      message.error('获取资产失败');
+      setData([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, activeTab, keyword]);
+  }, [activeTab, keyword, selectedChip, selectedScenario]);
 
   useEffect(() => {
     fetchAssets();
@@ -366,9 +433,10 @@ export default function AssetList() {
         }
       />
 
-      <Tabs activeKey={activeTab} onChange={(key) => { setActiveTab(key); setPage(1); }} items={tabItems} />
+      <Tabs activeKey={activeTab} onChange={(key) => { setActiveTab(key); }} items={tabItems} />
 
-      <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
+      {/* 筛选器 */}
+      <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
         <Input
           placeholder="搜索资产名称"
           prefix={<SearchOutlined />}
@@ -376,11 +444,54 @@ export default function AssetList() {
           allowClear
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          onPressEnter={() => { setPage(1); fetchAssets(); }}
+          onPressEnter={fetchAssets}
         />
-        <Button type="primary" icon={<SearchOutlined />} onClick={() => { setPage(1); fetchAssets(); }}>
+        
+        {/* 镜像筛选：芯片和场景 */}
+        {activeTab === 'image' && (
+          <>
+            <Select
+              placeholder="芯片类型"
+              style={{ width: 160 }}
+              allowClear
+              value={selectedChip || undefined}
+              onChange={(val) => { setSelectedChip(val || ''); }}
+              options={CHIP_OPTIONS}
+            />
+            <Select
+              placeholder="场景分类"
+              style={{ width: 160 }}
+              allowClear
+              value={selectedScenario || undefined}
+              onChange={(val) => { setSelectedScenario(val || ''); }}
+              options={SCENARIO_OPTIONS}
+            />
+          </>
+        )}
+        
+        <Button type="primary" icon={<SearchOutlined />} onClick={fetchAssets}>
           搜索
         </Button>
+        
+        {/* 筛选状态提示 */}
+        {activeTab === 'image' && (selectedChip || selectedScenario) && (
+          <Space size="small" style={{ marginLeft: 'auto' }}>
+            <Text type="secondary">筛选:</Text>
+            {selectedChip && selectedChip !== 'all' && (
+              <Tag color="orange">{CHIP_OPTIONS.find(c => c.value === selectedChip)?.label}</Tag>
+            )}
+            {selectedScenario && selectedScenario !== 'all' && (
+              <Tag color="green">{SCENARIO_OPTIONS.find(s => s.value === selectedScenario)?.label}</Tag>
+            )}
+            <Button 
+              type="link" 
+              size="small" 
+              onClick={() => { setSelectedChip(''); setSelectedScenario(''); }}
+            >
+              清除
+            </Button>
+          </Space>
+        )}
       </div>
 
       <Table
@@ -389,12 +500,11 @@ export default function AssetList() {
         rowKey="id"
         loading={loading}
         pagination={{
-          current: page,
-          pageSize,
+          pageSize: Math.max(pageSize, total),  // 显示所有数据
           total,
-          showSizeChanger: true,
+          showSizeChanger: false,
+          showQuickJumper: false,
           showTotal: (t) => `共 ${t} 条`,
-          onChange: (p, ps) => { setPage(p); setPageSize(ps); },
         }}
       />
 
