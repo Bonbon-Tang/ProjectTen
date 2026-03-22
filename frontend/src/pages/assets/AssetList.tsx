@@ -77,11 +77,11 @@ export default function AssetList() {
   const [selectedChip, setSelectedChip] = useState<string>('');
   const [selectedScenario, setSelectedScenario] = useState<string>('');
   
-  // 芯片选项
+  // 芯片选项（value 使用简写，方便匹配）
   const CHIP_OPTIONS = [
     { label: '全部芯片', value: 'all' },
-    { label: '华为昇腾 910C', value: 'Ascend910C' },
-    { label: '华为昇腾 910B', value: 'Ascend910B' },
+    { label: '华为昇腾 910C', value: '910C' },
+    { label: '华为昇腾 910B', value: '910B' },
     { label: '寒武纪 MLU590', value: 'MLU590' },
     { label: '昆仑芯 P800', value: 'P800' },
     { label: '海光 DCU BW1000', value: 'BW1000' },
@@ -131,13 +131,26 @@ export default function AssetList() {
       // 前端筛选：模型镜像 Tab 支持按芯片和场景筛选
       if (activeTab === 'image') {
         if (selectedChip && selectedChip !== 'all') {
-          items = items.filter((item: AssetItem) => 
-            item.tags && item.tags.includes(selectedChip)
-          );
+          items = items.filter((item: AssetItem) => {
+            // 检查 tags 中是否包含芯片型号（如 910C, MLU590, P800, BW1000）
+            const chipMatch = item.tags && item.tags.some(tag => 
+              tag.includes(selectedChip)
+            );
+            // 或者从描述中解析芯片信息（支持中文和英文格式）
+            const descMatch = item.description && (
+              item.description.includes(selectedChip) ||  // 匹配 910C, MLU590 等
+              item.description.includes('华为昇腾' + selectedChip) ||  // 匹配 华为昇腾 910C
+              item.description.includes('寒武纪' + selectedChip) ||
+              item.description.includes('昆仑芯' + selectedChip) ||
+              item.description.includes('海光' + selectedChip)
+            );
+            return chipMatch || descMatch;
+          });
         }
         if (selectedScenario && selectedScenario !== 'all') {
           items = items.filter((item: AssetItem) => 
-            item.tags && item.tags.includes(selectedScenario)
+            (item.tags && item.tags.includes(selectedScenario)) ||
+            (item.description && item.description.includes(selectedScenario))
           );
         }
       }
