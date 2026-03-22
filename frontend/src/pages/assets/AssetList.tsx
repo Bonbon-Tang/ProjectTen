@@ -161,12 +161,6 @@ export default function AssetList() {
       
       let filteredItems = allItems;
       
-      const res: any = await getAssets(params);
-      const d = res?.data || res;
-      let allItems = d?.items || [];
-      
-      // 前端筛选：模型镜像 Tab 支持按芯片、框架和场景筛选（完全基于 tags）
-      // tags 格式：[芯片型号，框架名称，子场景 1, 子场景 2, ...]
       console.log('[AssetList] 获取到原始数据:', allItems.length, 'activeTab:', activeTab);
       
       // 前端筛选：模型镜像 Tab 支持按芯片、框架和场景筛选（完全基于 tags）
