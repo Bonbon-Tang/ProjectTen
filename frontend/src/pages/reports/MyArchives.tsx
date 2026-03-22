@@ -141,6 +141,9 @@ export default function MyArchives() {
         title="我的存档"
         breadcrumbs={[{ title: '报告管理', path: '/reports/list' }, { title: '我的存档' }]}
       />
+      <div style={{ marginBottom: 16, color: 'rgba(0,0,0,0.45)', fontSize: 13 }}>
+        查看您收藏和归档的评测报告
+      </div>
 
       <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
         <Input

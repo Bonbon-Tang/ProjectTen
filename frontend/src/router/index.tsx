@@ -62,7 +62,6 @@ export default function AppRouter() {
 
           {/* 报告管理 */}
           <Route path="/reports/list" element={<ReportList />} />
-          <Route path="/reports/compare" element={<ReportList />} />
           <Route path="/reports/archives" element={<MyArchives />} />
           <Route path="/reports/:id" element={<ReportDetail />} />
 

@@ -84,11 +84,6 @@ export default function Sidebar() {
             label: '评测报告',
           },
           {
-            key: '/reports/compare',
-            icon: <SwapOutlined />,
-            label: '报告对比',
-          },
-          {
             key: '/reports/archives',
             icon: <FolderOpenOutlined />,
             label: '我的存档',

@@ -9,6 +9,7 @@ import {
   DownloadOutlined,
   DeleteOutlined,
   FileTextOutlined,
+  StarOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '@/components/PageHeader';
@@ -79,6 +80,7 @@ export default function ReportList() {
       render: (_, record) => (
         <Space>
           <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => navigate(`/reports/${record.id}`)}>查看</Button>
+          <Button type="link" size="small" icon={<StarOutlined />}>存档</Button>
           <Button type="link" size="small" icon={<DownloadOutlined />}>下载</Button>
           <Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button>
         </Space>
@@ -98,6 +100,9 @@ export default function ReportList() {
           </Radio.Group>
         }
       />
+      <div style={{ marginBottom: 16, color: 'rgba(0,0,0,0.45)', fontSize: 13 }}>
+        查看所有可见的评测报告列表
+      </div>
 
       <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
         <Input placeholder="搜索报告" prefix={<SearchOutlined />} style={{ width: 260 }} allowClear />
