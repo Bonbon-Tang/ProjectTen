@@ -123,6 +123,20 @@ def get_available_images(
     db: Session = Depends(get_db),
 ):
     """Get available images for model deployment test, optionally filtered by sub-scenario tag and chip."""
+    from app.models.resource import ComputeDevice
+    
+    # Device type mapping (frontend value -> Chinese name in description)
+    DEVICE_NAME_MAP = {
+        "huawei_910c": "华为昇腾 910C",
+        "huawei_910b": "华为昇腾 910B",
+        "cambrian_590": "寒武纪 MLU590",
+        "kunlun_p800": "昆仑芯 P800",
+        "hygon_bw1000": "海光 DCU BW1000",
+    }
+    
+    # Get the Chinese name for the selected device type
+    target_chip_name = DEVICE_NAME_MAP.get(device_type) if device_type else None
+    
     q = db.query(DigitalAsset).filter(
         DigitalAsset.asset_type == "image",
         DigitalAsset.status == "active",
@@ -137,12 +151,22 @@ def get_available_images(
             continue
         
         # Parse chip/framework/model from description
+        # Handle both formats:
+        # - "Chip + Framework + Model"
+        # - "Prefix - Chip + Framework + Model"
         desc = img.description or ""
         parts = desc.split(" + ")
-        chip_name = parts[0].strip() if parts else img.name
         
-        # Filter by device_type (chip)
-        if device_type and device_type != chip_name:
+        # Extract chip name, handling prefix format
+        raw_chip = parts[0].strip() if parts else img.name
+        # If there's a " - " in the first part, take the part after it
+        if " - " in raw_chip:
+            chip_name = raw_chip.split(" - ")[-1].strip()
+        else:
+            chip_name = raw_chip
+        
+        # Filter by device_type (chip) - match Chinese name
+        if target_chip_name and target_chip_name != chip_name:
             continue
         
         result.append({
