@@ -34,8 +34,10 @@ api.interceptors.response.use(
     return res;
   },
   (error) => {
+    console.error('[API Error]', error);
     if (error.response) {
-      const { status } = error.response;
+      const { status, data } = error.response;
+      console.error('[API Error Response]', status, data);
       switch (status) {
         case 401:
           message.error('登录已过期，请重新登录');
@@ -53,7 +55,7 @@ api.interceptors.response.use(
           message.error('服务器内部错误');
           break;
         default:
-          message.error(error.response.data?.message || '请求失败');
+          message.error(data?.message || data?.detail || '请求失败');
       }
     } else if (error.message.includes('timeout')) {
       message.error('请求超时，请稍后重试');

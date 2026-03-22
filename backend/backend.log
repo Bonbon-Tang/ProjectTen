@@ -1,53 +1,33 @@
 INFO:     Will watch for changes in these directories: ['/root/.openclaw/workspace/ProjectTen/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [1376480] using WatchFiles
-INFO:     Started server process [1376482]
+INFO:     Started reloader process [1385275] using WatchFiles
+INFO:     Started server process [1385277]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:33198 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53274 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53266 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53278 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53280 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53290 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53302 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53316 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53328 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47952 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:47964 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:60694 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60704 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60720 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:60722 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:43294 - "GET /api/v1/assets/?page=1 HTTP/1.1" 401 Unauthorized
 (trapped) error reading bcrypt version
 Traceback (most recent call last):
   File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
     version = _bcrypt.__about__.__version__
               ^^^^^^^^^^^^^^^^^
 AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:40652 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40658 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40664 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40668 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40680 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40688 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40684 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40698 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37826 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37828 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33662 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:33672 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:54362 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:54370 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:57074 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57098 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57084 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57100 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57114 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57118 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47076 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:47080 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:50904 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50914 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38594 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38586 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38596 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38612 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38620 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38624 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38638 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38652 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38666 - "GET /api/v1/model-benchmark/toolsets?task_type=multimodal HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38674 - "GET /api/v1/model-benchmark/images?task_type=multimodal&device_type=huawei_910c HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46986 - "GET /api/v1/assets/11 HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:39096 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [1376482]
-INFO:     Stopping reloader process [1376480]
+INFO:     Finished server process [1385277]
+INFO:     Stopping reloader process [1385275]

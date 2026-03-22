@@ -202,6 +202,8 @@ export default function AssetList() {
   };
 
   const showDetail = (record: AssetItem) => {
+    console.log('[AssetList] 打开详情:', record.name, record.id);
+    console.log('[AssetList] 完整数据:', record);
     setSelectedAsset(record);
     setDetailVisible(true);
   };
