@@ -75,9 +75,10 @@ export default function AssetList() {
   
   // 镜像筛选状态
   const [selectedChip, setSelectedChip] = useState<string>('');
+  const [selectedFramework, setSelectedFramework] = useState<string>('');
   const [selectedScenario, setSelectedScenario] = useState<string>('');
   
-  // 芯片选项（value 使用简写，方便匹配）
+  // 芯片选项
   const CHIP_OPTIONS = [
     { label: '全部芯片', value: 'all' },
     { label: '华为昇腾 910C', value: '910C' },
@@ -85,6 +86,15 @@ export default function AssetList() {
     { label: '寒武纪 MLU590', value: 'MLU590' },
     { label: '昆仑芯 P800', value: 'P800' },
     { label: '海光 DCU BW1000', value: 'BW1000' },
+  ];
+  
+  // 框架选项
+  const FRAMEWORK_OPTIONS = [
+    { label: '全部框架', value: 'all' },
+    { label: 'MindSpore', value: 'MindSpore' },
+    { label: 'PyTorch', value: 'PyTorch' },
+    { label: 'PaddlePaddle', value: 'PaddlePaddle' },
+    { label: 'ROCm', value: 'ROCm' },
   ];
   
   // 25 个子场景选项
@@ -128,29 +138,21 @@ export default function AssetList() {
       const d = res?.data || res;
       let items = d?.items || [];
       
-      // 前端筛选：模型镜像 Tab 支持按芯片和场景筛选
+      // 前端筛选：模型镜像 Tab 支持按芯片、框架和场景筛选（基于 tags）
       if (activeTab === 'image') {
         if (selectedChip && selectedChip !== 'all') {
-          items = items.filter((item: AssetItem) => {
-            // 检查 tags 中是否包含芯片型号（如 910C, MLU590, P800, BW1000）
-            const chipMatch = item.tags && item.tags.some(tag => 
-              tag.includes(selectedChip)
-            );
-            // 或者从描述中解析芯片信息（支持中文和英文格式）
-            const descMatch = item.description && (
-              item.description.includes(selectedChip) ||  // 匹配 910C, MLU590 等
-              item.description.includes('华为昇腾' + selectedChip) ||  // 匹配 华为昇腾 910C
-              item.description.includes('寒武纪' + selectedChip) ||
-              item.description.includes('昆仑芯' + selectedChip) ||
-              item.description.includes('海光' + selectedChip)
-            );
-            return chipMatch || descMatch;
-          });
+          items = items.filter((item: AssetItem) => 
+            item.tags && item.tags.includes(selectedChip)
+          );
+        }
+        if (selectedFramework && selectedFramework !== 'all') {
+          items = items.filter((item: AssetItem) => 
+            item.tags && item.tags.includes(selectedFramework)
+          );
         }
         if (selectedScenario && selectedScenario !== 'all') {
           items = items.filter((item: AssetItem) => 
-            (item.tags && item.tags.includes(selectedScenario)) ||
-            (item.description && item.description.includes(selectedScenario))
+            item.tags && item.tags.includes(selectedScenario)
           );
         }
       }
@@ -460,20 +462,28 @@ export default function AssetList() {
           onPressEnter={fetchAssets}
         />
         
-        {/* 镜像筛选：芯片和场景 */}
+        {/* 镜像筛选：芯片、框架和场景 */}
         {activeTab === 'image' && (
           <>
             <Select
               placeholder="芯片类型"
-              style={{ width: 160 }}
+              style={{ width: 150 }}
               allowClear
               value={selectedChip || undefined}
               onChange={(val) => { setSelectedChip(val || ''); }}
               options={CHIP_OPTIONS}
             />
             <Select
-              placeholder="场景分类"
-              style={{ width: 160 }}
+              placeholder="框架"
+              style={{ width: 130 }}
+              allowClear
+              value={selectedFramework || undefined}
+              onChange={(val) => { setSelectedFramework(val || ''); }}
+              options={FRAMEWORK_OPTIONS}
+            />
+            <Select
+              placeholder="子场景"
+              style={{ width: 150 }}
               allowClear
               value={selectedScenario || undefined}
               onChange={(val) => { setSelectedScenario(val || ''); }}
@@ -487,11 +497,14 @@ export default function AssetList() {
         </Button>
         
         {/* 筛选状态提示 */}
-        {activeTab === 'image' && (selectedChip || selectedScenario) && (
+        {activeTab === 'image' && (selectedChip || selectedFramework || selectedScenario) && (
           <Space size="small" style={{ marginLeft: 'auto' }}>
             <Text type="secondary">筛选:</Text>
             {selectedChip && selectedChip !== 'all' && (
               <Tag color="orange">{CHIP_OPTIONS.find(c => c.value === selectedChip)?.label}</Tag>
+            )}
+            {selectedFramework && selectedFramework !== 'all' && (
+              <Tag color="purple">{FRAMEWORK_OPTIONS.find(f => f.value === selectedFramework)?.label}</Tag>
             )}
             {selectedScenario && selectedScenario !== 'all' && (
               <Tag color="green">{SCENARIO_OPTIONS.find(s => s.value === selectedScenario)?.label}</Tag>
@@ -499,7 +512,7 @@ export default function AssetList() {
             <Button 
               type="link" 
               size="small" 
-              onClick={() => { setSelectedChip(''); setSelectedScenario(''); }}
+              onClick={() => { setSelectedChip(''); setSelectedFramework(''); setSelectedScenario(''); }}
             >
               清除
             </Button>

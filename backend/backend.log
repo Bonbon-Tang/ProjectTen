@@ -1,1601 +1,258 @@
 INFO:     Will watch for changes in these directories: ['/root/.openclaw/workspace/ProjectTen/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [99149] using WatchFiles
-INFO:     Started server process [99151]
+INFO:     Started reloader process [1355447] using WatchFiles
+INFO:     Started server process [1355449]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:48446 - "GET /health HTTP/1.1" 200 OK
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:55080 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52454 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52462 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52476 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52486 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44270 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44286 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44298 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:60830 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60854 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:60844 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60858 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60864 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:60876 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34508 - "POST /api/v1/auth/logout HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34518 - "POST /api/v1/auth/login HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:34840 - "POST /api/v1/auth/login HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:55976 - "POST /api/v1/auth/login HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:56154 - "POST /api/v1/auth/login HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:54016 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53690 - "POST /api/v1/auth/login HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:58054 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58056 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58060 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:58058 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58068 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58074 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:58076 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58086 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34162 - "GET /api/v1/assets?type=toolset&page_size=100 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:34178 - "GET /api/v1/assets?type=toolset&page_size=100 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:41040 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41056 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:41048 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41062 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41076 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:41082 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38558 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38560 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:38566 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38578 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38600 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:38584 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38616 - "GET /api/v1/assets?type=toolset&page_size=100 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:38628 - "GET /api/v1/assets?type=toolset&page_size=100 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:33700 - "POST /api/v1/evaluations HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:33712 - "POST /api/v1/evaluations HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:50254 - "POST /api/v1/evaluations HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:39950 - "GET /api/v1/evaluations?page=1&page_size=10 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:39952 - "GET /api/v1/evaluations?page=1&page_size=10 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:39956 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60398 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60412 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60414 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:60430 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60444 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:43190 - "GET /api/v1/evaluations?page=1&page_size=10 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:43200 - "GET /api/v1/evaluations?page=1&page_size=10 HTTP/1.1" 307 Temporary Redirect
-WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
+INFO:     127.0.0.1:46448 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46462 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46476 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46484 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46486 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46496 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46498 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46512 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46522 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46534 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46550 - "GET /api/v1/model-benchmark/toolsets?task_type=llm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57080 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=hygon_bw1000 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40044 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=huawei_910c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40050 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=huawei_910b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40060 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=kunlun_p800 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36870 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=cambrian_590 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39168 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39182 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39184 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39192 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37706 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37720 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56926 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56942 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56954 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56962 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56978 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56992 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57004 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57018 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57020 - "GET /api/v1/model-benchmark/toolsets?task_type=llm HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57028 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=huawei_910c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46184 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46192 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46206 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51940 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51946 - "GET /api/v1/assets/?page=1&page_size=100&keyword=9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51948 - "GET /api/v1/assets/?page=1&page_size=100&keyword=91 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51954 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51956 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51972 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51978 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51982 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C- HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51988 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-M HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52004 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MI HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52010 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MIN HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52014 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MIND HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52030 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDE HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53050 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDES HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53064 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESP HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53070 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESPO HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53078 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESPOR HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53092 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESPO HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53106 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESP HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53108 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDES HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53118 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDE HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53122 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MIND HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53132 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDS HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53138 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDSP HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53146 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDSPO HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53148 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDSPOR HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53162 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDSPORE HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35144 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C-MINDSPORE HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32900 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C-MINDSPORE HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32908 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50222 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=M HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50224 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MI HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50236 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MID HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50246 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MI HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50256 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MIN HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50266 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MIND HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50268 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MIND HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49850 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52254 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52260 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m%27j HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52270 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52272 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52282 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=min HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52286 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=min%27d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52288 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32780 - "GET /api/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32786 - "GET /api HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32800 - "GET /api/im/v2/app/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32802 - "GET /api/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32804 - "GET /api/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32812 - "GET /api.php HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32822 - "GET /api/c/a HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32834 - "GET /api/ping HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32848 - "GET /api.php/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32858 - "POST /api/init HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32872 - "POST /api/notice HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32882 - "GET /api?code=1 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32884 - "GET /api/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32894 - "GET /api/events HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32906 - "GET /apis/globals HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32910 - "GET /api/room/join HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32920 - "GET /api/user/time HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32924 - "GET /api/v1/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32938 - "GET /api/index/init HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32940 - "GET /api/shop/getKF HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32954 - "POST /api/app/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32970 - "GET /api/apps/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:32986 - "GET /api/order/lists HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33002 - "GET /api/index/index HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33014 - "GET /api/siteConfig HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33022 - "GET /api/front/index HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33038 - "GET /api/Event/basic HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33048 - "GET /api/users/login HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33054 - "POST /api/link-submit HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33060 - "GET /api/common/init HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33076 - "GET /api/card/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33082 - "GET /api/app/banners HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33098 - "GET /api/user/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33104 - "GET /api/product/list HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33112 - "GET /api/index/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33120 - "GET /api/lottery/list HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33136 - "GET /api/app/indexList HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33144 - "GET /api/common/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33154 - "GET /api/user/confinfo HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33156 - "GET /api/Home/videoNew HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33164 - "GET /api/uploads/apimap HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33176 - "GET /api/system/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33184 - "GET /api/product/getAll HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33188 - "POST /api/chat/fish_init HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33198 - "GET /api/message/webInfo HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33200 - "GET /api/site/getInfo.do HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33208 - "GET /api/index/webconfig HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33224 - "GET /api/index/gettreaty HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33238 - "POST /api/v1/seller/login HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33242 - "POST /api/Uploads/apiimei HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33256 - "GET /api/v1/setting/main HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33266 - "GET /api/latestSdkConfig HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33270 - "GET /api/getWebSiteConfig HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33282 - "GET /api.php/index/system HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33284 - "GET /api/user/ismustmobile HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33288 - "POST /api/user/ismustmobile HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33290 - "POST /api/user/ismustmobile HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33294 - "GET /api/index/get_setting HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33302 - "GET /api/vue/common/config HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33318 - "GET /api/BaseInfo/xnb/24hr HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33330 - "GET /api/index/productshow HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33340 - "GET /api/Index/getHome?id=1 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33344 - "GET /api/user/language_list HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33350 - "GET /apix/tongchengyue/tags HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33354 - "GET /api/account/price_rate HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33368 - "GET /api/index/getBannerList HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33384 - "GET /api/banner?appKey=bxefdn HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33388 - "GET /api/Config/getShowConfig HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33400 - "GET /api/common/findIpAddress HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33416 - "POST /api/common/getAllSetting HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33424 - "GET /api/wanlshop/common/init HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33438 - "GET /api/apicom/index/getkefu HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33444 - "GET /api/dict/getServiceConfig HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33454 - "GET /api/product/getPointStore HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33458 - "GET /api/currency/quotation_new HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33474 - "POST /api/chat/visitor/channelInfo HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33488 - "GET /api/common/menus?lang=zh-Hans HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33494 - "GET /api/new-version/daily/rooms/1 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33506 - "GET /api/app/getExecutedRealOrders HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33510 - "GET /api/app/getserviceinfo?token=1 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33524 - "GET /api/app/contract/getMarketList HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33526 - "GET /api/currency/getTradeCurrencyList HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33542 - "GET /api/public/?service=Home.getConfig HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33554 - "GET /api/seller/index/GetSellerConfigAll HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33564 - "GET /api/api/exchangerateuserconfig%21get.action HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33566 - "GET /api/Interface/mobile_ajax.asmx/GetWebConfig HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33570 - "GET /api/set/appSysSet/getKeyByParam?key=sys_set HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33576 - "POST /api/system/systemConfigs/getCustomerServiceLink HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33588 - "GET /api/app/appsetting/link/indexLink?key=customer_service HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:33592 - "POST /api/heartbeat HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52774 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51176 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59420 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59426 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59428 - "GET /api/v1/assets/?asset_type=image&page_size=200 HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:32988 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33000 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33012 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33022 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi%27d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33028 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33036 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=min HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33048 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=min%27d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58592 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51058 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48354 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48358 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54650 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40878 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40882 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40890 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40904 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mid HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60944 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mid HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56566 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mid HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42844 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mid HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45016 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45024 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37234 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37248 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37260 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42798 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53744 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53754 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53614 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37916 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33730 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33744 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33754 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33760 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42068 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910c HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'scripts/update_image_tags.py'. Reloading...
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [99151]
-INFO:     Started server process [101179]
+INFO:     Finished server process [1355449]
+INFO:     Started server process [1360163]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [101179]
-INFO:     Started server process [101305]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:40036 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40354 - "GET /api/v1/evaluations?page=1&page_size=10 HTTP/1.1" 307 Temporary Redirect
-INFO:     127.0.0.1:42008 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42024 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57524 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57538 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57544 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57558 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57570 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57574 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:58402 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58418 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58432 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58448 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58452 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 500 Internal Server Error
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 187, in __call__
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 165, in __call__
-    await self.app(scope, receive, _send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 715, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 735, in app
-    await route.handle(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 288, in handle
-    await self.app(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 76, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 73, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 301, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 214, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 39, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/app/api/v1/assets.py", line 51, in list_assets
-    items = [AssetOut.model_validate(a).model_dump() for a in assets]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/pydantic/main.py", line 627, in model_validate
-    return cls.__pydantic_validator__.validate_python(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pydantic_core._pydantic_core.ValidationError: 1 validation error for AssetOut
-creator_id
-  Input should be a valid integer [type=int_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.10/v/int_type
-INFO:     127.0.0.1:58460 - "POST /api/v1/evaluations/ HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:40174 - "GET /api/v1/reports/archives?keyword=&page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40178 - "GET /api/v1/reports/archives?keyword=&page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39460 - "GET /api/v1/reports/archives?keyword=&page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39470 - "GET /api/v1/reports/archives?keyword=&page=1&page_size=10 HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'app/schemas/asset.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [101305]
-INFO:     Started server process [102068]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:48880 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48894 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57434 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57444 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57452 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57466 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57482 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57498 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58668 - "GET /api/v1/benchmark/operators?page=2&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58676 - "GET /api/v1/benchmark/operators?page=3&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58684 - "GET /api/v1/benchmark/operators?page=4&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58690 - "GET /api/v1/benchmark/operators?page=5&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56512 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35404 - "POST /api/v1/auth/logout HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40800 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40812 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40826 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40828 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40840 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40844 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40846 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40852 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43540 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43546 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38654 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:36394 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:37910 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:35912 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35928 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:35946 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35938 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35952 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35968 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35980 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35986 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41356 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41360 - "POST /api/v1/evaluations/ HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:44930 - "GET /api/v1/reports/archives?keyword=&page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44934 - "GET /api/v1/reports/archives?keyword=&page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46122 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46126 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'app/api/v1/evaluations.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [102068]
-INFO:     Started server process [103279]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app/api/v1/evaluations.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [103279]
-INFO:     Started server process [103346]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app/api/v1/tenants.py', 'app/api/v1/users.py', 'app/api/v1/assets.py', 'app/api/v1/roles.py', 'app/api/v1/reports.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [103346]
-INFO:     Started server process [103397]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app/api/v1/tenants.py', 'app/api/v1/users.py', 'app/api/v1/assets.py', 'app/api/v1/roles.py', 'app/api/v1/reports.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [103397]
-INFO:     Started server process [103480]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:33764 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33768 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33780 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33792 - "GET /api/v1/assets?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [103480]
-INFO:     Stopping reloader process [99149]
-INFO:     Will watch for changes in these directories: ['/root/.openclaw/workspace/ProjectTen/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [110200] using WatchFiles
-INFO:     Started server process [110202]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:33846 - "GET /health HTTP/1.1" 200 OK
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:44282 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44298 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44310 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44316 - "GET /api/v1/evaluations?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44318 - "GET /api/v1/assets?type=toolset HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44332 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33132 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33146 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33148 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33164 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33166 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33182 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38474 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38476 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45826 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:45836 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:37686 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:37694 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:52356 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52362 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [110202]
-INFO:     Started server process [111660]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:53186 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53196 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:53202 - "POST /api/v1/evaluations/ HTTP/1.1" 400 Bad Request
-WARNING:  WatchFiles detected changes in 'app/schemas/evaluation.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [111660]
-INFO:     Started server process [111999]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'app/services/evaluation_service.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [111999]
-INFO:     Started server process [112076]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:40350 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:50724 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50736 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50752 - "POST /api/v1/evaluations/5/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60224 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60240 - "POST /api/v1/evaluations/5/start HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:51522 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51528 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45544 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45558 - "GET /api/v1/evaluations/5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36836 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36850 - "GET /api/v1/evaluations/5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45300 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45306 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'app/api/v1/evaluations.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [112076]
-INFO:     Started server process [113415]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:39170 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47344 - "GET /api/v1/evaluations/5 HTTP/1.1" 500 Internal Server Error
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 187, in __call__
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 165, in __call__
-    await self.app(scope, receive, _send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 715, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 735, in app
-    await route.handle(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 288, in handle
-    await self.app(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 76, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 73, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 301, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 214, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 39, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/app/api/v1/evaluations.py", line 113, in get_evaluation
-    from app.models.asset import Asset
-ImportError: cannot import name 'Asset' from 'app.models.asset' (/root/.openclaw/workspace/ProjectTen/backend/app/models/asset.py)
-INFO:     127.0.0.1:47354 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47356 - "GET /api/v1/evaluations/5 HTTP/1.1" 500 Internal Server Error
-ERROR:    Exception in ASGI application
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 187, in __call__
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/errors.py", line 165, in __call__
-    await self.app(scope, receive, _send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/cors.py", line 85, in __call__
-    await self.app(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 62, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 715, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 735, in app
-    await route.handle(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 288, in handle
-    await self.app(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 76, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/routing.py", line 73, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 301, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/fastapi/routing.py", line 214, in run_endpoint_function
-    return await run_in_threadpool(dependant.call, **values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/starlette/concurrency.py", line 39, in run_in_threadpool
-    return await anyio.to_thread.run_sync(func, *args)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/to_thread.py", line 63, in run_sync
-    return await get_async_backend().run_sync_in_worker_thread(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 2502, in run_sync_in_worker_thread
-    return await future
-           ^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 986, in run
-    result = context.run(func, *args)
-             ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/root/.openclaw/workspace/ProjectTen/backend/app/api/v1/evaluations.py", line 113, in get_evaluation
-    from app.models.asset import Asset
-ImportError: cannot import name 'Asset' from 'app.models.asset' (/root/.openclaw/workspace/ProjectTen/backend/app/models/asset.py)
-WARNING:  WatchFiles detected changes in 'app/api/v1/evaluations.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [113415]
-INFO:     Started server process [113567]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:38748 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38750 - "GET /api/v1/evaluations/5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54204 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54198 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54212 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54226 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54236 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54242 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41018 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41020 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56302 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56318 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56326 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56342 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40486 - "POST /api/v1/evaluations/ HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:60116 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60126 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60146 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60154 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60164 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60170 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60184 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60200 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60212 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60224 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36238 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:36246 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:45188 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:45204 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45212 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45224 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45236 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45242 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45254 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49612 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49622 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49624 - "POST /api/v1/evaluations/6/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39278 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39290 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39304 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39312 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39326 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39332 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41688 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41690 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41700 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41702 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41714 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41724 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57178 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57190 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57206 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57216 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57222 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57236 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57242 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39162 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39178 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39186 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39196 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39198 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'app/main.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [113567]
-INFO:     Started server process [114436]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:39200 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39208 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60746 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60752 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60762 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60774 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60780 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60788 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60090 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60094 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60106 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60120 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60128 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60142 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:60158 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60168 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60176 - "GET /api/v1/evaluations/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60192 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39668 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39670 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39678 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39690 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39702 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39712 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39724 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46696 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46712 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46718 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46732 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46742 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46748 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56330 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56334 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56336 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56342 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56354 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56364 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56376 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56088 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56090 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56096 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56098 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56102 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56112 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56122 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42010 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42012 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42022 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42034 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42050 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42058 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59316 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59330 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59346 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59362 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59368 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59376 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55942 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55950 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55954 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55964 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55970 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55974 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55990 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56004 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58904 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58906 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58910 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"测精度-华为昇腾910C-20260319","description":"","task_category":"operator_test","task_type":"accuracy_only","device_type":"huawei_910c","device_count":1,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:58916 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"精度+性能-昇腾910B-20260319","task_category":"operator_test","task_type":"accuracy_and_performance","device_type":"huawei_910b","device_count":2,"toolset_id":1,"priority":"high"}
-INFO:     127.0.0.1:58918 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"test-null","task_category":"operator_test","task_type":"accuracy_only","device_type":"huawei_910c","device_count":null,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:58932 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58934 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58936 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58942 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43234 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43246 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43260 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39572 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39574 - "DELETE /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39586 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39594 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39602 - "DELETE /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38450 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38452 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38454 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38460 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_and_performance","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:33730 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:45312 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33440 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33442 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33432 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33456 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33466 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33478 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52640 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52652 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52656 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52664 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52678 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52686 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41960 - "DELETE /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41976 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60926 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60936 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60940 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43760 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_and_performance","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:45248 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_and_performance","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:44098 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:44100 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44108 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44124 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44138 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44144 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44158 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38066 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38082 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38094 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38096 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38102 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49380 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49392 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49394 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49396 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49410 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49418 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49420 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49422 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49432 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37394 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37404 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37396 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37414 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37422 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37434 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37450 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40172 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40176 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40182 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40190 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47172 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47178 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47186 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47196 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47202 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47216 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37900 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37912 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37920 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37934 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37938 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37940 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35532 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35538 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_and_performance","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:47102 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:58692 - "POST /api/v1/auth/logout HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58704 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58706 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34756 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34764 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34772 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34784 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34794 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34796 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34798 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34812 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51410 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51418 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51420 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51422 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/6/stop body=
-INFO:     127.0.0.1:51430 - "POST /api/v1/evaluations/6/stop HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58990 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59004 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59012 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59026 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59042 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59048 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42160 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42166 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_and_performance","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:43400 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_and_performance","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:43408 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:43414 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43420 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43422 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43438 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43452 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43466 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40792 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40806 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40820 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40828 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40836 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40840 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36402 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36410 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36416 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36418 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36424 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36436 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47250 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47260 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_and_performance","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:40090 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:40098 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40102 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40120 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40122 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57210 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57216 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57226 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57232 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57234 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57246 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57258 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57260 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_only","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:40194 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_only","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:49168 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"operator_test","task_type":"accuracy_only","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:49184 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:54148 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54156 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54168 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54172 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54176 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54186 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53352 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53362 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"model_test","task_type":"text_generation","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:42240 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"model_test","task_type":"text_generation","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:57194 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"task_category":"model_test","task_type":"text_generation","device_count":1}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 422
-INFO:     127.0.0.1:54086 - "POST /api/v1/evaluations/ HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:51056 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40784 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40796 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40806 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38368 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [114436]
-INFO:     Stopping reloader process [110200]
-INFO:     Will watch for changes in these directories: ['/root/.openclaw/workspace/ProjectTen/backend']
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [120329] using WatchFiles
-INFO:     Started server process [120331]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:35288 - "GET /health HTTP/1.1" 200 OK
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:42250 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"验证测试","task_category":"operator_test","task_type":"accuracy_only","device_type":"huawei_910c","device_count":1,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:42262 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56298 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56312 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56328 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56332 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56340 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56342 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56344 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56358 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38728 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38744 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"测精度+性能-华为昇腾910C-20260319","description":"12","task_category":"operator_test","task_type":"accuracy_and_performance","device_type":"huawei_910c","device_count":1,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:57220 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57228 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57234 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/8/start body=
-INFO:     127.0.0.1:57246 - "POST /api/v1/evaluations/8/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48600 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48612 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48622 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48632 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48638 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48654 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48656 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48662 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59878 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59894 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49652 - "DELETE /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49658 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49668 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49676 - "DELETE /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49680 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49690 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44702 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44714 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44722 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44734 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44738 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44748 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44750 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44760 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"测精度+性能-寒武纪MLU590-20260319","description":"AB","task_category":"operator_test","task_type":"accuracy_and_performance","device_type":"cambrian_590","device_count":1,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:60054 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60068 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60072 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60078 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60102 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60094 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60118 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60122 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60128 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48404 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48414 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48424 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48428 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/9/start body=
-INFO:     127.0.0.1:48430 - "POST /api/v1/evaluations/9/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48432 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48438 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48448 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48462 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48478 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48482 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52782 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52788 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52794 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52798 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39766 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39782 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39788 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39802 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55112 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55120 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55128 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55130 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59936 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59946 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59952 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59960 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40610 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40620 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40636 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40638 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53588 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53594 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53604 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53596 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51856 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51858 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51862 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51866 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40290 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40304 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40306 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40320 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49540 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49556 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49570 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49586 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53360 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53374 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53378 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53390 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37622 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37624 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37638 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37652 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51330 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51340 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52694 - "GET /api/v1/reports/3/download HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:47266 - "POST /api/v1/reports/3/archive HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:47272 - "GET /api/v1/reports/3/download HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:42690 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42704 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42706 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42714 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42728 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42736 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42752 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42760 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54584 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54590 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54600 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54610 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54618 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54622 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40028 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40040 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40042 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40056 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40066 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40072 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56396 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56406 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56412 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56416 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50988 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50998 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51006 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51010 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51024 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51026 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51034 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51042 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33980 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33986 - "GET /api/v1/assets/?page_size=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34002 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53800 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53802 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38976 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38988 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39000 - "GET /api/v1/assets/?page=1&page_size=20&type=template HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39002 - "GET /api/v1/assets/?page=1&page_size=20&type=toolset HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39012 - "GET /api/v1/assets/?page=1&page_size=20&type=template HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39014 - "GET /api/v1/assets/?page=1&page_size=20&type=script HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52300 - "GET /api/v1/assets/?page=1&page_size=20&type=operator HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52306 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52314 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52318 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53592 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53606 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53622 - "DELETE /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53630 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35448 - "DELETE /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35460 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35464 - "DELETE /api/v1/evaluations/5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35474 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/4/start body=
-INFO:     127.0.0.1:35480 - "POST /api/v1/evaluations/4/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35488 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41768 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41778 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38614 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38622 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38624 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38626 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38636 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38642 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38658 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38664 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38674 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38676 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52814 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53340 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'app/services/evaluation_service.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [120331]
-INFO:     Started server process [123932]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:41394 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41400 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41406 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41410 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41422 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41432 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41434 - "GET /api/v1/evaluations/4 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41444 - "GET /api/v1/evaluations/4 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59680 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59682 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59696 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59712 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59718 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59732 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59742 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59756 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-(trapped) error reading bcrypt version
-Traceback (most recent call last):
-  File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
-    version = _bcrypt.__about__.__version__
-              ^^^^^^^^^^^^^^^^^
-AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:59758 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"正常测试","task_category":"operator_test","task_type":"accuracy_only","device_type":"huawei_910c","device_count":1,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:45582 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45560 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45576 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"超量测试","task_category":"operator_test","task_type":"accuracy_only","device_type":"hygon_bw1000","device_count":100,"toolset_id":1,"priority":"medium"}
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ => 400
-INFO:     127.0.0.1:45596 - "POST /api/v1/evaluations/ HTTP/1.1" 400 Bad Request
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"极限测试","task_category":"operator_test","task_type":"accuracy_only","device_type":"hygon_bw1000","device_count":8,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:45612 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45624 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45640 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60086 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60102 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60106 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60118 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33988 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34000 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34004 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34006 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34014 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34016 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50712 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50722 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/6/start body=
-INFO:     127.0.0.1:59810 - "POST /api/v1/evaluations/6/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59826 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59842 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59852 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59854 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59864 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59866 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51792 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51800 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51814 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51820 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51826 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51842 - "GET /api/v1/evaluations/6/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50988 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50986 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51002 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51006 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51008 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51018 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51030 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51042 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51044 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51058 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57832 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57846 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57852 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57868 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57874 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57888 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34304 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34316 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34318 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34328 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45816 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45826 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45834 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45846 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53738 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53752 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53764 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53768 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45096 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45108 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45110 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45112 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54068 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54078 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54088 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54094 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45374 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45382 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44954 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44968 - "GET /api/v1/evaluations/6 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56842 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56856 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56866 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56876 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56886 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56892 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56898 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56900 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56914 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56924 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45468 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"大语言模型-华为昇腾910C-20260319","description":"ABC","task_category":"model_test","task_type":"llm","device_type":"huawei_910c","device_count":1,"priority":"medium"}
-INFO:     127.0.0.1:45470 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45482 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45484 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40974 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40978 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50798 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50814 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50822 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50830 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50834 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50840 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/7/start body=
-INFO:     127.0.0.1:50842 - "POST /api/v1/evaluations/7/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50848 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50852 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39292 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39294 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39304 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39316 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39320 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39332 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55282 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55298 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55308 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55312 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55324 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55336 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52610 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52626 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52636 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52648 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52654 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52666 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52682 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52684 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41510 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41512 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41524 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41528 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41530 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41540 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45364 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45372 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45382 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45394 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45406 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45408 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45424 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45438 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45452 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45462 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45470 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45482 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45490 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45506 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51258 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51266 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51280 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51292 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51296 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51312 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51320 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51322 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44862 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44878 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44880 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44892 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44904 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44908 - "GET /api/v1/evaluations/7/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59704 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59714 - "GET /api/v1/evaluations/7 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59730 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59736 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59748 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59756 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59768 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59778 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54912 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54920 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54934 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54946 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44180 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"测精度+性能-寒武纪MLU590-20260319","description":"abc","task_category":"operator_test","task_type":"accuracy_and_performance","device_type":"cambrian_590","device_count":1,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:44186 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44194 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44196 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/8/start body=
-INFO:     127.0.0.1:40604 - "POST /api/v1/evaluations/8/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40618 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40630 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40644 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40646 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40648 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40664 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34956 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34972 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34976 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34982 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46286 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46288 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46312 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46302 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54592 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54602 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54604 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54610 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54626 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54630 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53914 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53924 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53932 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53938 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53946 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53962 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53976 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53980 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44370 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44378 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44382 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44386 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44390 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44396 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60844 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60860 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60862 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60874 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60884 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60892 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60828 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60834 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60844 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60848 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60862 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60864 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60876 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60884 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53216 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53230 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53246 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53252 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53264 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53280 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54774 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54788 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54796 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54806 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54822 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54824 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38648 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38662 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38678 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38690 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38700 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38714 - "GET /api/v1/evaluations/8/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40310 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40324 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40338 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40342 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40346 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40350 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39010 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39012 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39016 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39024 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44402 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:44408 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:44420 - "GET /api/v1/benchmark/summary HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:44432 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:44446 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:44454 - "GET /api/v1/benchmark/summary HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:38248 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38264 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38276 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38288 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38300 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38306 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38310 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38326 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54798 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54810 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38034 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38040 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38048 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38064 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38052 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38072 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37308 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42372 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42382 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38708 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44196 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44198 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56210 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56222 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56214 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56228 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56238 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56244 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47028 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47034 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47050 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47052 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36766 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"测精度+性能-寒武纪MLU590-20260319","description":"abc","task_category":"operator_test","task_type":"accuracy_and_performance","device_type":"cambrian_590","device_count":1,"toolset_id":1,"priority":"low"}
-INFO:     127.0.0.1:36782 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36792 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36804 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/9/start body=
-INFO:     127.0.0.1:41234 - "POST /api/v1/evaluations/9/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41242 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41256 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41266 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41268 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41274 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41286 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41300 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41306 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42338 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42340 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42346 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42356 - "GET /api/v1/evaluations/9/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42364 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42368 - "GET /api/v1/evaluations/9/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52612 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52614 - "GET /api/v1/evaluations/9/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52630 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52642 - "GET /api/v1/evaluations/9/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52646 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52652 - "GET /api/v1/evaluations/9/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50222 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50232 - "GET /api/v1/evaluations/9/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50244 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50256 - "GET /api/v1/evaluations/9/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50264 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50276 - "GET /api/v1/evaluations/9/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50288 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50294 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50310 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50332 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50324 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50338 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39454 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39464 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50816 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50820 - "GET /api/v1/evaluations/8 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38948 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38954 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38960 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38966 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38980 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38986 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50036 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50042 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50054 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50064 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55280 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55286 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56342 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56356 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56350 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56360 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56370 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56374 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49488 - "GET /api/v1/evaluations/stats HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:49490 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:49494 - "GET /api/v1/resources/summary HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:49520 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:49506 - "GET /api/v1/evaluations/stats HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:49522 - "GET /api/v1/resources/summary HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:51188 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51198 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51204 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51208 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51216 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51220 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51232 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51238 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49580 - "POST /api/v1/auth/logout HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56776 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56778 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56792 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56800 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56808 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56820 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56848 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56836 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57376 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57382 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57386 - "GET /api/v1/assets/?type=toolset&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57398 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47790 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/ body={"name":"测精度+性能-华为昇腾910C-20260319","description":"abd","task_category":"operator_test","task_type":"accuracy_and_performance","device_type":"huawei_910c","device_count":1,"toolset_id":1,"priority":"medium"}
-INFO:     127.0.0.1:47794 - "POST /api/v1/evaluations/ HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47810 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47826 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-WARNING:root:[DEBUG] POST /api/v1/evaluations/10/start body=
-INFO:     127.0.0.1:47834 - "POST /api/v1/evaluations/10/start HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56894 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56896 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56910 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56920 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56924 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56926 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56934 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56942 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39028 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39038 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39052 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39054 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39064 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39078 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45306 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45318 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45320 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45328 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45330 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45340 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34324 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34326 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34342 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34344 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34358 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34368 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34370 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55104 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55106 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55112 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55116 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55118 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55128 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55130 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49092 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49096 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49106 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49122 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49134 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49136 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57228 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57242 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57254 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57256 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57270 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57286 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49890 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49904 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49916 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49928 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49942 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49952 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49966 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49978 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40162 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40174 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40186 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40198 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40202 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40208 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33228 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33242 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33254 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33270 - "GET /api/v1/evaluations/10/logs?offset=0&limit=50 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33274 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33276 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33290 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33300 - "GET /api/v1/evaluations/9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40736 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40738 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53982 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53984 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49264 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49266 - "GET /api/v1/assets/?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34674 - "GET /api/v1/resources/summary HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:34676 - "GET /api/v1/evaluations/stats HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:34688 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:34692 - "GET /api/v1/resources/summary HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:34706 - "GET /api/v1/evaluations/stats HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:34714 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:59060 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59068 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59078 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59092 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59096 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59106 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59122 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59126 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44924 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44934 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44946 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44950 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44956 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44968 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39862 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39870 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39882 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39890 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39896 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39906 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55322 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55334 - "GET /api/v1/evaluations/10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55352 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55344 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55338 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55364 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55372 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55382 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37480 - "POST /api HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:56932 - "POST /api/route HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:56968 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56970 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56996 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56980 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56982 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57000 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56998 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57014 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [123932]
-INFO:     Stopping reloader process [120329]
+INFO:     127.0.0.1:36286 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36300 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47164 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47178 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39968 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39978 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39980 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39992 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40000 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48426 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C%22 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48442 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=%22910C%22 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44076 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=%22910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44082 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35850 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40764 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40778 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40780 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40794 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40798 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37268 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37284 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37290 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37300 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35516 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51630 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55434 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=dataset&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55444 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55450 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=toolset&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55464 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55474 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56470 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=script&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56476 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56488 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56490 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator&keyword=910C HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46880 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator HTTP/1.1" 200 OK
