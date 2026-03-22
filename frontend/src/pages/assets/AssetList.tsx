@@ -138,18 +138,22 @@ export default function AssetList() {
       const d = res?.data || res;
       let items = d?.items || [];
       
-      // 前端筛选：模型镜像 Tab 支持按芯片、框架和场景筛选（基于 tags）
+      // 前端筛选：模型镜像 Tab 支持按芯片、框架和场景筛选（完全基于 tags）
+      // tags 格式：[芯片型号，框架名称，子场景 1, 子场景 2, ...]
       if (activeTab === 'image') {
+        // 芯片筛选：910C, 910B, MLU590, P800, BW1000
         if (selectedChip && selectedChip !== 'all') {
           items = items.filter((item: AssetItem) => 
             item.tags && item.tags.includes(selectedChip)
           );
         }
+        // 框架筛选：MindSpore, PyTorch, PaddlePaddle, ROCm
         if (selectedFramework && selectedFramework !== 'all') {
           items = items.filter((item: AssetItem) => 
             item.tags && item.tags.includes(selectedFramework)
           );
         }
+        // 子场景筛选：llm, multimodal 等 25 类
         if (selectedScenario && selectedScenario !== 'all') {
           items = items.filter((item: AssetItem) => 
             item.tags && item.tags.includes(selectedScenario)
