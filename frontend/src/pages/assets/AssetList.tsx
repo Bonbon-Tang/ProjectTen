@@ -132,9 +132,34 @@ export default function AssetList() {
     setLoading(true);
     try {
       // 获取全部数据（不分页），前端进行筛选和分页
-      const params: any = { page: 1, page_size: 500 };
-      if (activeTab !== 'all') params.asset_type = activeTab;
-      if (keyword) params.keyword = keyword;
+      // 注意：page_size 最大 100，需要多次请求获取全部数据
+      const allItems: AssetItem[] = [];
+      let currentPage = 1;
+      const maxPageSize = 100;
+      
+      while (true) {
+        const params: any = { page: currentPage, page_size: maxPageSize };
+        if (activeTab !== 'all') params.asset_type = activeTab;
+        if (keyword) params.keyword = keyword;
+        
+        const res: any = await getAssets(params);
+        const d = res?.data || res;
+        const items = d?.items || [];
+        allItems.push(...items);
+        
+        // 如果返回的数据少于 page_size，说明已经是最后一页
+        if (items.length < maxPageSize) {
+          break;
+        }
+        
+        // 防止无限循环，最多获取 10 页
+        if (currentPage >= 10) {
+          break;
+        }
+        currentPage++;
+      }
+      
+      let filteredItems = allItems;
       
       const res: any = await getAssets(params);
       const d = res?.data || res;
@@ -142,7 +167,10 @@ export default function AssetList() {
       
       // 前端筛选：模型镜像 Tab 支持按芯片、框架和场景筛选（完全基于 tags）
       // tags 格式：[芯片型号，框架名称，子场景 1, 子场景 2, ...]
-      let filteredItems = allItems;
+      console.log('[AssetList] 获取到原始数据:', allItems.length, 'activeTab:', activeTab);
+      
+      // 前端筛选：模型镜像 Tab 支持按芯片、框架和场景筛选（完全基于 tags）
+      // tags 格式：[芯片型号，框架名称，子场景 1, 子场景 2, ...]
       if (activeTab === 'image') {
         // 芯片筛选：910C, 910B, MLU590, P800, BW1000
         if (selectedChip && selectedChip !== 'all') {

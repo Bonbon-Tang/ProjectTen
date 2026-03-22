@@ -1,33 +1,34 @@
 INFO:     Will watch for changes in these directories: ['/root/.openclaw/workspace/ProjectTen/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [1385275] using WatchFiles
-INFO:     Started server process [1385277]
+INFO:     Started reloader process [1393348] using WatchFiles
+INFO:     Started server process [1393350]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:53274 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53266 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53278 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53280 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53290 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53302 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53316 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53328 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47952 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:47964 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:60694 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60704 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60720 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:60722 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
-INFO:     127.0.0.1:43294 - "GET /api/v1/assets/?page=1 HTTP/1.1" 401 Unauthorized
 (trapped) error reading bcrypt version
 Traceback (most recent call last):
   File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
     version = _bcrypt.__about__.__version__
               ^^^^^^^^^^^^^^^^^
 AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:39096 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [1385277]
-INFO:     Stopping reloader process [1385275]
+INFO:     127.0.0.1:33156 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33166 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33182 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33178 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33190 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33196 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33212 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33228 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33238 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:33242 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:51242 - "GET /api/v1/assets/?page=1&page_size=500&asset_type=image HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:51254 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:51270 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51272 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39696 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:39706 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:39722 - "GET /api/v1/assets/?page=1&page_size=500&asset_type=image HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:38436 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:38438 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:38452 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38464 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53202 - "GET /api/v1/assets/?page=1 HTTP/1.1" 401 Unauthorized
