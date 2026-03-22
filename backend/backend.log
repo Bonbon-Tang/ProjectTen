@@ -361,3 +361,20 @@ INFO:     127.0.0.1:50254 - "GET /api/v1/assets/?asset_type=image&page=1&page_si
 INFO:     127.0.0.1:52246 - "GET /api/v1/assets/?asset_type=image&page_size=100 HTTP/1.1" 401 Unauthorized
 INFO:     127.0.0.1:35594 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
 INFO:     127.0.0.1:45922 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34392 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34408 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34410 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34412 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59264 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50712 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47026 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47034 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38476 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59350 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59868 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:59882 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 401 Unauthorized
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1360163]
+INFO:     Stopping reloader process [1355447]
