@@ -26,6 +26,11 @@ interface ArchiveItem {
   task_type?: string;
   device_type?: string;
   progress?: number;
+  // Image and model info
+  image_name?: string;
+  model_name?: string;
+  chip_name?: string;
+  framework_name?: string;
 }
 
 // 合并子类型用于显示
@@ -151,6 +156,23 @@ export default function MyArchives() {
       render: (val: string) => {
         const d = DEVICE_TYPES.find((dv) => dv.value === val);
         return d ? <span style={{ color: d.color, fontWeight: 500 }}>{d.label}</span> : <span style={{ color: '#999' }}>{val || '-'}</span>;
+      },
+    },
+    {
+      title: '模型',
+      dataIndex: 'model_name',
+      key: 'model_name',
+      width: 120,
+      render: (val: string, record) => {
+        if (!val) return <span style={{ color: '#999' }}>-</span>;
+        return (
+          <Space direction="vertical" size={0}>
+            <span style={{ fontWeight: 500 }}>{val}</span>
+            {record.framework_name && (
+              <span style={{ fontSize: 11, color: '#999' }}>{record.framework_name}</span>
+            )}
+          </Space>
+        );
       },
     },
     {

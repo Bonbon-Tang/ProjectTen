@@ -86,12 +86,30 @@ def list_evaluations(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    from app.models.asset import DigitalAsset
+    
     pagination = PaginationParams(page, page_size)
     tasks, total = EvaluationService.list_tasks(
         db, pagination, status=status, task_type=task_type,
         creator_id=current_user.id if current_user.user_type != "admin" else None,
     )
-    items = [EvaluationOut.model_validate(t).model_dump() for t in tasks]
+    
+    # Build response with image/model info
+    items = []
+    for task in tasks:
+        item = EvaluationOut.model_validate(task).model_dump()
+        # Add image and model name info for model_test tasks
+        if task.image_id:
+            image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
+            if image:
+                item["image_name"] = image.name
+                # Parse model name from image name (format: "Chip + Framework + Model")
+                parts = image.name.split(" + ")
+                item["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
+                item["chip_name"] = parts[0].strip() if parts else image.name
+                item["framework_name"] = parts[1].strip() if len(parts) > 1 else None
+        items.append(item)
+    
     return _ok(paginate(items, total, page, page_size))
 
 
@@ -122,13 +140,27 @@ def get_evaluation(task_id: int, current_user: User = Depends(get_current_user),
         data["operator_lib_name"] = op_lib.name if op_lib else None
     else:
         data["operator_lib_name"] = None
-    # Attach image name
+    # Attach image name and model info
     if task.image_id:
         from app.models.asset import DigitalAsset
         image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
-        data["image_name"] = image.name if image else None
+        if image:
+            data["image_name"] = image.name
+            # Parse model name from image name (format: "Chip + Framework + Model")
+            parts = image.name.split(" + ")
+            data["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
+            data["chip_name"] = parts[0].strip() if parts else image.name
+            data["framework_name"] = parts[1].strip() if len(parts) > 1 else None
+        else:
+            data["image_name"] = None
+            data["model_name"] = None
+            data["chip_name"] = None
+            data["framework_name"] = None
     else:
         data["image_name"] = None
+        data["model_name"] = None
+        data["chip_name"] = None
+        data["framework_name"] = None
     return _ok(data)
 
 

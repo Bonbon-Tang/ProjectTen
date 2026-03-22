@@ -48,6 +48,7 @@ def list_reports(
     db: Session = Depends(get_db),
 ):
     from app.models.evaluation import EvaluationTask
+    from app.models.asset import DigitalAsset
     
     pagination = PaginationParams(page, page_size)
     reports, total = ReportService.list_reports(
@@ -56,7 +57,7 @@ def list_reports(
         status=status,
     )
     
-    # Build response with task info
+    # Build response with task and image info
     items = []
     for report in reports:
         task = db.query(EvaluationTask).filter(EvaluationTask.id == report.task_id).first()
@@ -81,6 +82,16 @@ def list_reports(
             "device_type": task.device_type if task else None,
             "progress": task.progress if task else None,
         }
+        # Add image and model name info if task has image_id
+        if task and task.image_id:
+            image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
+            if image:
+                item["image_name"] = image.name
+                # Parse model name from image name (format: "Chip + Framework + Model")
+                parts = image.name.split(" + ")
+                item["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
+                item["chip_name"] = parts[0].strip() if parts else image.name
+                item["framework_name"] = parts[1].strip() if len(parts) > 1 else None
         items.append(item)
     
     return _ok(paginate(items, total, page, page_size))
