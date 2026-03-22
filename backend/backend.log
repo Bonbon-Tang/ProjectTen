@@ -1,380 +1,53 @@
 INFO:     Will watch for changes in these directories: ['/root/.openclaw/workspace/ProjectTen/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [1355447] using WatchFiles
-INFO:     Started server process [1355449]
+INFO:     Started reloader process [1376480] using WatchFiles
+INFO:     Started server process [1376482]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:46448 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46462 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46476 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46484 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46486 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46496 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46498 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46512 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46522 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46534 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46550 - "GET /api/v1/model-benchmark/toolsets?task_type=llm HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57080 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=hygon_bw1000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40044 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=huawei_910c HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40050 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=huawei_910b HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40060 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=kunlun_p800 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36870 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=cambrian_590 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39168 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39182 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39184 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39192 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37706 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37720 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56926 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56942 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56954 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56962 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56978 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56992 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57004 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57018 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57020 - "GET /api/v1/model-benchmark/toolsets?task_type=llm HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57028 - "GET /api/v1/model-benchmark/images?task_type=llm&device_type=huawei_910c HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46184 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46192 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46206 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51940 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51946 - "GET /api/v1/assets/?page=1&page_size=100&keyword=9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51948 - "GET /api/v1/assets/?page=1&page_size=100&keyword=91 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51954 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51956 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910c HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51972 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51978 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51982 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C- HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51988 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-M HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52004 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MI HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52010 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MIN HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52014 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MIND HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52030 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDE HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53050 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDES HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53064 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESP HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53070 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESPO HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53078 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESPOR HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53092 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESPO HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53106 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDESP HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53108 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDES HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53118 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDE HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53122 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MIND HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53132 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDS HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53138 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDSP HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53146 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDSPO HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53148 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDSPOR HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53162 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C-MINDSPORE HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35144 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C-MINDSPORE HTTP/1.1" 200 OK
-INFO:     127.0.0.1:32900 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C-MINDSPORE HTTP/1.1" 200 OK
-INFO:     127.0.0.1:32908 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50222 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=M HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50224 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MI HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50236 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MID HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50246 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MI HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50256 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MIN HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50266 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MIND HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50268 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=MIND HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49850 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52254 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52260 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m%27j HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52270 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52272 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52282 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=min HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52286 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=min%27d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52288 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
-INFO:     127.0.0.1:32780 - "GET /api/ HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32786 - "GET /api HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32800 - "GET /api/im/v2/app/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32802 - "GET /api/ HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32804 - "GET /api/ HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32812 - "GET /api.php HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32822 - "GET /api/c/a HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32834 - "GET /api/ping HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32848 - "GET /api.php/ HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32858 - "POST /api/init HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32872 - "POST /api/notice HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32882 - "GET /api?code=1 HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32884 - "GET /api/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32894 - "GET /api/events HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32906 - "GET /apis/globals HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32910 - "GET /api/room/join HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32920 - "GET /api/user/time HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32924 - "GET /api/v1/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32938 - "GET /api/index/init HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32940 - "GET /api/shop/getKF HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32954 - "POST /api/app/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32970 - "GET /api/apps/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:32986 - "GET /api/order/lists HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33002 - "GET /api/index/index HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33014 - "GET /api/siteConfig HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33022 - "GET /api/front/index HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33038 - "GET /api/Event/basic HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33048 - "GET /api/users/login HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33054 - "POST /api/link-submit HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33060 - "GET /api/common/init HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33076 - "GET /api/card/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33082 - "GET /api/app/banners HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33098 - "GET /api/user/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33104 - "GET /api/product/list HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33112 - "GET /api/index/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33120 - "GET /api/lottery/list HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33136 - "GET /api/app/indexList HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33144 - "GET /api/common/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33154 - "GET /api/user/confinfo HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33156 - "GET /api/Home/videoNew HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33164 - "GET /api/uploads/apimap HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33176 - "GET /api/system/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33184 - "GET /api/product/getAll HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33188 - "POST /api/chat/fish_init HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33198 - "GET /api/message/webInfo HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33200 - "GET /api/site/getInfo.do HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33208 - "GET /api/index/webconfig HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33224 - "GET /api/index/gettreaty HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33238 - "POST /api/v1/seller/login HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33242 - "POST /api/Uploads/apiimei HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33256 - "GET /api/v1/setting/main HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33266 - "GET /api/latestSdkConfig HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33270 - "GET /api/getWebSiteConfig HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33282 - "GET /api.php/index/system HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33284 - "GET /api/user/ismustmobile HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33288 - "POST /api/user/ismustmobile HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33290 - "POST /api/user/ismustmobile HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33294 - "GET /api/index/get_setting HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33302 - "GET /api/vue/common/config HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33318 - "GET /api/BaseInfo/xnb/24hr HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33330 - "GET /api/index/productshow HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33340 - "GET /api/Index/getHome?id=1 HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33344 - "GET /api/user/language_list HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33350 - "GET /apix/tongchengyue/tags HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33354 - "GET /api/account/price_rate HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33368 - "GET /api/index/getBannerList HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33384 - "GET /api/banner?appKey=bxefdn HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33388 - "GET /api/Config/getShowConfig HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33400 - "GET /api/common/findIpAddress HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33416 - "POST /api/common/getAllSetting HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33424 - "GET /api/wanlshop/common/init HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33438 - "GET /api/apicom/index/getkefu HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33444 - "GET /api/dict/getServiceConfig HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33454 - "GET /api/product/getPointStore HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33458 - "GET /api/currency/quotation_new HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33474 - "POST /api/chat/visitor/channelInfo HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33488 - "GET /api/common/menus?lang=zh-Hans HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33494 - "GET /api/new-version/daily/rooms/1 HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33506 - "GET /api/app/getExecutedRealOrders HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33510 - "GET /api/app/getserviceinfo?token=1 HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33524 - "GET /api/app/contract/getMarketList HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33526 - "GET /api/currency/getTradeCurrencyList HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33542 - "GET /api/public/?service=Home.getConfig HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33554 - "GET /api/seller/index/GetSellerConfigAll HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33564 - "GET /api/api/exchangerateuserconfig%21get.action HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33566 - "GET /api/Interface/mobile_ajax.asmx/GetWebConfig HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33570 - "GET /api/set/appSysSet/getKeyByParam?key=sys_set HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33576 - "POST /api/system/systemConfigs/getCustomerServiceLink HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33588 - "GET /api/app/appsetting/link/indexLink?key=customer_service HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:33592 - "POST /api/heartbeat HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:52774 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51176 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59420 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59426 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59428 - "GET /api/v1/assets/?asset_type=image&page_size=200 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:32988 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33000 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33012 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33022 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi%27d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33028 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33036 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=min HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33048 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=min%27d HTTP/1.1" 200 OK
-INFO:     127.0.0.1:58592 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51058 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48354 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48358 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mind HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54650 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40878 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40882 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=m HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40890 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mi HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40904 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mid HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60944 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mid HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56566 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mid HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42844 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mid HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45016 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45024 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37234 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37248 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37260 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42798 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53744 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53754 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:53614 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37916 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33730 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33744 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33754 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:33760 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910c HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42068 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910c HTTP/1.1" 200 OK
-WARNING:  WatchFiles detected changes in 'scripts/update_image_tags.py'. Reloading...
-INFO:     Shutting down
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
-INFO:     Finished server process [1355449]
-INFO:     Started server process [1360163]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     127.0.0.1:36286 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36300 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47164 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47178 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39968 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39978 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39980 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39992 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40000 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48426 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C%22 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48442 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=%22910C%22 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44076 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=%22910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44082 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35850 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40764 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40778 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40780 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40794 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40798 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37268 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37284 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37290 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37300 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:35516 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51630 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55434 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=dataset&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55444 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55450 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=toolset&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55464 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55474 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56470 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=script&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56476 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56488 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56490 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46880 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=operator HTTP/1.1" 200 OK
-INFO:     127.0.0.1:43480 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=toolset HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44520 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39622 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39636 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36404 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36408 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59294 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:59308 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:36712 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:36720 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:33198 - "GET / HTTP/1.1" 200 OK
 (trapped) error reading bcrypt version
 Traceback (most recent call last):
   File "/root/.openclaw/workspace/ProjectTen/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
     version = _bcrypt.__about__.__version__
               ^^^^^^^^^^^^^^^^^
 AttributeError: module 'bcrypt' has no attribute '__about__'
-INFO:     127.0.0.1:36730 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36742 - "GET /api/v1/users/me HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36748 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36762 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36754 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36772 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36780 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36788 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37184 - "GET /api/v1/reports/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37198 - "GET /api/v1/reports/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37210 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37220 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37226 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37234 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37244 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37258 - "GET /api/v1/benchmark/operators?page=1&page_size=20 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37260 - "GET /api/v1/reports/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:37272 - "GET /api/v1/reports/?page=1&page_size=10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46104 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:46118 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48614 - "GET /api/v1/assets/?page=1&page_size=100&keyword=9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48628 - "GET /api/v1/assets/?page=1&page_size=100&keyword=91 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48640 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:48644 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39144 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910B HTTP/1.1" 200 OK
-INFO:     127.0.0.1:39150 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55848 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49628 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910%27 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49634 - "GET /api/v1/assets/?page=1&page_size=100&keyword=%27910%27 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49642 - "GET /api/v1/assets/?page=1&page_size=100&keyword=%27910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49650 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44798 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44808 - "GET /api/v1/assets/?page=1&page_size=100&keyword=b HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44812 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44822 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44826 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44840 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:44852 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw1000 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47468 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47472 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw10 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47480 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47486 - "GET /api/v1/assets/?page=1&page_size=100&keyword=bw HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47488 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47504 - "GET /api/v1/assets/?page=1&page_size=100&keyword=b HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47512 - "GET /api/v1/assets/?page=1&page_size=100&keyword=m HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47524 - "GET /api/v1/assets/?page=1&page_size=100&keyword=ml HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47530 - "GET /api/v1/assets/?page=1&page_size=100&keyword=mlu HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40944 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=mlu HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40958 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:40964 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36436 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41914 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=dataset&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41930 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41934 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=dataset&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54510 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54526 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50148 - "GET /api/v1/assets/?page=1&page_size=100&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50158 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50166 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38242 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38256 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38262 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49556 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49558 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41452 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57998 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60286 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60298 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60304 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60316 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60328 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57104 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57112 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57120 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=template HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57134 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=script HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41914 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:41916 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47012 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47026 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=9 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47032 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=91 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47034 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47038 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42510 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image&keyword=910C HTTP/1.1" 200 OK
-INFO:     127.0.0.1:42516 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50246 - "GET /api/v1/assets/?asset_type=image&page=1&page_size=100 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:50254 - "GET /api/v1/assets/?asset_type=image&page=1&page_size=100 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:52246 - "GET /api/v1/assets/?asset_type=image&page_size=100 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:35594 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:45922 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34392 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34408 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34410 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:34412 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59264 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50712 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47026 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:47034 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:38476 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59350 - "GET /api/v1/assets/?page=1&page_size=100&asset_type=image HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59868 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:59882 - "GET /api/v1/assets/?page=1&page_size=100 HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:40652 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40658 - "GET /api/v1/users/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40664 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40668 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40680 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40688 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40684 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40698 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37826 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37828 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33662 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:33672 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:54362 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:54370 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:57074 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57098 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57084 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57100 - "GET /api/v1/evaluations/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57114 - "GET /api/v1/evaluations/?page=1&page_size=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57118 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47076 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:47080 - "GET /api/v1/assets/?page=1&page_size=500 HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:50904 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50914 - "GET /api/v1/evaluations/?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38594 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38586 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38596 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38612 - "GET /api/v1/assets/?asset_type=operator&category=%E7%AE%97%E5%AD%90%E5%BA%93&page_size=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38620 - "GET /api/v1/benchmark/operators/categories HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38624 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38638 - "GET /api/v1/resources/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38652 - "GET /api/v1/benchmark/summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38666 - "GET /api/v1/model-benchmark/toolsets?task_type=multimodal HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38674 - "GET /api/v1/model-benchmark/images?task_type=multimodal&device_type=huawei_910c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46986 - "GET /api/v1/assets/11 HTTP/1.1" 401 Unauthorized
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [1360163]
-INFO:     Stopping reloader process [1355447]
+INFO:     Finished server process [1376482]
+INFO:     Stopping reloader process [1376480]
