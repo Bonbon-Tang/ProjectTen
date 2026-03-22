@@ -141,26 +141,40 @@ export default function AssetList() {
       // 前端筛选：模型镜像 Tab 支持按芯片、框架和场景筛选（完全基于 tags）
       // tags 格式：[芯片型号，框架名称，子场景 1, 子场景 2, ...]
       if (activeTab === 'image') {
+        console.log('[AssetList] 获取到镜像总数:', items.length);
+        console.log('[AssetList] 筛选条件:', { selectedChip, selectedFramework, selectedScenario });
+        
         // 芯片筛选：910C, 910B, MLU590, P800, BW1000
         if (selectedChip && selectedChip !== 'all') {
-          items = items.filter((item: AssetItem) => 
-            item.tags && item.tags.includes(selectedChip)
-          );
+          const before = items.length;
+          items = items.filter((item: AssetItem) => {
+            const match = item.tags && item.tags.includes(selectedChip);
+            if (!match && item.tags) {
+              console.log(`[AssetList] 排除 ${item.name}, tags:`, item.tags);
+            }
+            return match;
+          });
+          console.log(`[AssetList] 芯片筛选后：${before} -> ${items.length}`);
         }
         // 框架筛选：MindSpore, PyTorch, PaddlePaddle, ROCm
         if (selectedFramework && selectedFramework !== 'all') {
+          const before = items.length;
           items = items.filter((item: AssetItem) => 
             item.tags && item.tags.includes(selectedFramework)
           );
+          console.log(`[AssetList] 框架筛选后：${before} -> ${items.length}`);
         }
         // 子场景筛选：llm, multimodal 等 25 类
         if (selectedScenario && selectedScenario !== 'all') {
+          const before = items.length;
           items = items.filter((item: AssetItem) => 
             item.tags && item.tags.includes(selectedScenario)
           );
+          console.log(`[AssetList] 子场景筛选后：${before} -> ${items.length}`);
         }
       }
       
+      console.log('[AssetList] 最终显示数量:', items.length);
       setData(items);
       setTotal(items.length);
     } catch (error) {
@@ -171,7 +185,7 @@ export default function AssetList() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, keyword, selectedChip, selectedScenario]);
+  }, [activeTab, keyword, selectedChip, selectedFramework, selectedScenario]);
 
   useEffect(() => {
     fetchAssets();
