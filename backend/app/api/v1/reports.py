@@ -105,6 +105,8 @@ def list_archives(
     db: Session = Depends(get_db),
 ):
     from app.models.report import EvaluationReport
+    from app.models.evaluation import EvaluationTask
+    from app.models.asset import DigitalAsset
     
     # Query archives with joined report info
     query = db.query(UserReportArchive).join(
@@ -117,9 +119,12 @@ def list_archives(
     total = query.count()
     archives = query.offset((page - 1) * page_size).limit(page_size).all()
     
-    # Build response with report info
+    # Build response with report and task info (same as list_reports)
     items = []
     for archive in archives:
+        report = archive.report
+        task = db.query(EvaluationTask).filter(EvaluationTask.id == report.task_id).first() if report else None
+        
         item = {
             "id": archive.id,
             "user_id": archive.user_id,
@@ -127,11 +132,29 @@ def list_archives(
             "note": archive.note,
             "archived_at": archive.archived_at.isoformat() if archive.archived_at else None,
             # Report info
-            "report_title": archive.report.title if archive.report else None,
-            "report_type": archive.report.report_type if archive.report else None,
-            "report_status": archive.report.status if archive.report else None,
-            "task_id": archive.report.task_id if archive.report else None,
+            "report_title": report.title if report else None,
+            "report_type": report.report_type if report else None,
+            "report_status": report.status if report else None,
+            "task_id": report.task_id if report else None,
+            # Task info (same as list_reports)
+            "eval_name": task.name if task else None,
+            "task_category": task.task_category.value if task and task.task_category else None,
+            "task_type": task.task_type.value if task and task.task_type else None,
+            "device_type": task.device_type if task else None,
+            "progress": task.progress if task else None,
         }
+        
+        # Add image and model name info if task has image_id
+        if task and task.image_id:
+            image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
+            if image:
+                item["image_name"] = image.name
+                # Parse model name from image name (format: "Chip + Framework + Model")
+                parts = image.name.split(" + ")
+                item["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
+                item["chip_name"] = parts[0].strip() if parts else image.name
+                item["framework_name"] = parts[1].strip() if len(parts) > 1 else None
+        
         items.append(item)
     
     return _ok({"items": items, "total": total, "page": page, "page_size": page_size})
