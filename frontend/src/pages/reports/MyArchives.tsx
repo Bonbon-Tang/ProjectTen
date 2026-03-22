@@ -1,64 +1,94 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table, Button, Space, Popconfirm, message, Tag, Input } from 'antd';
-import { SearchOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Popconfirm, message, Tag, Input, Select } from 'antd';
+import { SearchOutlined, EyeOutlined, DeleteOutlined, StarFilled } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '@/components/PageHeader';
-import { getArchives, deleteArchive } from '@/api/reports';
+import StatusTag from '@/components/StatusTag';
+import { EVAL_CATEGORIES, DEVICE_TYPES } from '@/utils/constants';
+import { getArchives } from '@/api/reports';
 import dayjs from 'dayjs';
 
 interface ArchiveItem {
   id: string;
-  report_name: string;
-  eval_type: string;
+  name: string;
+  task_category: string;
+  task_type: string;
+  device_type: string;
+  status: string;
+  eval_name: string;
   archived_at: string;
   remark: string;
   report_id: string;
+  creator: string;
+  progress?: number;
+}
+
+// 合并子类型用于显示
+const ALL_SUB_TYPES = [
+  { label: '测精度', value: 'accuracy_only' },
+  { label: '测精度 + 性能', value: 'accuracy_and_performance' },
+  { label: '大语言模型', value: 'llm' },
+  { label: '多模态模型', value: 'multimodal' },
+  { label: '语音识别', value: 'speech_recognition' },
+  { label: '图像分类', value: 'image_classification' },
+  { label: '目标检测', value: 'object_detection' },
+  { label: '语义分割', value: 'semantic_segmentation' },
+  { label: '文本生成', value: 'text_generation' },
+  { label: '机器翻译', value: 'machine_translation' },
+  { label: '情感分析', value: 'sentiment_analysis' },
+  { label: '问答系统', value: 'question_answering' },
+  { label: '文本摘要', value: 'text_summarization' },
+  { label: '语音合成', value: 'speech_synthesis' },
+  { label: '图像生成', value: 'image_generation' },
+  { label: '视频理解', value: 'video_understanding' },
+  { label: '文字识别 (OCR)', value: 'ocr' },
+  { label: '推荐系统', value: 'recommendation' },
+  { label: '异常检测', value: 'anomaly_detection' },
+  { label: '时序预测', value: 'time_series' },
+  { label: '强化学习', value: 'reinforcement_learning' },
+  { label: '图神经网络', value: 'graph_neural_network' },
+  { label: '医学影像', value: 'medical_imaging' },
+  { label: '自动驾驶', value: 'autonomous_driving' },
+  { label: '机器人控制', value: 'robot_control' },
+  { label: '代码生成', value: 'code_generation' },
+  { label: '知识图谱', value: 'knowledge_graph' },
+];
+
+function getSubTypeLabel(val: string): string {
+  return ALL_SUB_TYPES.find((t) => t.value === val)?.label || val;
 }
 
 export default function MyArchives() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [keyword, setKeyword] = useState('');
-  const [data, setData] = useState<ArchiveItem[]>([
-    {
-      id: '1',
-      report_name: 'LLM推理测试-华为昇腾910C-评测报告',
-      eval_type: '模型测试 / 大语言模型',
-      archived_at: '2026-03-19 11:00:00',
-      remark: '首次910C推理测试基准',
-      report_id: 'r1',
-    },
-    {
-      id: '2',
-      report_name: '精度验证-寒武纪MLU590-评测报告',
-      eval_type: '算子测试 / 精度验证',
-      archived_at: '2026-03-18 14:30:00',
-      remark: '',
-      report_id: 'r2',
-    },
-    {
-      id: '3',
-      report_name: '目标检测-昆仑芯P800-评测报告',
-      eval_type: '模型测试 / 目标检测',
-      archived_at: '2026-03-17 09:15:00',
-      remark: 'P800上YOLO性能参考',
-      report_id: 'r3',
-    },
-  ]);
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 3 });
+  const [data, setData] = useState<ArchiveItem[]>([]);
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
+  const [filters, setFilters] = useState<{
+    task_category?: string;
+    device_type?: string;
+    keyword?: string;
+  }>({});
 
   const fetchArchives = async () => {
     setLoading(true);
     try {
-      const res: any = await getArchives({ keyword, page: pagination.current, page_size: pagination.pageSize });
-      const items = res?.data?.items || res?.items || [];
-      if (Array.isArray(items) && items.length > 0) {
+      const res: any = await getArchives({
+        ...filters,
+        page: pagination.current,
+        page_size: pagination.pageSize,
+      });
+      const resData = res?.data || res;
+      const items = resData?.items || resData?.list || [];
+      if (Array.isArray(items)) {
         setData(items);
-        setPagination((prev) => ({ ...prev, total: res?.data?.total || res?.total || items.length }));
+        setPagination((prev) => ({
+          ...prev,
+          total: resData?.total ?? items.length,
+        }));
       }
     } catch {
-      // 使用 mock 数据
+      // 静默处理
     } finally {
       setLoading(false);
     }
@@ -66,11 +96,11 @@ export default function MyArchives() {
 
   useEffect(() => {
     fetchArchives();
-  }, []);
+  }, [filters, pagination.current, pagination.pageSize]);
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteArchive(id);
+      // TODO: 调用删除存档 API
       message.success('存档已删除');
       setData((prev) => prev.filter((item) => item.id !== id));
     } catch {
@@ -81,8 +111,8 @@ export default function MyArchives() {
   const columns: ColumnsType<ArchiveItem> = [
     {
       title: '报告名称',
-      dataIndex: 'report_name',
-      key: 'report_name',
+      dataIndex: 'name',
+      key: 'name',
       ellipsis: true,
       render: (text, record) => (
         <a onClick={() => navigate(`/reports/${record.report_id}`)} style={{ fontWeight: 500 }}>
@@ -91,12 +121,42 @@ export default function MyArchives() {
       ),
     },
     {
-      title: '评测类型',
-      dataIndex: 'eval_type',
-      key: 'eval_type',
-      width: 200,
-      render: (val: string) => <Tag color="geekblue">{val}</Tag>,
+      title: '评测大类',
+      dataIndex: 'task_category',
+      key: 'task_category',
+      width: 110,
+      render: (val: string) => {
+        const cat = EVAL_CATEGORIES.find((c) => c.value === val);
+        return cat ? <Tag>{cat.icon} {cat.label}</Tag> : <Tag>{val}</Tag>;
+      },
     },
+    {
+      title: '子场景',
+      dataIndex: 'task_type',
+      key: 'task_type',
+      width: 140,
+      render: (val: string) => <Tag color="geekblue">{getSubTypeLabel(val)}</Tag>,
+    },
+    {
+      title: '设备类型',
+      dataIndex: 'device_type',
+      key: 'device_type',
+      width: 140,
+      render: (val: string) => {
+        const d = DEVICE_TYPES.find((dv) => dv.value === val);
+        return d ? <span style={{ color: d.color, fontWeight: 500 }}>{d.label}</span> : val;
+      },
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: 130,
+      render: (status: string, record) => (
+        <StatusTag status={status} progress={record.progress} />
+      ),
+    },
+    { title: '关联评测', dataIndex: 'eval_name', key: 'eval_name', ellipsis: true },
     {
       title: '存档时间',
       dataIndex: 'archived_at',
@@ -108,7 +168,8 @@ export default function MyArchives() {
       title: '备注',
       dataIndex: 'remark',
       key: 'remark',
-      width: 200,
+      width: 180,
+      ellipsis: true,
       render: (text: string) => text || <span style={{ color: '#ccc' }}>无</span>,
     },
     {
@@ -125,9 +186,9 @@ export default function MyArchives() {
           >
             查看
           </Button>
-          <Popconfirm title="确定删除此存档？" onConfirm={() => handleDelete(record.id)}>
+          <Popconfirm title="确定取消存档？" onConfirm={() => handleDelete(record.id)}>
             <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              删除
+              取消存档
             </Button>
           </Popconfirm>
         </Space>
@@ -145,15 +206,27 @@ export default function MyArchives() {
         查看您收藏和归档的评测报告
       </div>
 
-      <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
+      <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <Input
           placeholder="搜索报告名称"
           prefix={<SearchOutlined />}
-          style={{ width: 280 }}
+          style={{ width: 240 }}
           allowClear
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onPressEnter={fetchArchives}
+          onChange={(e) => setFilters({ ...filters, keyword: e.target.value })}
+        />
+        <Select
+          placeholder="评测大类"
+          style={{ width: 140 }}
+          allowClear
+          onChange={(value) => setFilters({ ...filters, task_category: value })}
+          options={EVAL_CATEGORIES.map((c) => ({ label: `${c.icon} ${c.label}`, value: c.value }))}
+        />
+        <Select
+          placeholder="设备类型"
+          style={{ width: 160 }}
+          allowClear
+          onChange={(value) => setFilters({ ...filters, device_type: value })}
+          options={DEVICE_TYPES.map((d) => ({ label: d.label, value: d.value }))}
         />
         <Button type="primary" icon={<SearchOutlined />} onClick={fetchArchives}>
           搜索
@@ -172,6 +245,7 @@ export default function MyArchives() {
           showTotal: (total) => `共 ${total} 条`,
           onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize }),
         }}
+        locale={{ emptyText: '暂无存档报告' }}
       />
     </div>
   );
