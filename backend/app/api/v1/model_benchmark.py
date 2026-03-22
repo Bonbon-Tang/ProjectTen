@@ -118,10 +118,11 @@ def get_model_benchmark_summary(
 @router.get("/images")
 def get_available_images(
     task_type: Optional[str] = None,
+    device_type: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get available images for model deployment test, optionally filtered by sub-scenario tag."""
+    """Get available images for model deployment test, optionally filtered by sub-scenario tag and chip."""
     q = db.query(DigitalAsset).filter(
         DigitalAsset.asset_type == "image",
         DigitalAsset.status == "active",
@@ -131,14 +132,28 @@ def get_available_images(
     result = []
     for img in images:
         tags = img.tags or []
+        # Filter by task_type (sub-scenario)
         if task_type and task_type not in tags:
             continue
+        
+        # Parse chip/framework/model from description
+        desc = img.description or ""
+        parts = desc.split(" + ")
+        chip_name = parts[0].strip() if parts else img.name
+        
+        # Filter by device_type (chip)
+        if device_type and device_type != chip_name:
+            continue
+        
         result.append({
             "id": img.id,
             "name": img.name,
             "description": img.description,
             "tags": tags,
             "version": img.version,
+            "chip_name": chip_name,
+            "framework_name": parts[1].strip() if len(parts) > 1 else None,
+            "model_name": parts[2].strip() if len(parts) > 2 else img.name,
         })
 
     return _ok(result)

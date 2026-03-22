@@ -178,9 +178,9 @@ export default function EvalCreate() {
   };
 
   // 从 GET /api/v1/model-benchmark/images 获取模型部署镜像列表
-  const fetchModelImages = (scenarioType?: string) => {
+  const fetchModelImages = (scenarioType?: string, deviceType?: string) => {
     setModelImagesLoading(true);
-    getAvailableImages(scenarioType)
+    getAvailableImages(scenarioType, deviceType)
       .then((res: any) => {
         const list = res?.data || res || [];
         if (Array.isArray(list)) {
@@ -189,6 +189,9 @@ export default function EvalCreate() {
             name: item.name,
             description: item.description,
             tags: item.tags,
+            chip_name: item.chip_name,
+            framework_name: item.framework_name,
+            model_name: item.model_name,
           })));
         }
       })
@@ -207,7 +210,7 @@ export default function EvalCreate() {
   useEffect(() => {
     if (taskCategory === 'model_test' && taskType) {
       fetchToolsets(taskType);
-      fetchModelImages(taskType);
+      // Don't fetch images yet - wait for device selection
     } else if (taskCategory === 'operator_test') {
       fetchToolsets();
     }
@@ -510,12 +513,15 @@ export default function EvalCreate() {
         >
           <Select
             placeholder="选择智算设备"
-            onChange={() => {
+            onChange={(deviceType) => {
               form.setFieldsValue({ device_count: 1 });
-              const dv = form.getFieldValue('device_type');
               form.setFieldsValue({
-                name: generateDefaultName(dv),
+                name: generateDefaultName(deviceType),
               });
+              // For model_test, fetch images when device is selected
+              if (taskCategory === 'model_test' && taskType && deviceType) {
+                fetchModelImages(taskType, deviceType);
+              }
             }}
             options={deviceList.filter(d => d.status === 'online').map((d) => ({
               label: `${d.name} (空闲 ${d.available_count} / 共 ${d.total_count} 台)`,
@@ -592,21 +598,43 @@ export default function EvalCreate() {
           <Form.Item
             name="image_id"
             label="选择部署镜像（芯片 + 框架 + 模型）"
-            extra="选择要测试的芯片 + 框架 + 模型组合镜像，镜像已预置子场景标签"
+            extra={
+              <div style={{ fontSize: 12, color: '#999' }}>
+                {taskType && form.getFieldValue('device_type') ? (
+                  <span>✅ 已根据芯片和子场景筛选镜像</span>
+                ) : (
+                  <span>⚠️ 请先选择设备类型和子场景，将自动筛选匹配的镜像</span>
+                )}
+              </div>
+            }
             rules={[{ required: true, message: '模型部署测试必须选择镜像' }]}
           >
             <Select
-              placeholder="选择模型部署镜像"
+              placeholder={
+                !form.getFieldValue('device_type')
+                  ? '请先选择设备类型'
+                  : modelImages.length === 0
+                  ? '没有匹配的镜像（请检查芯片和子场景是否匹配）'
+                  : '选择模型部署镜像'
+              }
               loading={modelImagesLoading}
               showSearch
+              disabled={!form.getFieldValue('device_type')}
               filterOption={(input, option) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
               }
               options={modelImages.map((img) => ({
-                label: `${img.name}${img.tags?.length ? ` (${img.tags.join(', ')})` : ''}`,
+                label: `${img.name} - ${img.model_name || '模型'} (${img.framework_name || '框架'})`,
                 value: img.id,
+                chip_name: img.chip_name,
+                model_name: img.model_name,
+                framework_name: img.framework_name,
               }))}
-              notFoundContent="暂无可用镜像"
+              notFoundContent={
+                modelImagesLoading ? '加载中...' : 
+                !form.getFieldValue('device_type') ? '请先选择设备类型' :
+                '没有匹配的镜像，请检查芯片和子场景选择'
+              }
             />
           </Form.Item>
         )}
