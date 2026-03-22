@@ -209,9 +209,17 @@ export default function AssetList() {
 
   useEffect(() => {
     // 筛选条件变化时重置到第一页
-    setPage(1);
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      fetchAssets();
+    }
+  }, [activeTab, keyword, selectedChip, selectedFramework, selectedScenario]);
+  
+  useEffect(() => {
+    // 页码变化时获取数据
     fetchAssets();
-  }, [fetchAssets]);
+  }, [page, pageSize]);
 
   const handleDelete = async (id: number) => {
     try {
