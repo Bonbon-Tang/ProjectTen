@@ -13,6 +13,7 @@ class EvaluationCreate(BaseModel):
     task_type: str  # chip | model | framework | middleware | operator | scene + new subtypes
     create_mode: str = "template"
     priority: str = "medium"
+    visibility: str = "private"
     config: Dict[str, Any] = {}
     resource_spec: Optional[Dict[str, Any]] = None
     is_custom_billing: bool = False
@@ -46,6 +47,7 @@ class EvaluationOut(BaseModel):
     progress: int = 0
     device_type: Optional[str] = None
     device_count: int = 1
+    visibility: str = "private"
     toolset_id: Optional[int] = None
     operator_count: Optional[int] = None
     operator_categories: Optional[List[str]] = None

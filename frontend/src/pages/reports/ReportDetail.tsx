@@ -22,10 +22,11 @@ import {
   SaveOutlined,
   CheckCircleFilled,
   CloseCircleFilled,
+  ShareAltOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '@/components/PageHeader';
-import { getReportById, archiveReport } from '@/api/reports';
+import { getReportById, archiveReport, shareReport } from '@/api/reports';
 import { DEVICE_TYPES } from '@/utils/constants';
 import dayjs from 'dayjs';
 
@@ -67,6 +68,17 @@ export default function ReportDetail() {
       message.success('已保存到个人存档');
     } catch {
       message.error('保存存档失败');
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const nextValue = !report?.is_public;
+      await shareReport(String(id), nextValue);
+      setReport((prev: any) => (prev ? { ...prev, is_public: nextValue } : prev));
+      message.success(nextValue ? '已设为全平台公开' : '已设为私有');
+    } catch {
+      message.error('更新报告可见性失败');
     }
   };
 
@@ -246,6 +258,9 @@ export default function ReportDetail() {
           <Space>
             <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>返回</Button>
             <Button icon={<SaveOutlined />} onClick={handleArchive}>保存存档</Button>
+            <Button icon={<ShareAltOutlined />} onClick={handleShare}>
+              {report?.is_public ? '设为私有' : '设为全平台'}
+            </Button>
             <Button icon={<PrinterOutlined />} onClick={handlePrint}>打印</Button>
             <Button type="primary" icon={<DownloadOutlined />} onClick={handleDownload}>下载报告</Button>
           </Space>
@@ -258,6 +273,7 @@ export default function ReportDetail() {
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <Space>
             <Tag color="blue">{isOperatorTest ? '算子测试报告' : '模型测试报告'}</Tag>
+            <Tag color={report?.is_public ? 'cyan' : 'default'}>{report?.is_public ? '全平台' : '私有'}</Tag>
             <Tag color="green">{report.status === 'published' ? '已发布' : report.status}</Tag>
             <Text type="secondary">生成时间：{dayjs(report.created_at).format('YYYY-MM-DD HH:mm:ss')}</Text>
           </Space>

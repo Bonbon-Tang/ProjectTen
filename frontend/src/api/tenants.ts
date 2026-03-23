@@ -23,7 +23,7 @@ export function updateTenant(id: string, data: any) {
   return api.put(`/tenants/${id}`, data);
 }
 
-export function deleteTenant(id: string) {
+export function deleteTenant(id: string | number) {
   return api.delete(`/tenants/${id}`);
 }
 

@@ -128,3 +128,18 @@ def update_quota(tenant_id: int, body: TenantQuotaUpdate, request: Request,
                     resource_id=tenant_id, details=body.model_dump(exclude_unset=True),
                     ip_address=request.client.host if request.client else None)
     return _ok(TenantOut.model_validate(tenant).model_dump())
+
+
+@router.delete("/{tenant_id}")
+def delete_tenant(tenant_id: int, request: Request,
+                  current_user: User = Depends(require_permissions("tenants:admin")),
+                  db: Session = Depends(get_db)):
+    tenant = TenantService.get_by_id(db, tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    TenantService.delete(db, tenant)
+
+    write_audit_log(db, user_id=current_user.id, action="delete_tenant", resource_type="tenant",
+                    resource_id=tenant_id,
+                    ip_address=request.client.host if request.client else None)
+    return _ok(message="Tenant deleted")

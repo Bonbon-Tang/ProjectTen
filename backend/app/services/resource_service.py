@@ -198,18 +198,39 @@ class ResourceService:
     def get_summary(db: Session, tenant_id: Optional[int] = None, user_type: Optional[str] = None) -> dict:
         """Get resource summary.
         
-        - Admin: sees all devices
+        - Admin: sees global pool after subtracting leased devices
         - Non-admin: sees allocated devices (using list_devices_for_tenant)
         """
+        from app.models.tenant import Tenant
+        from datetime import datetime, timezone
+
         if user_type != "admin" and tenant_id is not None:
-            # Non-admin users: use allocation-based logic
             devices = ResourceService.list_devices_for_tenant(db, tenant_id, check_expiry=True)
         else:
-            # Admin or no tenant_id: query all devices
-            q = db.query(ComputeDevice)
-            if tenant_id is not None:
-                q = q.filter((ComputeDevice.tenant_id == tenant_id) | (ComputeDevice.tenant_id == None))
-            devices = q.all()
+            devices = db.query(ComputeDevice).all()
+            active_allocations = {}
+            now = datetime.now(timezone.utc)
+            tenants = db.query(Tenant).all()
+
+            for tenant in tenants:
+                expires_at = tenant.device_allocation_expires_at
+                if expires_at:
+                    if expires_at.tzinfo is None:
+                        expires_at = expires_at.replace(tzinfo=timezone.utc)
+                    if now > expires_at:
+                        continue
+                allocation = tenant.device_allocation or {}
+                for device_type, count in allocation.items():
+                    active_allocations[device_type] = active_allocations.get(device_type, 0) + count
+
+            adjusted_devices = []
+            for device in devices:
+                device_type = device.device_type.value if hasattr(device.device_type, 'value') else str(device.device_type)
+                leased_count = active_allocations.get(device_type, 0)
+                available_count = max(0, device.total_count - leased_count)
+                device.available_count = min(device.available_count, available_count)
+                adjusted_devices.append(device)
+            devices = adjusted_devices
         
         total_devices = sum(d.total_count for d in devices)
         available_devices = sum(d.available_count for d in devices)

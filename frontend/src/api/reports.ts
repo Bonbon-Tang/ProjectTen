@@ -42,6 +42,10 @@ export function archiveReport(id: string) {
   return api.post(`/reports/${id}/archive`);
 }
 
+export function shareReport(id: string, isPublic: boolean) {
+  return api.post(`/reports/${id}/share`, { is_public: isPublic });
+}
+
 export function getArchives(params?: ArchiveQuery) {
   return api.get('/reports/archives', { params });
 }

@@ -102,6 +102,7 @@ class EvaluationTask(Base):
 
     device_type = Column(String(64), nullable=True, comment="Device type for execution")
     device_count = Column(Integer, default=1, comment="Number of devices to use")
+    visibility = Column(String(32), default="private", nullable=False, comment="private or platform")
     toolset_id = Column(Integer, ForeignKey("digital_assets.id", ondelete="SET NULL"), nullable=True,
                         comment="Associated toolset asset")
 

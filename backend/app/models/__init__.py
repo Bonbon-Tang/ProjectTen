@@ -9,6 +9,7 @@ from app.models.resource import ComputeDevice
 from app.models.operator import Operator
 from app.models.operator_benchmark import OperatorBenchmark
 from app.models.model_benchmark import ModelBenchmark
+from app.models.tenant_application import TenantApplication
 
 __all__ = [
     "User",
@@ -24,4 +25,5 @@ __all__ = [
     "Operator",
     "OperatorBenchmark",
     "ModelBenchmark",
+    "TenantApplication",
 ]

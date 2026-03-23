@@ -31,31 +31,36 @@ export default function Sidebar() {
   const { user } = useAuthStore();
   const { collapsed } = useAppStore();
   const isAdmin = user?.role === 'admin';
+  const isPersonalUser = user?.role === 'personal';
 
   const menuItems: MenuItem[] = useMemo(() => {
     const items: MenuItem[] = [
-      {
-        key: '/dashboard',
-        icon: <HomeOutlined />,
-        label: '工作台',
-      },
-      {
-        key: '/evaluations',
-        icon: <BarChartOutlined />,
-        label: '评测系统',
-        children: [
-          {
-            key: '/evaluations/list',
-            icon: <UnorderedListOutlined />,
-            label: '评测任务',
-          },
-          {
-            key: '/evaluations/create',
-            icon: <PlusCircleOutlined />,
-            label: '创建任务',
-          },
-        ],
-      },
+      ...(!isPersonalUser
+        ? [
+            {
+              key: '/dashboard',
+              icon: <HomeOutlined />,
+              label: '工作台',
+            },
+            {
+              key: '/evaluations',
+              icon: <BarChartOutlined />,
+              label: '评测系统',
+              children: [
+                {
+                  key: '/evaluations/list',
+                  icon: <UnorderedListOutlined />,
+                  label: '评测任务',
+                },
+                {
+                  key: '/evaluations/create',
+                  icon: <PlusCircleOutlined />,
+                  label: '创建任务',
+                },
+              ],
+            },
+          ]
+        : []),
       {
         key: '/benchmark',
         icon: <ThunderboltOutlined />,
@@ -105,6 +110,11 @@ export default function Sidebar() {
             icon: <UploadOutlined />,
             label: '上传资产',
           },
+          {
+            key: '/assets/GPUs',
+            icon: <DatabaseOutlined />,
+            label: 'GPU 去向',
+          },
         ],
       },
     ];
@@ -124,8 +134,8 @@ export default function Sidebar() {
       });
     }
 
-    items.push(
-      {
+    if (isAdmin) {
+      items.push({
         key: '/tenants',
         icon: <BankOutlined />,
         label: '租户管理',
@@ -135,24 +145,39 @@ export default function Sidebar() {
             icon: <UnorderedListOutlined />,
             label: '租户列表',
           },
-        ],
-      },
-      {
-        key: '/settings',
-        icon: <SettingOutlined />,
-        label: '设置',
-        children: [
           {
-            key: '/settings/profile',
-            icon: <SettingOutlined />,
-            label: '个人设置',
+            key: '/tenants/apply',
+            icon: <UnorderedListOutlined />,
+            label: '租户申请',
           },
         ],
-      },
-    );
+      });
+    }
+
+    items.push({
+      key: '/settings',
+      icon: <SettingOutlined />,
+      label: '设置',
+      children: [
+        {
+          key: '/settings/profile',
+          icon: <SettingOutlined />,
+          label: '个人设置',
+        },
+        ...(isPersonalUser
+          ? [
+              {
+                key: '/settings/become-tenant',
+                icon: <PlusCircleOutlined />,
+                label: '成为租户',
+              },
+            ]
+          : []),
+      ],
+    });
 
     return items;
-  }, [isAdmin]);
+  }, [isAdmin, isPersonalUser]);
 
   // 计算当前选中和展开的菜单
   const selectedKeys = [location.pathname];

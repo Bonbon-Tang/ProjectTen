@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Card, Form, Input, Button, Avatar, Tabs, message, Descriptions, Space, Upload, Divider } from 'antd';
+import { Card, Form, Input, Button, Avatar, Tabs, message, Alert, Upload } from 'antd';
 import { UserOutlined, UploadOutlined } from '@ant-design/icons';
 import PageHeader from '@/components/PageHeader';
 import useAuthStore from '@/stores/authStore';
 
 export default function Profile() {
   const { user, updateUser } = useAuthStore();
+  const isPersonalUser = user?.role === 'personal';
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
@@ -35,6 +36,16 @@ export default function Profile() {
       label: '基本信息',
       children: (
         <div style={{ maxWidth: 500 }}>
+          {isPersonalUser && (
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 16 }}
+              message="成为租户"
+              description="当前账号仅可登录查看信息、资产和评测报告。若要使用机器和创建任务，请先注册成为租户账号。"
+              action={<Button type="primary" size="small" href="/settings/become-tenant">成为租户</Button>}
+            />
+          )}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <Avatar size={80} icon={<UserOutlined />} style={{ backgroundColor: '#1B3A6B' }} />
             <div style={{ marginTop: 12 }}>

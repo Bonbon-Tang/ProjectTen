@@ -39,10 +39,16 @@ class ReportService:
         creator_id: Optional[int] = None,
         tenant_id: Optional[int] = None,
         status: Optional[str] = None,
+        include_public: bool = False,
     ) -> Tuple[List[EvaluationReport], int]:
+        from sqlalchemy import or_
+
         q = db.query(EvaluationReport)
-        if creator_id:
-            q = q.filter(EvaluationReport.creator_id == creator_id)
+        if include_public and creator_id:
+            q = q.filter(or_(EvaluationReport.creator_id == creator_id, EvaluationReport.is_public == True))
+        else:
+            if creator_id:
+                q = q.filter(EvaluationReport.creator_id == creator_id)
         if tenant_id:
             q = q.filter(EvaluationReport.tenant_id == tenant_id)
         if status:

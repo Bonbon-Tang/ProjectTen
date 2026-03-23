@@ -51,10 +51,12 @@ def list_reports(
     from app.models.asset import DigitalAsset
     
     pagination = PaginationParams(page, page_size)
+    user_type = getattr(current_user.user_type, 'value', current_user.user_type)
     reports, total = ReportService.list_reports(
         db, pagination,
-        creator_id=current_user.id if current_user.user_type != "admin" else None,
+        creator_id=current_user.id if user_type != "admin" else None,
         status=status,
+        include_public=user_type != 'admin',
     )
     
     # Build response with task and image info
@@ -166,6 +168,9 @@ def get_report(report_id: int, current_user: User = Depends(get_current_user),
     report = ReportService.get_by_id(db, report_id)
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
+    user_type = getattr(current_user.user_type, 'value', current_user.user_type)
+    if user_type != 'admin' and report.creator_id != current_user.id and not report.is_public:
+        raise HTTPException(status_code=403, detail='No permission to access this report')
     return _ok(ReportOut.model_validate(report).model_dump())
 
 
@@ -175,6 +180,9 @@ def download_report(report_id: int, current_user: User = Depends(get_current_use
     report = ReportService.get_by_id(db, report_id)
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
+    user_type = getattr(current_user.user_type, 'value', current_user.user_type)
+    if user_type != 'admin' and report.creator_id != current_user.id and not report.is_public:
+        raise HTTPException(status_code=403, detail='No permission to download this report')
     # Return report content as downloadable JSON
     import json
     from fastapi.responses import Response

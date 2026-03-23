@@ -341,6 +341,7 @@ export default function EvalCreate() {
         task_type: taskType,
         device_type: values.device_type,
         device_count: deviceCount,
+        visibility: values.visibility || 'private',
         toolset_id: values.toolset_id,
         priority: values.priority,
       };
@@ -711,6 +712,18 @@ export default function EvalCreate() {
             <Radio.Button value="low">低</Radio.Button>
           </Radio.Group>
         </Form.Item>
+
+        <Form.Item
+          name="visibility"
+          label="任务可见性"
+          initialValue="private"
+          rules={[{ required: true, message: '请选择任务可见性' }]}
+        >
+          <Radio.Group>
+            <Radio.Button value="private">私有</Radio.Button>
+            <Radio.Button value="platform">全平台</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
       </Form>
     </div>
   );
@@ -804,6 +817,11 @@ export default function EvalCreate() {
             <Descriptions.Item label="优先级">
               <Tag color={priorityInfo?.color}>
                 {priorityInfo?.label || values.priority}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="任务可见性">
+              <Tag color={values.visibility === 'platform' ? 'blue' : 'default'}>
+                {values.visibility === 'platform' ? '全平台' : '私有'}
               </Tag>
             </Descriptions.Item>
           </Descriptions>

@@ -55,6 +55,7 @@ class EvaluationService:
             max_retries=kwargs.get("max_retries", 3),
             device_type=kwargs.get("device_type"),
             device_count=kwargs.get("device_count") or 1,
+            visibility=kwargs.get("visibility", "private"),
             toolset_id=kwargs.get("toolset_id"),
             operator_count=kwargs.get("operator_count"),
             operator_categories=kwargs.get("operator_categories"),

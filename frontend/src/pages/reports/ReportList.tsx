@@ -214,6 +214,15 @@ export default function ReportList() {
       },
     },
     {
+      title: '可见性',
+      dataIndex: 'is_public',
+      key: 'is_public',
+      width: 110,
+      render: (isPublic: boolean) => (
+        <Tag color={isPublic ? 'blue' : 'default'}>{isPublic ? '全平台' : '私有'}</Tag>
+      ),
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       key: 'status',

@@ -19,6 +19,7 @@ export interface CreateEvalParams {
   task_type: string;
   device_type: string;
   device_count: number;
+  visibility?: 'private' | 'platform';
   toolset_id?: number;
   priority: 'high' | 'medium' | 'low';
   config?: Record<string, any>;

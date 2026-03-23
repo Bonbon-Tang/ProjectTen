@@ -88,11 +88,29 @@ def list_evaluations(
 ):
     from app.models.asset import DigitalAsset
     
+    from app.models.evaluation import EvaluationTask
+    from sqlalchemy import or_
+
     pagination = PaginationParams(page, page_size)
-    tasks, total = EvaluationService.list_tasks(
-        db, pagination, status=status, task_type=task_type,
-        creator_id=current_user.id if current_user.user_type != "admin" else None,
-    )
+
+    if getattr(current_user.user_type, 'value', current_user.user_type) == 'admin':
+        tasks, total = EvaluationService.list_tasks(
+            db, pagination, status=status, task_type=task_type,
+        )
+    else:
+        q = db.query(EvaluationTask)
+        if status:
+            q = q.filter(EvaluationTask.status == status)
+        if task_type:
+            q = q.filter(EvaluationTask.task_type == task_type)
+        q = q.filter(
+            or_(
+                EvaluationTask.creator_id == current_user.id,
+                EvaluationTask.visibility == 'platform',
+            )
+        )
+        total = q.count()
+        tasks = q.order_by(EvaluationTask.created_at.desc()).offset(pagination.offset).limit(pagination.limit).all()
     
     # Build response with image/model info
     items = []
@@ -119,6 +137,9 @@ def get_evaluation(task_id: int, current_user: User = Depends(get_current_user),
     task = EvaluationService.get_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+    if getattr(current_user.user_type, 'value', current_user.user_type) != 'admin':
+        if task.creator_id != current_user.id and getattr(task, 'visibility', 'private') != 'platform':
+            raise HTTPException(status_code=403, detail='No permission to access this task')
     # Refresh to get latest progress from DB
     db.refresh(task)
     data = EvaluationOut.model_validate(task).model_dump()

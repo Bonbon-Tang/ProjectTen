@@ -80,3 +80,11 @@ class TenantService:
         db.commit()
         db.refresh(tenant)
         return tenant
+
+    @staticmethod
+    def delete(db: Session, tenant: Tenant) -> None:
+        # Detach users from this tenant before deletion.
+        for member in db.query(User).filter(User.tenant_id == tenant.id).all():
+            member.tenant_id = None
+        db.delete(tenant)
+        db.commit()
