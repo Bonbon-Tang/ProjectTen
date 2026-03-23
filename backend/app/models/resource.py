@@ -10,6 +10,7 @@ from sqlalchemy import (
     Integer,
     String,
     JSON,
+    ForeignKey,
 )
 
 from app.database import Base
@@ -41,6 +42,7 @@ class ComputeDevice(Base):
     available_count = Column(Integer, nullable=False, default=0)
     specs = Column(JSON, default=dict, comment="Device specifications (memory, compute power, etc.)")
     status = Column(Enum(DeviceStatus), default=DeviceStatus.online, nullable=False)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True, comment="Owner tenant (NULL = shared/global)")
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

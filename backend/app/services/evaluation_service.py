@@ -23,7 +23,7 @@ from app.utils.pagination import PaginationParams
 class EvaluationService:
 
     @staticmethod
-    def create(db: Session, *, creator_id: int, tenant_id: Optional[int] = None, **kwargs) -> EvaluationTask:
+    def create(db: Session, *, creator_id: int, tenant_id: Optional[int] = None, user_type: Optional[str] = None, **kwargs) -> EvaluationTask:
         task_category = kwargs.get("task_category")
 
         # Validate: operator_test requires toolset_id
@@ -121,25 +121,42 @@ class EvaluationService:
         }
 
     @staticmethod
+    @staticmethod
     def start(db: Session, task: EvaluationTask) -> EvaluationTask:
+        """Start a task.
+        
+        Device allocation logic:
+        - Admin tasks: allocate from global pool (decrease available_count)
+        - Tenant tasks: no allocation from global pool (tenant's available count is tracked separately)
+        """
+        from app.models.user import User, UserType
+        
         if task.status not in (TaskStatus.pending, TaskStatus.queued):
             raise ValueError(f"Cannot start task in '{task.status.value}' status")
 
-        # Check device availability and allocate
+        # Only allocate devices for admin-created tasks
         if task.device_type:
-            device = db.query(ComputeDevice).filter(
-                ComputeDevice.device_type == task.device_type
-            ).first()
-            if not device:
-                raise ValueError(f"设备类型 '{task.device_type}' 不存在")
-            needed = task.device_count or 1
-            if device.available_count < needed:
-                raise ValueError(
-                    f"设备 '{device.name}' 可用数量不足: 需要 {needed} 台，当前可用 {device.available_count} 台"
-                )
-            # Allocate devices
-            device.available_count -= needed
-            db.add(device)
+            creator = db.query(User).filter(User.id == task.creator_id).first()
+            is_admin_task = creator and creator.user_type == UserType.admin
+            
+            # Debug logging
+            with open('/tmp/start_debug.log', 'a') as f:
+                f.write(f"Task {task.id}: creator_id={task.creator_id}, user_type={creator.user_type if creator else None}, is_admin={is_admin_task}\n")
+            
+            if is_admin_task:
+                device = db.query(ComputeDevice).filter(
+                    ComputeDevice.device_type == task.device_type,
+                    (ComputeDevice.tenant_id == None) | (ComputeDevice.tenant_id == 1)
+                ).first()
+                if not device:
+                    raise ValueError(f"设备类型 '{task.device_type}' 不存在")
+                needed = task.device_count or 1
+                if device.available_count < needed:
+                    raise ValueError(
+                        f"设备 '{device.name}' 可用数量不足：需要 {needed} 台，当前可用 {device.available_count} 台"
+                    )
+                device.available_count -= needed
+                db.add(device)
 
         task.status = TaskStatus.running
         task.started_at = datetime.utcnow()
@@ -150,17 +167,26 @@ class EvaluationService:
 
     @staticmethod
     def _release_devices(db: Session, task: EvaluationTask) -> None:
-        """Release devices allocated to a task."""
+        """Release devices allocated to a task.
+        
+        Only release devices for admin-created tasks.
+        """
+        from app.models.user import User, UserType
+        
         if task.device_type:
-            device = db.query(ComputeDevice).filter(
-                ComputeDevice.device_type == task.device_type
-            ).first()
-            if device:
-                needed = task.device_count or 1
-                device.available_count = min(device.available_count + needed, device.total_count)
-                db.add(device)
+            creator = db.query(User).filter(User.id == task.creator_id).first()
+            is_admin_task = creator and creator.user_type == UserType.admin
+            
+            if is_admin_task:
+                device = db.query(ComputeDevice).filter(
+                    ComputeDevice.device_type == task.device_type,
+                    (ComputeDevice.tenant_id == None) | (ComputeDevice.tenant_id == 1)
+                ).first()
+                if device:
+                    needed = task.device_count or 1
+                    device.available_count = min(device.available_count + needed, device.total_count)
+                    db.add(device)
 
-    @staticmethod
     def stop(db: Session, task: EvaluationTask) -> EvaluationTask:
         if task.status != TaskStatus.running:
             raise ValueError("Task is not running")
@@ -201,7 +227,9 @@ class EvaluationService:
         skipped = 0
         skipped_ids = []
         for tid in task_ids:
-            task = db.query(EvaluationTask).filter(EvaluationTask.id == tid).first()
+            task = db.query(EvaluationTask).filter(EvaluationTask.id == tid
+                (ComputeDevice.tenant_id == None) | (ComputeDevice.tenant_id == 1)
+            ).first()
             if not task:
                 continue
             if task.status == TaskStatus.running:
@@ -581,8 +609,14 @@ class EvaluationService:
         db.commit()
 
     @staticmethod
+    @staticmethod
     def _write_model_benchmark(db: Session, task: EvaluationTask, metrics: dict) -> None:
-        """Write model deployment test results to ModelBenchmark table."""
+        """Write model deployment test results to ModelBenchmark table.
+        
+        Key behavior: For the same chip + model combination, only keep the latest test result.
+        If a benchmark already exists for this device_type + model_name + task_type, update it.
+        Otherwise, create a new entry.
+        """
         from app.models.model_benchmark import ModelBenchmark
         from app.models.asset import DigitalAsset
 
@@ -598,36 +632,74 @@ class EvaluationService:
         desc = image.description or ""
         parts = desc.split(" + ")
         chip_name = parts[0] if len(parts) > 0 else image.name
+
         framework_name = parts[1] if len(parts) > 1 else ""
         model_name = parts[2] if len(parts) > 2 else image.name
 
-        # Create benchmark entry
-        bench = ModelBenchmark(
-            image_id=task.image_id,
-            task_type=task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type),
-            device_type=task.device_type or "unknown",
-            eval_method="standard",
-            # Core metrics
-            throughput=metrics.get("throughput"),
-            throughput_unit=metrics.get("throughput_unit"),
-            avg_latency_ms=metrics.get("avg_latency_ms"),
-            p50_latency_ms=metrics.get("p50_latency_ms"),
-            p99_latency_ms=metrics.get("p99_latency_ms"),
-            first_token_latency_ms=metrics.get("first_token_latency_ms"),
-            accuracy=metrics.get("accuracy"),
-            accuracy_metric=metrics.get("accuracy_metric"),
-            energy_efficiency=metrics.get("energy_efficiency"),
-            energy_efficiency_unit=metrics.get("energy_efficiency_unit"),
-            power_consumption_w=metrics.get("power_consumption_w"),
-            performance_score=metrics.get("performance_score"),
-            software_completeness_score=metrics.get("software_completeness", {}).get("score"),
-            memory_usage_gb=metrics.get("memory_usage_gb"),
-            # Image metadata
-            image_name=image.name,
-            chip_name=chip_name,
-            framework_name=framework_name,
-            model_name=model_name,
-            task_id=task.id,
-        )
-        db.add(bench)
+        device_type = task.device_type or "unknown"
+        task_type_val = task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type)
+
+        # Check if a benchmark already exists for this chip + model + task_type combination
+        existing_bench = db.query(ModelBenchmark).filter(
+            ModelBenchmark.device_type == device_type,
+            ModelBenchmark.model_name == model_name,
+            ModelBenchmark.task_type == task_type_val,
+        ).first()
+
+        if existing_bench:
+            # Update existing benchmark with latest results
+            existing_bench.image_id = task.image_id
+            existing_bench.eval_method = "standard"
+            existing_bench.throughput = metrics.get("throughput")
+            existing_bench.throughput_unit = metrics.get("throughput_unit")
+            existing_bench.avg_latency_ms = metrics.get("avg_latency_ms")
+            existing_bench.p50_latency_ms = metrics.get("p50_latency_ms")
+            existing_bench.p99_latency_ms = metrics.get("p99_latency_ms")
+            existing_bench.first_token_latency_ms = metrics.get("first_token_latency_ms")
+            existing_bench.accuracy = metrics.get("accuracy")
+            existing_bench.accuracy_metric = metrics.get("accuracy_metric")
+            existing_bench.energy_efficiency = metrics.get("energy_efficiency")
+            existing_bench.energy_efficiency_unit = metrics.get("energy_efficiency_unit")
+            existing_bench.power_consumption_w = metrics.get("power_consumption_w")
+            existing_bench.performance_score = metrics.get("performance_score")
+            existing_bench.software_completeness_score = metrics.get("software_completeness", {}).get("score")
+            existing_bench.memory_usage_gb = metrics.get("memory_usage_gb")
+            existing_bench.image_name = image.name
+            existing_bench.chip_name = chip_name
+            existing_bench.framework_name = framework_name
+            existing_bench.model_name = model_name
+            existing_bench.task_id = task.id
+            existing_bench.tested_at = datetime.utcnow()
+            db.add(existing_bench)
+        else:
+            # Create new benchmark entry
+            bench = ModelBenchmark(
+                image_id=task.image_id,
+                task_type=task_type_val,
+                device_type=device_type,
+                eval_method="standard",
+                # Core metrics
+                throughput=metrics.get("throughput"),
+                throughput_unit=metrics.get("throughput_unit"),
+                avg_latency_ms=metrics.get("avg_latency_ms"),
+                p50_latency_ms=metrics.get("p50_latency_ms"),
+                p99_latency_ms=metrics.get("p99_latency_ms"),
+                first_token_latency_ms=metrics.get("first_token_latency_ms"),
+                accuracy=metrics.get("accuracy"),
+                accuracy_metric=metrics.get("accuracy_metric"),
+                energy_efficiency=metrics.get("energy_efficiency"),
+                energy_efficiency_unit=metrics.get("energy_efficiency_unit"),
+                power_consumption_w=metrics.get("power_consumption_w"),
+                performance_score=metrics.get("performance_score"),
+                software_completeness_score=metrics.get("software_completeness", {}).get("score"),
+                memory_usage_gb=metrics.get("memory_usage_gb"),
+                # Image metadata
+                image_name=image.name,
+                chip_name=chip_name,
+                framework_name=framework_name,
+                model_name=model_name,
+                task_id=task.id,
+            )
+            db.add(bench)
         db.commit()
+

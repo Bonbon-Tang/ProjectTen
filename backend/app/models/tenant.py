@@ -12,6 +12,7 @@ from sqlalchemy import (
     String,
     Float,
     Text,
+    JSON,
 )
 from sqlalchemy.orm import relationship
 
@@ -37,6 +38,8 @@ class Tenant(Base):
     compute_quota = Column(Float, default=0.0, comment="Compute quota in hours")
     storage_quota = Column(Float, default=0.0, comment="Storage quota in GB")
     max_concurrent_tasks = Column(Integer, default=5)
+    device_allocation = Column(JSON, default=dict, comment="Device allocation by type: {'huawei_910c': 1}")
+    device_allocation_expires_at = Column(DateTime, nullable=True, comment="Device allocation expiry time")
 
     expires_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

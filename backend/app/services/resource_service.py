@@ -115,16 +115,102 @@ class ResourceService:
         db.commit()
 
     @staticmethod
-    def list_devices(db: Session) -> List[ComputeDevice]:
-        return db.query(ComputeDevice).order_by(ComputeDevice.id).all()
+    def list_devices(db: Session, tenant_id: Optional[int] = None) -> List[ComputeDevice]:
+        """List compute devices. If tenant_id is provided, filter by tenant (for non-admin users)."""
+        q = db.query(ComputeDevice)
+        if tenant_id is not None:
+            q = q.filter(
+                (ComputeDevice.tenant_id == tenant_id) | (ComputeDevice.tenant_id == None)
+            )
+        return q.order_by(ComputeDevice.id).all()
 
     @staticmethod
+    @staticmethod
+    def list_devices_for_tenant(db: Session, tenant_id: int, check_expiry: bool = True) -> List[ComputeDevice]:
+        """List devices for a non-admin tenant.
+        
+        Available count = allocated count - devices in use by tenant's running tasks.
+        Admin's device pool is not affected by tenant's task usage.
+        """
+        from app.models.tenant import Tenant
+        from app.models.evaluation import EvaluationTask, TaskStatus
+        from app.models.user import User
+        
+        # Get tenant's device allocation
+        tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+        if not tenant:
+            return []
+        
+        # Check if device allocation has expired
+        if check_expiry and tenant.device_allocation_expires_at:
+            from datetime import datetime, timezone
+            now = datetime.now(timezone.utc)
+            expires_at = tenant.device_allocation_expires_at
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if now > expires_at:
+                return []
+        
+        allocation = tenant.device_allocation or {}
+        if not allocation:
+            return []
+        
+        # Count devices in use by tenant's running tasks
+        devices_in_use = {}
+        tenant_user_ids = [u[0] for u in db.query(User.id).filter(User.tenant_id == tenant_id).all()]
+        
+        if tenant_user_ids:
+            running_tasks = db.query(EvaluationTask).filter(
+                EvaluationTask.creator_id.in_(tenant_user_ids),
+                EvaluationTask.status == TaskStatus.running,
+                EvaluationTask.device_type.isnot(None)
+            ).all()
+            
+            for task in running_tasks:
+                device_type = task.device_type.value if hasattr(task.device_type, 'value') else str(task.device_type)
+                devices_in_use[device_type] = devices_in_use.get(device_type, 0) + (task.device_count or 1)
+        
+        # Get all global devices
+        global_devices = db.query(ComputeDevice).filter(
+            (ComputeDevice.tenant_id == None) | (ComputeDevice.tenant_id == 1)
+        ).all()
+        
+        # Build result
+        result = []
+        for device in global_devices:
+            device_type = device.device_type.value
+            if device_type in allocation:
+                allocated_count = allocation[device_type]
+                in_use_count = devices_in_use.get(device_type, 0)
+                available_count = max(0, allocated_count - in_use_count)
+                
+                device.name = device.name
+                device.total_count = allocated_count
+                device.available_count = available_count
+                result.append(device)
+        
+        return result
+
     def get_device_by_id(db: Session, device_id: int) -> Optional[ComputeDevice]:
         return db.query(ComputeDevice).filter(ComputeDevice.id == device_id).first()
 
     @staticmethod
-    def get_summary(db: Session) -> dict:
-        devices = db.query(ComputeDevice).all()
+    def get_summary(db: Session, tenant_id: Optional[int] = None, user_type: Optional[str] = None) -> dict:
+        """Get resource summary.
+        
+        - Admin: sees all devices
+        - Non-admin: sees allocated devices (using list_devices_for_tenant)
+        """
+        if user_type != "admin" and tenant_id is not None:
+            # Non-admin users: use allocation-based logic
+            devices = ResourceService.list_devices_for_tenant(db, tenant_id, check_expiry=True)
+        else:
+            # Admin or no tenant_id: query all devices
+            q = db.query(ComputeDevice)
+            if tenant_id is not None:
+                q = q.filter((ComputeDevice.tenant_id == tenant_id) | (ComputeDevice.tenant_id == None))
+            devices = q.all()
+        
         total_devices = sum(d.total_count for d in devices)
         available_devices = sum(d.available_count for d in devices)
         by_type = []

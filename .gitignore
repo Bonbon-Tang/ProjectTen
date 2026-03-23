@@ -5,3 +5,14 @@
 .env.production
 *.pem
 *.key
+
+# Runtime and local environment artifacts
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+*.db-journal
+backend/data/*.db
+backend/venv/
+backend/backend.log
+/tmp/

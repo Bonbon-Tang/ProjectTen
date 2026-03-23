@@ -143,12 +143,13 @@ export default function Dashboard() {
       pollRef.current = setInterval(() => {
         fetchRecentTasks();
         fetchStats();
+        fetchResources(); // 刷新设备状态，让 usr1 能看到设备"使用中"
       }, 5000);
     }
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [hasRunning, fetchRecentTasks, fetchStats]);
+  }, [hasRunning, fetchRecentTasks, fetchStats, fetchResources]);
 
   // 设备状态渲染
   const renderDeviceStatus = (device: DeviceResource) => {
