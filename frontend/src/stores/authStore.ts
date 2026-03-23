@@ -6,6 +6,7 @@ interface UserInfo {
   email: string;
   role: string;
   avatar?: string;
+  tenant_id?: number | null;
 }
 
 interface AuthState {

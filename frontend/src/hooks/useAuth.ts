@@ -32,6 +32,7 @@ export function useAuth() {
               email: userInfo.email,
               role: userInfo.user_type || 'personal',
               avatar: userInfo.avatar,
+              tenant_id: userInfo.tenant_id ?? null,
             });
           } catch {
             // 用户信息拉取失败，用基础信息

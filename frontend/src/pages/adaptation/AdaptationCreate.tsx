@@ -7,9 +7,25 @@ import { createAdaptation } from '@/api/adaptation';
 
 const { TextArea } = Input;
 
+const devicesTagMap: Record<string, string> = {
+  '华为昇腾910C': 'huawei_910c',
+  '华为昇腾910B': 'huawei_910b',
+  '寒武纪MLU590': 'cambrian_590',
+  '昆仑芯P800': 'kunlun_p800',
+  '海光DCU BW1000': 'hygon_bw1000',
+  '910C': 'huawei_910c',
+  '910B': 'huawei_910b',
+  'MLU590': 'cambrian_590',
+  'P800': 'kunlun_p800',
+  'BW1000': 'hygon_bw1000',
+  'Ascend910C': 'huawei_910c',
+  'Ascend910B': 'huawei_910b',
+};
+
 interface ImageOption {
   id: number;
   name: string;
+  device_type?: string;
 }
 
 interface DeviceOption {
@@ -21,6 +37,7 @@ interface DeviceOption {
 
 export default function AdaptationCreate() {
   const [form] = Form.useForm();
+  const selectedDeviceType = Form.useWatch('device_type', form);
   const [images, setImages] = useState<ImageOption[]>([]);
   const [devices, setDevices] = useState<DeviceOption[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,7 +52,27 @@ export default function AdaptationCreate() {
 
         const assetPayload = assetRes?.data || assetRes;
         const assetItems = assetPayload?.items || assetPayload?.list || [];
-        setImages(Array.isArray(assetItems) ? assetItems.map((item: any) => ({ id: item.id, name: item.name })) : []);
+        setImages(
+          Array.isArray(assetItems)
+            ? assetItems.map((item: any) => ({
+                id: item.id,
+                name: item.name,
+                device_type: Array.isArray(item.tags)
+                  ? devicesTagMap[item.tags.find((tag: string) => typeof tag === 'string' && devicesTagMap[tag]) as string]
+                  : item.name.includes('910C')
+                    ? 'huawei_910c'
+                    : item.name.includes('910B')
+                      ? 'huawei_910b'
+                      : item.name.includes('MLU590')
+                        ? 'cambrian_590'
+                        : item.name.includes('P800')
+                          ? 'kunlun_p800'
+                          : item.name.includes('BW1000')
+                            ? 'hygon_bw1000'
+                            : undefined,
+              }))
+            : [],
+        );
 
         const resourcePayload = resourceRes?.data || resourceRes;
         const deviceItems = resourcePayload?.devices_by_type || [];
@@ -57,9 +94,23 @@ export default function AdaptationCreate() {
   }, []);
 
   const selectedDevice = useMemo(() => {
-    const deviceType = form.getFieldValue('device_type');
-    return devices.find((item) => item.device_type === deviceType);
-  }, [devices, form]);
+    return devices.find((item) => item.device_type === selectedDeviceType);
+  }, [devices, selectedDeviceType]);
+
+  const filteredImages = useMemo(() => {
+    if (!selectedDeviceType) {
+      return [];
+    }
+    return images.filter((item) => item.device_type === selectedDeviceType);
+  }, [images, selectedDeviceType]);
+
+  const handleDeviceChange = (deviceType: string) => {
+    const currentImageId = form.getFieldValue('image_id');
+    const imageStillValid = images.some((item) => item.id === currentImageId && item.device_type === deviceType);
+    if (!imageStillValid) {
+      form.setFieldValue('image_id', undefined);
+    }
+  };
 
   const handleSubmit = async (values: any) => {
     setLoading(true);
@@ -115,23 +166,26 @@ export default function AdaptationCreate() {
         <Card className="tech-panel" style={{ marginBottom: 18 }}>
           <Row gutter={16}>
             <Col xs={24} md={12}>
-              <Form.Item name="image_id" label="模型部署镜像" rules={[{ required: true, message: '请选择镜像' }]}>
-                <Select
-                  placeholder="选择模型部署镜像"
-                  options={images.map((item) => ({ label: item.name, value: item.id }))}
-                  showSearch
-                  optionFilterProp="label"
-                />
-              </Form.Item>
-            </Col>
-            <Col xs={24} md={12}>
               <Form.Item name="device_type" label="运行设备" rules={[{ required: true, message: '请选择设备' }]}>
                 <Select
-                  placeholder="选择设备"
+                  placeholder="先选择设备"
+                  onChange={handleDeviceChange}
                   options={devices.map((item) => ({
                     label: `${item.name}（可用 ${item.available_count}/${item.total_count}）`,
                     value: item.device_type,
                   }))}
+                />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item name="image_id" label="模型部署镜像" rules={[{ required: true, message: '请选择镜像' }]}>
+                <Select
+                  placeholder={selectedDevice ? '选择该设备可用镜像' : '请先选择设备'}
+                  disabled={!selectedDevice}
+                  options={filteredImages.map((item) => ({ label: item.name, value: item.id }))}
+                  showSearch
+                  optionFilterProp="label"
+                  notFoundContent={selectedDevice ? '该设备暂无对应镜像' : '请先选择设备'}
                 />
               </Form.Item>
             </Col>

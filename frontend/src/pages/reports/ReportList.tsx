@@ -159,9 +159,10 @@ export default function ReportList() {
       title: '报告名称',
       dataIndex: 'eval_name',
       key: 'eval_name',
+      width: 220,
       ellipsis: true,
       render: (text: string, record) => (
-        <a onClick={() => navigate(`/reports/${record.id}`)} style={{ fontWeight: 500 }}>
+        <a onClick={() => navigate(`/reports/${record.id}`)} style={{ fontWeight: 500, display: 'inline-block', maxWidth: '100%', wordBreak: 'break-word' }}>
           {text || record.title || `报告 #${record.id}`}
         </a>
       ),
@@ -241,9 +242,10 @@ export default function ReportList() {
     {
       title: '操作',
       key: 'action',
-      width: 220,
+      width: 260,
+      fixed: 'right',
       render: (_, record) => (
-        <Space size={0}>
+        <Space size={[0, 4]} wrap>
           <Button 
             type="link" 
             size="small" 
@@ -298,7 +300,7 @@ export default function ReportList() {
         查看所有可见的评测报告列表
       </div>
 
-      <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+      <div className="tech-filter-bar">
         <Input
           placeholder="搜索报告名称"
           prefix={<SearchOutlined />}
@@ -337,19 +339,22 @@ export default function ReportList() {
       </div>
 
       {viewMode === 'table' ? (
-        <Table
-          columns={columns}
-          dataSource={data}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            ...pagination,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条`,
-            onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize }),
-          }}
-        />
+        <div className="tech-panel report-table-shell" style={{ padding: 12, overflow: 'hidden' }}>
+          <Table
+            columns={columns}
+            dataSource={data}
+            rowKey="id"
+            loading={loading}
+            scroll={{ x: 1480 }}
+            pagination={{
+              ...pagination,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total) => `共 ${total} 条`,
+              onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize }),
+            }}
+          />
+        </div>
       ) : (
         <Row gutter={[16, 16]}>
           {data.map((item) => (
@@ -373,10 +378,10 @@ export default function ReportList() {
                 onClick={() => navigate(`/reports/${item.id}`)}
               >
                 <Card.Meta
-                  title={item.eval_name || item.title || `报告 #${item.id}`}
+                  title={<span style={{ display: 'inline-block', maxWidth: '100%', whiteSpace: 'normal', wordBreak: 'break-word' }}>{item.eval_name || item.title || `报告 #${item.id}`}</span>}
                   description={
-                    <Space direction="vertical" size={4}>
-                      <Tag>{EVAL_CATEGORIES.find((c) => c.value === item.task_category)?.label || '-'}</Tag>
+                    <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                      <Tag style={{ width: 'fit-content' }}>{EVAL_CATEGORIES.find((c) => c.value === item.task_category)?.label || '-'}</Tag>
                       <span style={{ fontSize: 12, color: '#999' }}>
                         {item.created_at ? dayjs(item.created_at).format('YYYY-MM-DD') : '-'}
                       </span>

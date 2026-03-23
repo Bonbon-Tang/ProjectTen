@@ -6,10 +6,13 @@ from typing import List
 
 from pydantic_settings import BaseSettings
 
+BASE_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_DB_PATH = BASE_DIR / "data" / "app.db"
+
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "sqlite:///./data/app.db"
+    DATABASE_URL: str = f"sqlite:///{DEFAULT_DB_PATH}"
 
     # JWT
     SECRET_KEY: str = "change-me-to-a-long-random-string-in-production"

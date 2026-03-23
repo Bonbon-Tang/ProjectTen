@@ -27,6 +27,8 @@ const BenchmarkList = lazy(() => import('@/pages/benchmark/BenchmarkList'));
 const ModelBenchmarkList = lazy(() => import('@/pages/benchmark/ModelBenchmarkList'));
 const Profile = lazy(() => import('@/pages/settings/Profile'));
 const BecomeTenant = lazy(() => import('@/pages/settings/BecomeTenant'));
+const AdaptationList = lazy(() => import('@/pages/adaptation/AdaptationList'));
+const AdaptationCreate = lazy(() => import('@/pages/adaptation/AdaptationCreate'));
 
 const Loading = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 300 }}>
@@ -53,29 +55,42 @@ export default function AppRouter() {
           }
         >
           <Route path="/dashboard" element={
-            <PrivateRoute requireAdmin>
+            <PrivateRoute requireTenant>
               <Dashboard />
             </PrivateRoute>
           } />
 
           {/* 评测系统 */}
           <Route path="/evaluations/list" element={
-            <PrivateRoute requireAdmin>
+            <PrivateRoute requireTenant>
               <EvalList />
             </PrivateRoute>
           } />
           <Route path="/evaluations/create" element={
-            <PrivateRoute requireAdmin>
+            <PrivateRoute requireTenant>
               <EvalCreate />
             </PrivateRoute>
           } />
           <Route path="/evaluations/:id" element={<EvalDetail />} />
+
+          {/* 适配系统 */}
+          <Route path="/adaptation/list" element={
+            <PrivateRoute requireTenant>
+              <AdaptationList />
+            </PrivateRoute>
+          } />
+          <Route path="/adaptation/create" element={
+            <PrivateRoute requireTenant>
+              <AdaptationCreate />
+            </PrivateRoute>
+          } />
 
           {/* Benchmark */}
           <Route path="/benchmark/operators" element={<BenchmarkList />} />
           <Route path="/benchmark/models" element={<ModelBenchmarkList />} />
 
           {/* 报告管理 */}
+          <Route path="/reports" element={<Navigate to="/reports/list" replace />} />
           <Route path="/reports/list" element={<ReportList />} />
           <Route path="/reports/archives" element={<MyArchives />} />
           <Route path="/reports/:id" element={<ReportDetail />} />
