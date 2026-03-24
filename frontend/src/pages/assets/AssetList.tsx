@@ -34,6 +34,16 @@ const { Text } = Typography;
 import PageHeader from '@/components/PageHeader';
 import { ASSET_TYPES } from '@/utils/constants';
 import { getAssets, deleteAsset } from '@/api/assets';
+import { getDeviceUsage } from '@/api/resources';
+
+interface DeviceUsageItem {
+  device_name: string;
+  device_type: string;
+  leased_total: number;
+  running_total: number;
+  leased: Array<{ username: string | null; count: number }>;
+  running: Array<{ task_id: number; task_name: string; username: string | null; count: number }>;
+}
 
 interface AssetItem {
   id: number;
@@ -73,6 +83,7 @@ export default function AssetList() {
   const [filteredTotal, setFilteredTotal] = useState(0); // 筛选后的总数
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<AssetItem | null>(null);
+  const [deviceUsage, setDeviceUsage] = useState<DeviceUsageItem[]>([]);
   
   // 镜像筛选状态
   const [selectedChip, setSelectedChip] = useState<string>('');
@@ -96,6 +107,7 @@ export default function AssetList() {
     { label: 'PyTorch', value: 'PyTorch' },
     { label: 'PaddlePaddle', value: 'PaddlePaddle' },
     { label: 'ROCm', value: 'ROCm' },
+    { label: 'DeepLink', value: 'DeepLink' },
   ];
   
   // 25 个子场景选项
@@ -131,6 +143,9 @@ export default function AssetList() {
   const fetchAssets = useCallback(async () => {
     setLoading(true);
     try {
+      const usageRes: any = await getDeviceUsage().catch(() => ({ data: [] }));
+      const usageData = usageRes?.data || usageRes || [];
+      setDeviceUsage(Array.isArray(usageData) ? usageData : []);
       // 获取全部数据（不分页），前端进行筛选和分页
       // 注意：page_size 最大 100，需要多次请求获取全部数据
       const allItems: AssetItem[] = [];
@@ -339,6 +354,28 @@ export default function AssetList() {
         ) : (
           <Tag>私有</Tag>
         ),
+    },
+    {
+      title: '设备去向/占用',
+      key: 'device_usage',
+      width: 280,
+      render: (_: any, record: AssetItem) => {
+        if (record.asset_type !== 'image' || !record.tags?.length) return <Text type="secondary">-</Text>;
+        const matched = deviceUsage.find((item) => record.tags.includes(item.device_type) || record.name.includes(item.device_name));
+        if (!matched) return <Text type="secondary">-</Text>;
+        const leasedText = matched.leased.length
+          ? matched.leased.map((x) => `租售给 ${x.username || '未知用户'} ${x.count}台`).join('；')
+          : '未租售';
+        const runningText = matched.running.length
+          ? matched.running.map((x) => `任务 ${x.task_name} 使用 ${x.count}台`).join('；')
+          : '无运行任务';
+        return (
+          <div style={{ fontSize: 12, lineHeight: 1.6 }}>
+            <div>{leasedText}</div>
+            <div style={{ color: '#666' }}>{runningText}</div>
+          </div>
+        );
+      },
     },
     { title: '创建时间', dataIndex: 'created_at', key: 'created_at', width: 120, render: (v: string) => v?.slice(0, 10) },
     {

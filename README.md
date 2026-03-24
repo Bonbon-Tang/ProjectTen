@@ -18,7 +18,7 @@
 
 ### 模型部署测试
 - 🤖 **模型部署评测** - LLM、CV、语音、多模态等 25 类子场景
-- 📦 **镜像选择** - 芯片 + 框架 + 模型组合镜像（16 个预置镜像）
+- 📦 **镜像选择** - 芯片 + 框架/中间层 + 模型组合镜像（含 DeepLink 中间层镜像）
 - 📊 **综合指标** - 吞吐量、延迟、准确率、能效比、软件功能完备性
 - 🏆 **部署榜单** - 按子场景分页、按准确率排名
 
@@ -124,12 +124,11 @@ npm run dev
 - BangC_Ops（寒武纪）
 - XTCL_Ops（昆仑芯）
 
-### 模型部署镜像（16 个预置）
-- **LLM**: Ascend910C-MindSpore-Qwen2-72B, Ascend910C-PyTorch-LLaMA3-70B, 等
-- **多模态**: Ascend910C-MindSpore-InternVL2-26B, MLU590-PyTorch-Qwen-VL-Chat
-- **CV**: Ascend910C-MindSpore-YOLOv8, MLU590-PyTorch-ResNet152, P800-PaddlePaddle-PP-YOLOE
-- **语音**: Ascend910B-MindSpore-Paraformer, MLU590-PyTorch-Whisper-Large
-- **其他**: SDXL 图像生成、PaddleOCR、SAM 分割等
+### 模型部署镜像
+- 已包含按芯片 × 子场景组织的模型部署镜像池
+- 追加了 `75` 个 DeepLink 中间层镜像：`Ascend910C` / `Ascend910B` / `MLU590` × `25` 个子场景
+- DeepLink 镜像命名示例：`Ascend910C-DeepLink-Qwen2-7B`、`Ascend910B-DeepLink-Paraformer`、`MLU590-DeepLink-ResNet50`
+- 资产页支持按芯片、框架/中间层、子场景筛选镜像
 
 ## 📁 项目结构
 

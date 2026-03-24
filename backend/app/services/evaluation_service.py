@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import random
+import re
 import threading
 import time
 from datetime import datetime
@@ -291,7 +293,12 @@ class EvaluationService:
             if task_category == TaskCategory.operator_test:
                 metrics = EvaluationService._generate_operator_metrics(db, task)
             else:
-                metrics = EvaluationService._generate_model_metrics(task.task_type)
+                image_name = ""
+                if task.image_id:
+                    from app.models.asset import DigitalAsset
+                    image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
+                    image_name = image.name if image else ""
+                metrics = EvaluationService._generate_model_metrics(task.task_type, image_name, task.device_type or "")
 
             task.metrics = metrics
             task.result = {"status": "success", "metrics": metrics}
@@ -481,87 +488,163 @@ class EvaluationService:
         return result
 
     @staticmethod
-    def _generate_model_metrics(task_type) -> dict:
-        """Generate simulated model deployment test metrics.
+    def _extract_model_size_billions(model_name: str) -> float:
+        """Infer model size in billions from names like Qwen2-72B or InternVL2-8B."""
+        if not model_name:
+            return 7.0
+        match = re.search(r"(\d+(?:\.\d+)?)\s*B", model_name, re.IGNORECASE)
+        if match:
+            return float(match.group(1))
+        # Fall back to lighter defaults for models without explicit parameter counts.
+        fallback_map = {
+            "resnet": 0.1,
+            "yolov8": 0.2,
+            "deeplab": 0.2,
+            "videomae": 0.4,
+            "paddleocr": 0.1,
+            "vits": 0.2,
+            "paraformer": 0.4,
+            "informer": 0.3,
+            "deepfm": 0.1,
+            "gat": 0.1,
+            "3d-unet": 0.2,
+            "apollo": 0.5,
+            "ppo": 0.2,
+            "rl-control": 0.2,
+            "kg-bert": 0.3,
+            "autoencoder": 0.1,
+            "nmt-transformer": 0.6,
+            "sdxl": 3.5,
+        }
+        lower_name = model_name.lower()
+        for key, value in fallback_map.items():
+            if key in lower_name:
+                return value
+        return 1.0
 
-        Core metrics for model deployment testing:
-        - 吞吐量 (throughput)
-        - 延迟 (latency)
-        - 准确率 (accuracy)
-        - 能效比 (energy_efficiency)
-        - 软件功能完备性 (software_completeness)
-        - 性能 (performance_score)
-        """
+    @staticmethod
+    def _stable_variation(seed_key: str, percent: float = 0.05) -> float:
+        """Return a deterministic multiplier within +/- percent."""
+        digest = hashlib.sha256(seed_key.encode("utf-8")).hexdigest()
+        ratio = int(digest[:8], 16) / 0xFFFFFFFF
+        return 1.0 + ((ratio * 2.0) - 1.0) * percent
+
+    @staticmethod
+    def _generate_model_metrics(task_type, image_name: str = "", device_type: str = "") -> dict:
+        """Generate stable model deployment metrics with <=5% deterministic drift."""
         task_type_val = task_type.value if hasattr(task_type, 'value') else str(task_type)
 
-        # Universal deployment metrics
+        image_parts = image_name.split("-") if image_name else []
+        chip = image_parts[0] if image_parts else (device_type or "Generic")
+        framework = image_parts[1] if len(image_parts) > 2 else "Generic"
+        model_name = "-".join(image_parts[2:]) if len(image_parts) > 2 else (image_name or task_type_val)
+        if framework == "DeepLink" and len(image_parts) > 2:
+            model_name = "-".join(image_parts[2:])
+
+        size_b = EvaluationService._extract_model_size_billions(model_name)
+        size_factor = min(math.log(size_b + 1.0, 2) / 6.5, 1.0)
+
+        chip_perf_factor = {
+            "Ascend910C": 1.0,
+            "Ascend910B": 0.94,
+            "MLU590": 0.91,
+            "P800": 0.86,
+            "BW1000": 0.84,
+        }.get(chip, 0.88)
+        framework_factor = {
+            "MindSpore": 1.0,
+            "PyTorch": 0.97,
+            "PaddlePaddle": 0.95,
+            "ROCm": 0.94,
+            "DeepLink": 0.96,
+        }.get(framework, 0.95)
+
+        metric_key = f"{task_type_val}|{image_name}|{device_type or chip}"
+        score_base = min(72.0 + size_factor * 24.0, 98.0)
+        accuracy_base = min(90.0 + size_factor * 8.0, 99.2)
+        throughput_base = (900.0 - size_factor * 520.0) * chip_perf_factor * framework_factor
+        latency_base = (26.0 + size_factor * 54.0) / max(chip_perf_factor * framework_factor, 0.75)
+        energy_base = (260.0 - size_factor * 80.0) * chip_perf_factor
+        power_base = 180.0 + size_factor * 130.0 + (1.0 - chip_perf_factor) * 60.0
+        memory_base = min(8.0 + size_b * 0.52, 78.0)
+
+        throughput_unit = "tokens/s" if task_type_val in ("llm", "text_generation", "code_generation", "machine_translation", "text_summarization") else "samples/s"
+        energy_unit = "tokens/J" if task_type_val in ("llm", "text_generation", "code_generation") else "samples/J"
+        accuracy_metric = "top1" if task_type_val in ("image_classification",) else ("mAP" if task_type_val in ("object_detection",) else ("WER" if task_type_val in ("speech_recognition",) else "pass_rate"))
+
+        throughput = round(max(throughput_base * EvaluationService._stable_variation(metric_key + '|throughput'), 20.0), 1)
+        avg_latency_ms = round(max(latency_base * EvaluationService._stable_variation(metric_key + '|avg_latency'), 2.0), 1)
+        p50_latency_ms = round(avg_latency_ms * 0.88, 1)
+        p99_latency_ms = round(avg_latency_ms * 1.18, 1)
+        first_token_latency_ms = round(avg_latency_ms * (1.35 if throughput_unit == 'tokens/s' else 1.08), 1)
+        accuracy = round(min(max(accuracy_base * EvaluationService._stable_variation(metric_key + '|accuracy'), 70.0), 99.5), 2)
+        energy_efficiency = round(max(energy_base * EvaluationService._stable_variation(metric_key + '|energy'), 10.0), 1)
+        power_consumption_w = round(max(power_base * EvaluationService._stable_variation(metric_key + '|power'), 80.0), 0)
+        gpu_utilization_pct = round(min(max(76.0 + size_factor * 15.0, 60.0), 98.0) * EvaluationService._stable_variation(metric_key + '|util', 0.03), 1)
+        software_score = round(min(max((78.0 + size_factor * 16.0 + chip_perf_factor * 4.0) * EvaluationService._stable_variation(metric_key + '|software'), 65.0), 99.0), 1)
+        performance_score = round(min(max(score_base * EvaluationService._stable_variation(metric_key + '|perf'), 60.0), 99.0), 1)
+        memory_usage_gb = round(max(memory_base * EvaluationService._stable_variation(metric_key + '|memory', 0.04), 2.0), 1)
+        memory_utilization_pct = round(min(max((58.0 + size_factor * 24.0) * EvaluationService._stable_variation(metric_key + '|mem_util', 0.03), 35.0), 96.0), 1)
+
         base_metrics = {
-            # 吞吐量
-            "throughput": round(random.uniform(100.0, 2000.0), 1),
-            "throughput_unit": "tokens/s" if task_type_val in ("llm", "text_generation", "code_generation", "machine_translation", "text_summarization") else "samples/s",
-            # 延迟
-            "avg_latency_ms": round(random.uniform(5.0, 200.0), 1),
-            "p50_latency_ms": round(random.uniform(3.0, 150.0), 1),
-            "p99_latency_ms": round(random.uniform(10.0, 500.0), 1),
-            "first_token_latency_ms": round(random.uniform(10.0, 300.0), 1),
-            # 准确率
-            "accuracy": round(random.uniform(85.0, 99.5), 2),
-            "accuracy_metric": "top1" if task_type_val in ("image_classification",) else ("mAP" if task_type_val in ("object_detection",) else ("WER" if task_type_val in ("speech_recognition",) else "pass_rate")),
-            # 能效比
-            "energy_efficiency": round(random.uniform(50.0, 500.0), 1),
-            "energy_efficiency_unit": "tokens/J" if task_type_val in ("llm", "text_generation", "code_generation") else "samples/J",
-            "power_consumption_w": round(random.uniform(80.0, 400.0), 0),
-            "gpu_utilization_pct": round(random.uniform(60.0, 98.0), 1),
-            # 软件功能完备性
+            "throughput": throughput,
+            "throughput_unit": throughput_unit,
+            "avg_latency_ms": avg_latency_ms,
+            "p50_latency_ms": p50_latency_ms,
+            "p99_latency_ms": p99_latency_ms,
+            "first_token_latency_ms": first_token_latency_ms,
+            "accuracy": accuracy,
+            "accuracy_metric": accuracy_metric,
+            "energy_efficiency": energy_efficiency,
+            "energy_efficiency_unit": energy_unit,
+            "power_consumption_w": power_consumption_w,
+            "gpu_utilization_pct": gpu_utilization_pct,
             "software_completeness": {
-                "framework_support": random.choice([True, True, True, False]),
-                "mixed_precision_support": random.choice([True, True, False]),
-                "dynamic_batching": random.choice([True, True, False]),
-                "model_parallelism": random.choice([True, False]),
-                "quantization_support": random.choice([True, True, True, False]),
-                "streaming_output": random.choice([True, True, False]) if task_type_val in ("llm", "text_generation", "code_generation") else None,
-                "multi_instance": random.choice([True, True, False]),
-                "hot_update": random.choice([True, False]),
-                "score": round(random.uniform(60.0, 100.0), 1),
+                "framework_support": True,
+                "mixed_precision_support": True,
+                "dynamic_batching": True,
+                "model_parallelism": size_b >= 7.0,
+                "quantization_support": True,
+                "streaming_output": task_type_val in ("llm", "text_generation", "code_generation"),
+                "multi_instance": chip != "BW1000",
+                "hot_update": chip in ("Ascend910C", "Ascend910B", "MLU590"),
+                "score": software_score,
             },
-            # 综合性能评分
-            "performance_score": round(random.uniform(65.0, 98.0), 1),
-            # 显存
-            "memory_usage_gb": round(random.uniform(4.0, 60.0), 1),
-            "memory_utilization_pct": round(random.uniform(40.0, 95.0), 1),
+            "performance_score": performance_score,
+            "memory_usage_gb": memory_usage_gb,
+            "memory_utilization_pct": memory_utilization_pct,
         }
 
-        # Task-type specific additional metrics
         extra = {}
         if task_type_val in ("llm", "text_generation", "code_generation"):
             extra = {
-                "tokens_per_second": round(random.uniform(30.0, 300.0), 1),
-                "perplexity": round(random.uniform(3.0, 15.0), 2),
-                "context_length_tested": random.choice([2048, 4096, 8192, 16384, 32768]),
-                "batch_size_tested": random.choice([1, 4, 8, 16, 32]),
+                "tokens_per_second": throughput,
+                "perplexity": round(max((8.8 - size_factor * 3.2) * EvaluationService._stable_variation(metric_key + '|ppl'), 1.5), 2),
+                "context_length_tested": 32768 if size_b >= 30 else (16384 if size_b >= 7 else 8192),
+                "batch_size_tested": 4 if size_b >= 30 else (8 if size_b >= 7 else 16),
             }
         elif task_type_val == "multimodal":
             extra = {
-                "image_text_alignment": round(random.uniform(70.0, 95.0), 1),
-                "visual_qa_accuracy": round(random.uniform(60.0, 90.0), 1),
+                "image_text_alignment": round(min(accuracy * 0.95, 98.0), 1),
+                "visual_qa_accuracy": round(min(accuracy * 0.92, 96.0), 1),
             }
         elif task_type_val in ("image_classification", "object_detection", "semantic_segmentation"):
             extra = {
-                "top1_accuracy": round(random.uniform(75.0, 95.0), 1),
-                "top5_accuracy": round(random.uniform(90.0, 99.0), 1),
-                "map50": round(random.uniform(50.0, 85.0), 1),
-                "fps": round(random.uniform(20.0, 200.0), 1),
+                "top1_accuracy": round(min(accuracy, 99.0), 1),
+                "top5_accuracy": round(min(accuracy + 3.0, 99.5), 1),
+                "map50": round(min(accuracy - 8.0, 95.0), 1),
+                "fps": round(max(throughput * 0.72, 10.0), 1),
             }
         elif task_type_val in ("speech_recognition", "speech_synthesis"):
             extra = {
-                "wer": round(random.uniform(2.0, 15.0), 1),
-                "cer": round(random.uniform(1.0, 10.0), 1),
-                "rtf": round(random.uniform(0.01, 0.5), 3),
+                "wer": round(max(8.5 - size_factor * 4.5, 1.2) * EvaluationService._stable_variation(metric_key + '|wer'), 1),
+                "cer": round(max(4.5 - size_factor * 2.2, 0.6) * EvaluationService._stable_variation(metric_key + '|cer'), 1),
+                "rtf": round(max(0.08 + size_factor * 0.18, 0.02) * EvaluationService._stable_variation(metric_key + '|rtf'), 3),
             }
         elif task_type_val == "ocr":
             extra = {
-                "character_accuracy": round(random.uniform(95.0, 99.5), 1),
-                "word_accuracy": round(random.uniform(90.0, 98.0), 1),
+                "character_accuracy": round(min(accuracy + 1.0, 99.5), 1),
+                "word_accuracy": round(min(accuracy - 0.8, 99.0), 1),
             }
 
         base_metrics.update(extra)
