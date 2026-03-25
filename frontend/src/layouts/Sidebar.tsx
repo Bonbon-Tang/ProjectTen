@@ -16,6 +16,7 @@ import {
   FolderOpenOutlined,
   ThunderboltOutlined,
   TrophyOutlined,
+  DeploymentUnitOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import useAuthStore from '@/stores/authStore';
@@ -31,7 +32,8 @@ export default function Sidebar() {
   const { user } = useAuthStore();
   const { collapsed } = useAppStore();
   const isAdmin = user?.role === 'admin';
-  const isPersonalUser = user?.role === 'personal';
+  const isTenantUser = Boolean(user?.tenant_id) && user?.username?.startsWith('tenant');
+  const isPersonalUser = !isAdmin && !isTenantUser;
 
   const menuItems: MenuItem[] = useMemo(() => {
     const items: MenuItem[] = [
@@ -56,6 +58,23 @@ export default function Sidebar() {
                   key: '/evaluations/create',
                   icon: <PlusCircleOutlined />,
                   label: '创建任务',
+                },
+              ],
+            },
+            {
+              key: '/adaptation',
+              icon: <DeploymentUnitOutlined />,
+              label: '适配系统',
+              children: [
+                {
+                  key: '/adaptation/list',
+                  icon: <UnorderedListOutlined />,
+                  label: '适配任务',
+                },
+                {
+                  key: '/adaptation/create',
+                  icon: <ExperimentOutlined />,
+                  label: '新建适配',
                 },
               ],
             },
@@ -203,7 +222,9 @@ export default function Sidebar() {
         left: 0,
         top: 0,
         bottom: 0,
-        background: '#001529',
+        background: 'linear-gradient(180deg, rgba(5, 15, 28, 0.96), rgba(7, 18, 32, 0.9))',
+        borderRight: '1px solid rgba(79, 216, 255, 0.12)',
+        boxShadow: '12px 0 40px rgba(0, 0, 0, 0.18)',
       }}
     >
       <div
@@ -219,24 +240,30 @@ export default function Sidebar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: 'linear-gradient(135deg, #2196F3, #1B3A6B)',
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, #2f7cf6, #4fd8ff)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#fff',
               fontWeight: 'bold',
               fontSize: 16,
+              boxShadow: '0 0 22px rgba(79, 216, 255, 0.28)',
             }}
           >
             AI
           </div>
           {!collapsed && (
-            <span style={{ color: '#fff', fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>
-              AGI4Sci 适配&验证基地
-            </span>
+            <div style={{ color: '#eef8ff', lineHeight: 1.15 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.2 }}>
+                上海人工智能实验室
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(238,248,255,0.82)' }}>
+                AGI4SCI适配&验证基地
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -247,7 +274,7 @@ export default function Sidebar() {
         defaultOpenKeys={openKeys}
         items={menuItems}
         onClick={({ key }) => navigate(key)}
-        style={{ borderRight: 0 }}
+        style={{ borderRight: 0, background: 'transparent', paddingTop: 10 }}
       />
     </Sider>
   );

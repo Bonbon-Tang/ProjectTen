@@ -60,6 +60,10 @@ export function retryEvaluation(id: string) {
   return api.post(`/evaluations/${id}/retry`);
 }
 
+export function setEvaluationPostActions(id: string, data: { save_image: boolean; include_in_ranking: boolean }) {
+  return api.post(`/evaluations/${id}/post-actions`, data);
+}
+
 export function getEvaluationLogs(id: string, params?: { offset?: number; limit?: number }) {
   return api.get(`/evaluations/${id}/logs`, { params });
 }

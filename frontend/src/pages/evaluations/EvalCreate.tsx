@@ -18,6 +18,7 @@ import {
   Alert,
 } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
+import type { DefaultOptionType } from 'antd/es/select';
 import PageHeader from '@/components/PageHeader';
 import {
   EVAL_CATEGORIES,
@@ -56,7 +57,15 @@ export default function EvalCreate() {
   const [operatorLibs, setOperatorLibs] = useState<{ id: number; name: string; description?: string }[]>([]);
   const [operatorLibsLoading, setOperatorLibsLoading] = useState(false);
   // 模型部署镜像列表
-  const [modelImages, setModelImages] = useState<{ id: number; name: string; description?: string; tags?: string[] }[]>([]);
+  const [modelImages, setModelImages] = useState<{
+    id: number;
+    name: string;
+    description?: string;
+    tags?: string[];
+    chip_name?: string;
+    model_name?: string;
+    framework_name?: string;
+  }[]>([]);
   const [modelImagesLoading, setModelImagesLoading] = useState(false);
   // Cache form values before leaving step 2 so they survive unmount
   const [cachedFormValues, setCachedFormValues] = useState<any>({});
@@ -383,6 +392,8 @@ export default function EvalCreate() {
     EVAL_CATEGORIES.find((c) => c.value === val)?.label || val;
   const getSubTypeLabel = (val: string) =>
     subTypes.find((t) => t.value === val)?.label || val;
+
+  const scenarioTagSet = useMemo(() => new Set(subTypes.map((t) => t.value)), [subTypes]);
   const getDeviceLabel = (val: string) =>
     deviceList.find((d) => d.device_type === val)?.name || val;
 
@@ -390,45 +401,82 @@ export default function EvalCreate() {
 
   const renderStep0 = () => (
     <div>
-      <div style={{ textAlign: 'center', marginBottom: 24, color: '#666' }}>请选择评测大类</div>
+      <div style={{ textAlign: 'center', marginBottom: 24, color: '#666' }}>选择评测类型</div>
       <Row gutter={24} justify="center">
-        {EVAL_CATEGORIES.map((cat) => (
-          <Col key={cat.value} xs={24} sm={12} md={10}>
-            <Card
-              hoverable
-              onClick={() => setTaskCategory(cat.value)}
-              style={{
-                textAlign: 'center',
-                borderRadius: 12,
-                border:
-                  taskCategory === cat.value
-                    ? '2px solid #1B3A6B'
-                    : '2px solid transparent',
-                background: taskCategory === cat.value ? '#f0f5ff' : '#fff',
-                cursor: 'pointer',
-                marginBottom: 16,
-              }}
-              styles={{ body: { padding: '40px 24px' } }}
-            >
-              <div style={{ fontSize: 48, marginBottom: 16 }}>{cat.icon}</div>
-              <div
+        {EVAL_CATEGORIES.map((cat) => {
+          const isActive = taskCategory === cat.value;
+          return (
+            <Col key={cat.value} xs={24} sm={12} md={10}>
+              <Card
+                hoverable
+                onClick={() => setTaskCategory(cat.value)}
                 style={{
-                  fontSize: 20,
-                  fontWeight: 600,
-                  color: '#1B3A6B',
-                  marginBottom: 8,
+                  textAlign: 'center',
+                  borderRadius: 18,
+                  border: isActive ? '3px solid #1B3A6B' : '2px solid #cfd8ea',
+                  background: isActive
+                    ? 'linear-gradient(180deg, #e8f0ff 0%, #f7faff 100%)'
+                    : 'linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)',
+                  boxShadow: isActive
+                    ? '0 18px 38px rgba(27, 58, 107, 0.22)'
+                    : '0 10px 24px rgba(27, 58, 107, 0.08)',
+                  cursor: 'pointer',
+                  marginBottom: 16,
+                  transform: isActive ? 'translateY(-4px) scale(1.01)' : 'translateY(0)',
+                  transition: 'all 0.2s ease',
+                  overflow: 'hidden',
+                  position: 'relative',
                 }}
+                styles={{ body: { padding: '40px 24px' } }}
               >
-                {cat.label}
-              </div>
-              <div style={{ color: '#999', fontSize: 14 }}>
-                {cat.value === 'operator_test'
-                  ? '验证算子精度与性能表现'
-                  : '测试AI模型在智算设备上的推理能力'}
-              </div>
-            </Card>
-          </Col>
-        ))}
+                {isActive ? (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 14,
+                      right: 14,
+                    }}
+                  >
+                    <Tag
+                      color="blue"
+                      style={{
+                        borderRadius: 999,
+                        paddingInline: 10,
+                        fontWeight: 700,
+                      }}
+                    >
+                      已选中
+                    </Tag>
+                  </div>
+                ) : null}
+                <div
+                  style={{
+                    fontSize: 56,
+                    marginBottom: 16,
+                    filter: isActive ? 'drop-shadow(0 6px 12px rgba(27,58,107,0.18))' : 'none',
+                  }}
+                >
+                  {cat.icon}
+                </div>
+                <div
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: '#102a4f',
+                    marginBottom: 10,
+                  }}
+                >
+                  {cat.label}
+                </div>
+                <div style={{ color: '#50627d', fontSize: 14, lineHeight: 1.7 }}>
+                  {cat.value === 'operator_test'
+                    ? '适用于算子精度验证、性能测试与算子库适配分析'
+                    : '适用于模型部署验证、镜像能力评估与综合指标测试'}
+                </div>
+              </Card>
+            </Col>
+          );
+        })}
       </Row>
     </div>
   );
@@ -453,40 +501,60 @@ export default function EvalCreate() {
         gutter={[16, 16]}
         justify={isOperatorTest ? 'center' : 'start'}
       >
-        {filteredSubTypes.map((st) => (
-          <Col key={st.value} xs={24} sm={12} md={isOperatorTest ? 10 : 6}>
-            <Card
-              hoverable
-              size="small"
-              onClick={() => setTaskType(st.value)}
-              style={{
-                borderRadius: 10,
-                border:
-                  taskType === st.value
-                    ? '2px solid #1B3A6B'
-                    : '2px solid transparent',
-                background: taskType === st.value ? '#f0f5ff' : '#fff',
-                cursor: 'pointer',
-                height: '100%',
-              }}
-              styles={{ body: { padding: '16px' } }}
-            >
-              <div
+        {filteredSubTypes.map((st) => {
+          const isActive = taskType === st.value;
+          return (
+            <Col key={st.value} xs={24} sm={12} md={isOperatorTest ? 10 : 6}>
+              <Card
+                hoverable
+                size="small"
+                onClick={() => setTaskType(st.value)}
                 style={{
-                  fontWeight: 600,
-                  fontSize: 14,
-                  color: '#1B3A6B',
-                  marginBottom: 6,
+                  borderRadius: 16,
+                  border: isActive ? '3px solid #1B3A6B' : '1px solid #d7deeb',
+                  background: isActive
+                    ? 'linear-gradient(180deg, #eaf2ff 0%, #f8fbff 100%)'
+                    : 'linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)',
+                  cursor: 'pointer',
+                  height: '100%',
+                  boxShadow: isActive
+                    ? '0 16px 34px rgba(27, 58, 107, 0.18)'
+                    : '0 8px 18px rgba(15, 34, 64, 0.06)',
+                  transform: isActive ? 'translateY(-3px)' : 'translateY(0)',
+                  transition: 'all 0.2s ease',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
+                styles={{ body: { padding: '18px 16px' } }}
               >
-                {st.label}
-              </div>
-              <div style={{ color: '#999', fontSize: 12, lineHeight: 1.5 }}>
-                {st.description}
-              </div>
-            </Card>
-          </Col>
-        ))}
+                {isActive ? (
+                  <div style={{ position: 'absolute', top: 12, right: 12 }}>
+                    <Tag
+                      color="blue"
+                      style={{ borderRadius: 999, paddingInline: 8, fontWeight: 700 }}
+                    >
+                      已选中
+                    </Tag>
+                  </div>
+                ) : null}
+                <div
+                  style={{
+                    fontWeight: 700,
+                    fontSize: 15,
+                    color: '#102a4f',
+                    marginBottom: 8,
+                    paddingRight: 70,
+                  }}
+                >
+                  {st.label}
+                </div>
+                <div style={{ color: '#60738f', fontSize: 12, lineHeight: 1.7 }}>
+                  {st.description}
+                </div>
+              </Card>
+            </Col>
+          );
+        })}
       </Row>
       {filteredSubTypes.length === 0 && (
         <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
@@ -495,6 +563,12 @@ export default function EvalCreate() {
       )}
     </div>
   );
+
+  const selectFieldStyle = {
+    borderRadius: 12,
+    border: '1px solid #cfd8ea',
+    boxShadow: '0 6px 18px rgba(16, 42, 79, 0.06)',
+  } as const;
 
   const renderStep2 = () => (
     <div style={{ maxWidth: 600, margin: '0 auto' }}>
@@ -514,6 +588,7 @@ export default function EvalCreate() {
         >
           <Select
             placeholder="选择智算设备"
+            style={selectFieldStyle}
             onChange={(deviceType) => {
               form.setFieldsValue({ device_count: 1 });
               form.setFieldsValue({
@@ -552,14 +627,14 @@ export default function EvalCreate() {
               const device = deviceList.find((d) => d.device_type === dv);
               return device?.available_count || device?.total_count || 1;
             })()}
-            style={{ width: '100%' }}
+            style={{ width: '100%', ...selectFieldStyle }}
             placeholder="选择设备数量"
           />
         </Form.Item>
 
         <Form.Item
           name="toolset_id"
-          label={isOperatorTest ? '算子评测工具（必选）' : '模型部署测试工具（可选）'}
+          label={isOperatorTest ? '算子评测工具' : '模型部署测试工具'}
           rules={
             isOperatorTest
               ? [{ required: true, message: '算子测试必须选择评测工具' }]
@@ -570,6 +645,7 @@ export default function EvalCreate() {
             placeholder={isOperatorTest ? '选择算子评测工具' : '选择模型部署测试工具'}
             allowClear={!isOperatorTest}
             loading={toolsetsLoading}
+            style={selectFieldStyle}
             options={(isOperatorTest ? operatorToolsets : modelToolsets).map((t) => ({ label: t.name, value: t.id }))}
             notFoundContent={isOperatorTest ? '暂无算子评测工具' : '暂无模型部署测试工具'}
           />
@@ -586,6 +662,7 @@ export default function EvalCreate() {
               <Select
                 placeholder="选择算子库来源"
                 loading={operatorLibsLoading}
+                style={selectFieldStyle}
                 options={operatorLibs.map((lib) => ({
                   label: `${lib.name}${lib.description ? ` — ${lib.description.substring(0, 40)}...` : ''}`,
                   value: lib.id,
@@ -600,11 +677,20 @@ export default function EvalCreate() {
             name="image_id"
             label="选择部署镜像（芯片 + 框架 + 模型）"
             extra={
-              <div style={{ fontSize: 12, color: '#999' }}>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: taskType && form.getFieldValue('device_type') ? '#0f7a55' : '#8a5a00',
+                  background: taskType && form.getFieldValue('device_type') ? '#edf9f3' : '#fff7e8',
+                  border: `1px solid ${taskType && form.getFieldValue('device_type') ? '#b7ebc6' : '#ffd591'}`,
+                  borderRadius: 10,
+                  padding: '8px 10px',
+                }}
+              >
                 {taskType && form.getFieldValue('device_type') ? (
-                  <span>✅ 已根据芯片和子场景筛选镜像</span>
+                  <span>✅ 已根据设备类型和子场景匹配可用镜像</span>
                 ) : (
-                  <span>⚠️ 请先选择设备类型和子场景，将自动筛选匹配的镜像</span>
+                  <span>⚠️ 请先选择设备类型和子场景，系统将自动匹配可用镜像</span>
                 )}
               </div>
             }
@@ -620,17 +706,51 @@ export default function EvalCreate() {
               }
               loading={modelImagesLoading}
               showSearch
+              style={selectFieldStyle}
               disabled={!form.getFieldValue('device_type')}
               filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                String(option?.searchText ?? option?.label ?? '').toLowerCase().includes(input.toLowerCase())
               }
-              options={modelImages.map((img) => ({
-                label: `${img.name} - ${img.model_name || '模型'} (${img.framework_name || '框架'})`,
-                value: img.id,
-                chip_name: img.chip_name,
-                model_name: img.model_name,
-                framework_name: img.framework_name,
-              }))}
+              options={modelImages.map((img) => {
+                const scenarioTags = (img.tags || []).filter((tag) => scenarioTagSet.has(tag));
+                const scenarioLabel = scenarioTags.map((tag) => getSubTypeLabel(tag)).join(' / ');
+                return {
+                  label: `${img.name} - ${img.model_name || '模型'} (${img.framework_name || '框架'})`,
+                  value: img.id,
+                  searchText: `${img.name} ${img.model_name || ''} ${img.framework_name || ''} ${scenarioTags.join(' ')}`,
+                  chip_name: img.chip_name,
+                  model_name: img.model_name,
+                  framework_name: img.framework_name,
+                  scenarioTags,
+                  scenarioLabel,
+                };
+              })}
+              optionRender={(option) => {
+                const data = option.data as DefaultOptionType & {
+                  chip_name?: string;
+                  model_name?: string;
+                  framework_name?: string;
+                  scenarioTags?: string[];
+                  scenarioLabel?: string;
+                };
+                return (
+                  <div style={{ padding: '4px 0' }}>
+                    <div style={{ fontWeight: 600, color: '#102a4f', marginBottom: 4 }}>{String(data.label)}</div>
+                    <div style={{ fontSize: 12, color: '#60738f', marginBottom: data.scenarioTags?.length ? 6 : 0 }}>
+                      {data.chip_name || '芯片'} · {data.framework_name || '框架'} · {data.model_name || '模型'}
+                    </div>
+                    {data.scenarioTags?.length ? (
+                      <Space size={[4, 4]} wrap>
+                        {data.scenarioTags.map((tag) => (
+                          <Tag key={tag} color={tag === taskType ? 'blue' : 'default'} style={{ marginInlineEnd: 0 }}>
+                            {getSubTypeLabel(tag)}
+                          </Tag>
+                        ))}
+                      </Space>
+                    ) : null}
+                  </div>
+                );
+              }}
               notFoundContent={
                 modelImagesLoading ? '加载中...' : 
                 !form.getFieldValue('device_type') ? '请先选择设备类型' :
@@ -651,6 +771,7 @@ export default function EvalCreate() {
                 mode="multiple"
                 placeholder="选择要测试的算子分类（可多选，不选=全部）"
                 allowClear
+                style={selectFieldStyle}
                 options={operatorCategories.map((c) => ({
                   label: `${c.category} (${c.count}个)`,
                   value: c.category,
@@ -677,16 +798,16 @@ export default function EvalCreate() {
                   const matchedCount = operatorCategories
                     .filter((c: OpCategoryInfo) => selectedCats.includes(c.category))
                     .reduce((sum: number, c: OpCategoryInfo) => sum + c.count, 0);
-                  return `已选分类共 ${matchedCount} 个算子，不填则测试全部`;
+                  return `已选分类共 ${matchedCount} 个算子，留空时默认全部纳入测试`;
                 }
-                return `共 ${totalOperatorCount} 个算子，不填则测试全部`;
+                return `当前共 ${totalOperatorCount} 个算子，留空时默认全部纳入测试`;
               })()}
             >
               <InputNumber
                 min={1}
                 max={totalOperatorCount || 100}
-                style={{ width: '100%' }}
-                placeholder="不填则测试全部匹配算子"
+                style={{ width: '100%', ...selectFieldStyle }}
+                placeholder="留空时默认测试全部匹配算子"
               />
             </Form.Item>
           </>

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from typing import Optional
 
+from pydantic import BaseModel
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_user, require_permissions, write_audit_log
+from app.dependencies import get_db, get_current_user, is_tenant_user, require_permissions, write_audit_log
 from app.models.user import User
 from app.schemas.evaluation import (
     EvaluationCreate,
@@ -24,13 +26,18 @@ def _ok(data=None, message: str = "success"):
     return {"code": 0, "message": message, "data": data}
 
 
+class EvaluationPostAction(BaseModel):
+    save_image: bool = False
+    include_in_ranking: bool = True
+
+
 @router.get("/stats")
 def get_evaluation_stats(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Return real task count statistics from database."""
-    tenant_id = current_user.tenant_id if current_user.user_type != "admin" else None
+    tenant_id = current_user.tenant_id if is_tenant_user(current_user) else None
     stats = EvaluationService.get_stats(db, tenant_id=tenant_id)
     return _ok(stats)
 
@@ -61,6 +68,8 @@ def create_evaluation(body: EvaluationCreate, request: Request,
                       db: Session = Depends(get_db)):
     import logging
     logging.info(f"CREATE EVAL body: {body.model_dump()}")
+    if not (getattr(current_user.user_type, 'value', current_user.user_type) == 'admin' or is_tenant_user(current_user)):
+        raise HTTPException(status_code=403, detail='Only admin or tenant users can create evaluations')
     try:
         task = EvaluationService.create(
             db,
@@ -97,6 +106,20 @@ def list_evaluations(
         tasks, total = EvaluationService.list_tasks(
             db, pagination, status=status, task_type=task_type,
         )
+    elif is_tenant_user(current_user):
+        q = db.query(EvaluationTask)
+        if status:
+            q = q.filter(EvaluationTask.status == status)
+        if task_type:
+            q = q.filter(EvaluationTask.task_type == task_type)
+        q = q.filter(
+            or_(
+                EvaluationTask.creator_id == current_user.id,
+                EvaluationTask.visibility == 'platform',
+            )
+        )
+        total = q.count()
+        tasks = q.order_by(EvaluationTask.created_at.desc()).offset(pagination.offset).limit(pagination.limit).all()
     else:
         q = db.query(EvaluationTask)
         if status:
@@ -138,6 +161,8 @@ def get_evaluation(task_id: int, current_user: User = Depends(get_current_user),
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     if getattr(current_user.user_type, 'value', current_user.user_type) != 'admin':
+        if not is_tenant_user(current_user):
+            raise HTTPException(status_code=403, detail='No permission to access this task')
         if task.creator_id != current_user.id and getattr(task, 'visibility', 'private') != 'platform':
             raise HTTPException(status_code=403, detail='No permission to access this task')
     # Refresh to get latest progress from DB
@@ -206,6 +231,8 @@ def start_evaluation(task_id: int, request: Request,
     task = EvaluationService.get_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+    if not (getattr(current_user.user_type, 'value', current_user.user_type) == 'admin' or is_tenant_user(current_user)):
+        raise HTTPException(status_code=403, detail='Only admin or tenant users can start evaluations')
     try:
         task = EvaluationService.start(db, task)
     except ValueError as e:
@@ -226,6 +253,8 @@ def stop_evaluation(task_id: int, request: Request,
     task = EvaluationService.get_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+    if not (getattr(current_user.user_type, 'value', current_user.user_type) == 'admin' or is_tenant_user(current_user)):
+        raise HTTPException(status_code=403, detail='Only admin or tenant users can stop evaluations')
     try:
         task = EvaluationService.stop(db, task)
     except ValueError as e:
@@ -250,6 +279,39 @@ def retry_evaluation(task_id: int, request: Request,
 
     write_audit_log(db, user_id=current_user.id, action="retry_evaluation", resource_type="evaluation",
                     resource_id=task_id, ip_address=request.client.host if request.client else None)
+    return _ok(EvaluationOut.model_validate(task).model_dump())
+
+
+@router.post("/{task_id}/post-actions")
+def set_evaluation_post_actions(
+    task_id: int,
+    body: EvaluationPostAction,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    task = EvaluationService.get_by_id(db, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    if str(task.status) != 'TaskStatus.completed' and getattr(task.status, 'value', task.status) != 'completed':
+        raise HTTPException(status_code=400, detail='Only completed tasks can set post actions')
+
+    config = dict(task.config or {})
+    config['save_image'] = body.save_image
+    config['include_in_ranking'] = body.include_in_ranking
+    task.config = config
+    db.commit()
+    db.refresh(task)
+
+    write_audit_log(
+        db,
+        user_id=current_user.id,
+        action="set_evaluation_post_actions",
+        resource_type="evaluation",
+        resource_id=task_id,
+        details=body.model_dump(),
+        ip_address=request.client.host if request.client else None,
+    )
     return _ok(EvaluationOut.model_validate(task).model_dump())
 
 
