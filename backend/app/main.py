@@ -222,11 +222,43 @@ def _init_model_images(db):
     db.commit()
 
 
+def _sync_elementwise_h100_baselines(db):
+    """Keep the first realistic H100 baseline pilot set for 元素操作类 in sync."""
+    from app.models.operator import Operator
+
+    pilot_data = {
+        "Abs": (12.1, 9.1, 8.2, 552.0, 3.8, "[1,256,56,56]"),
+        "Clamp": (13.0, 9.8, 8.8, 528.0, 4.0, "[1,256,56,56]"),
+        "Add": (14.2, 10.9, 9.7, 505.0, 4.3, "[1,256,56,56]"),
+        "Sub": (14.5, 11.0, 9.9, 498.0, 4.3, "[1,256,56,56]"),
+        "Mul": (15.3, 11.6, 10.4, 486.0, 4.5, "[1,256,56,56]"),
+        "Div": (21.4, 16.5, 15.2, 362.0, 4.9, "[1,256,56,56]"),
+        "Sqrt": (23.2, 17.8, 16.1, 334.0, 5.0, "[1,256,56,56]"),
+        "Exp": (30.6, 24.1, 22.3, 262.0, 5.4, "[1,256,56,56]"),
+        "Log": (31.7, 24.9, 23.1, 248.0, 5.5, "[1,256,56,56]"),
+        "Pow": (38.5, 30.2, 27.4, 214.0, 6.0, "[1,256,56,56]"),
+    }
+
+    for name, (fp32, fp16, int8, throughput, memory, shape) in pilot_data.items():
+        op = db.query(Operator).filter(Operator.name == name, Operator.category == "元素操作类").first()
+        if not op:
+            continue
+        op.h100_fp32_latency = fp32
+        op.h100_fp16_latency = fp16
+        op.h100_int8_latency = int8
+        op.h100_throughput = throughput
+        op.h100_memory_mb = memory
+        op.input_shape = shape
+
+    db.commit()
+
+
 def _init_operators(db):
     """Initialize 100 common operators with H100 benchmark baseline data."""
     from app.models.operator import Operator
     count = db.query(Operator).count()
     if count > 0:
+        _sync_elementwise_h100_baselines(db)
         return
 
     operators_data = [

@@ -29,6 +29,7 @@ const Profile = lazy(() => import('@/pages/settings/Profile'));
 const BecomeTenant = lazy(() => import('@/pages/settings/BecomeTenant'));
 const AdaptationList = lazy(() => import('@/pages/adaptation/AdaptationList'));
 const AdaptationCreate = lazy(() => import('@/pages/adaptation/AdaptationCreate'));
+const DLAgentCreate = lazy(() => import('@/pages/dl-agent/DLAgentCreate'));
 
 const Loading = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', minHeight: 300 }}>
@@ -57,6 +58,12 @@ export default function AppRouter() {
           <Route path="/dashboard" element={
             <PrivateRoute requireTenant>
               <Dashboard />
+            </PrivateRoute>
+          } />
+
+          <Route path="/dl-agent/create" element={
+            <PrivateRoute requireTenant>
+              <DLAgentCreate />
             </PrivateRoute>
           } />
 

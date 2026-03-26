@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_user, require_permissions, write_audit_log
+from app.dependencies import get_db, get_current_user, is_tenant_user, require_permissions, write_audit_log
 from app.models.user import User
 from app.models.report import UserReportArchive
 from app.schemas.report import ArchiveCreate, ArchiveOut, ReportCompareRequest, ReportGenerate, ReportOut, ReportShare
@@ -24,6 +24,8 @@ def _ok(data=None, message: str = "success"):
 def generate_report(task_id: int, body: ReportGenerate, request: Request,
                     current_user: User = Depends(get_current_user),
                     db: Session = Depends(get_db)):
+    if not (getattr(current_user.user_type, 'value', current_user.user_type) == 'admin' or is_tenant_user(current_user)):
+        raise HTTPException(status_code=403, detail='Only admin or tenant users can generate reports')
     try:
         report = ReportService.generate(
             db, task_id=task_id, creator_id=current_user.id,
@@ -52,9 +54,10 @@ def list_reports(
     
     pagination = PaginationParams(page, page_size)
     user_type = getattr(current_user.user_type, 'value', current_user.user_type)
+    creator_id = current_user.id if user_type != 'admin' and is_tenant_user(current_user) else None
     reports, total = ReportService.list_reports(
         db, pagination,
-        creator_id=current_user.id if user_type != "admin" else None,
+        creator_id=creator_id,
         status=status,
         include_public=user_type != 'admin',
     )

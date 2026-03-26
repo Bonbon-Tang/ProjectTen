@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table, Button, Space, Input, Select, DatePicker, Modal, message, Tag } from 'antd';
+import { Table, Button, Space, Input, Select, DatePicker, Modal, Switch, message, Tag } from 'antd';
 import {
   PlusOutlined,
   SearchOutlined,
@@ -28,6 +28,7 @@ import {
   stopEvaluation,
   retryEvaluation,
   batchDeleteEvaluations,
+  setEvaluationPostActions,
 } from '@/api/evaluations';
 import dayjs from 'dayjs';
 
@@ -51,6 +52,7 @@ interface EvalItem {
   creator: string;
   created_at: string;
   progress?: number;
+  config?: Record<string, any>;
   // Image and model info for model_test
   image_name?: string;
   model_name?: string;
@@ -224,6 +226,42 @@ export default function EvalList() {
     }
   };
 
+  const handlePostActions = (record: EvalItem) => {
+    let saveImage = Boolean(record.config?.save_image);
+    let includeInRanking = record.config?.include_in_ranking ?? true;
+
+    Modal.confirm({
+      title: '完成后操作',
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>是否保存镜像</span>
+            <Switch defaultChecked={saveImage} onChange={(checked) => { saveImage = checked; }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>是否参与模型部署榜单</span>
+            <Switch defaultChecked={includeInRanking} onChange={(checked) => { includeInRanking = checked; }} />
+          </div>
+        </Space>
+      ),
+      okText: '保存设置',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          await setEvaluationPostActions(record.id, {
+            save_image: saveImage,
+            include_in_ranking: includeInRanking,
+          });
+          message.success('设置已保存');
+          fetchData();
+        } catch {
+          message.error('保存设置失败');
+        }
+      },
+    });
+  };
+
   const columns: ColumnsType<EvalItem> = [
     {
       title: '任务名称',
@@ -315,6 +353,11 @@ export default function EvalList() {
               停止
             </Button>
           )}
+          {record.status === 'completed' && record.task_category === 'model_test' && (
+            <Button type="link" size="small" onClick={() => handlePostActions(record)}>
+              完成后操作
+            </Button>
+          )}
           {(record.status === 'failed' || record.status === 'terminated') && (
             <Button type="link" size="small" icon={<ReloadOutlined />} onClick={() => handleRetry(record.id)}>
               重试
@@ -365,7 +408,7 @@ export default function EvalList() {
       />
 
       {/* 筛选器 */}
-      <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+      <div className="tech-filter-bar">
         <Input
           placeholder="搜索任务名称"
           prefix={<SearchOutlined />}
@@ -407,20 +450,22 @@ export default function EvalList() {
         </Button>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={data}
-        rowKey="id"
-        loading={loading}
-        rowSelection={rowSelection}
-        pagination={{
-          ...pagination,
-          showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total) => `共 ${total} 条`,
-          onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize }),
-        }}
-      />
+      <div className="tech-panel" style={{ padding: 12 }}>
+        <Table
+          columns={columns}
+          dataSource={data}
+          rowKey="id"
+          loading={loading}
+          rowSelection={rowSelection}
+          pagination={{
+            ...pagination,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total) => `共 ${total} 条`,
+            onChange: (page, pageSize) => setPagination({ ...pagination, current: page, pageSize }),
+          }}
+        />
+      </div>
     </div>
   );
 }

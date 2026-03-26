@@ -17,6 +17,8 @@ import {
   ThunderboltOutlined,
   TrophyOutlined,
   DeploymentUnitOutlined,
+  ExperimentOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import useAuthStore from '@/stores/authStore';
@@ -43,6 +45,18 @@ export default function Sidebar() {
               key: '/dashboard',
               icon: <HomeOutlined />,
               label: '工作台',
+            },
+            {
+              key: '/dl-agent',
+              icon: <MessageOutlined />,
+              label: 'DL智能体',
+              children: [
+                {
+                  key: '/dl-agent/create',
+                  icon: <MessageOutlined />,
+                  label: '对话式启动',
+                },
+              ],
             },
             {
               key: '/evaluations',

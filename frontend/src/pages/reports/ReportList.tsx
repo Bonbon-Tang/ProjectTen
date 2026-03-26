@@ -124,7 +124,7 @@ export default function ReportList() {
   // 处理存档操作
   const handleArchive = async (record: ReportItem) => {
     try {
-      await archiveReport(record.id, { note: `归档：${record.eval_name || record.title}` });
+      await archiveReport(String(record.id));
       message.success('已添加到我的存档');
     } catch {
       message.error('存档失败');
@@ -134,7 +134,7 @@ export default function ReportList() {
   // 处理下载操作
   const handleDownload = async (record: ReportItem) => {
     try {
-      await downloadReport(record.id);
+      await downloadReport(String(record.id));
       message.success('下载已开始');
     } catch {
       message.error('下载失败');
@@ -144,7 +144,7 @@ export default function ReportList() {
   // 处理删除操作
   const handleDelete = (record: ReportItem) => {
     // TODO: 添加确认对话框
-    deleteReport(record.id)
+    deleteReport(String(record.id))
       .then(() => {
         message.success('删除成功');
         fetchReports();

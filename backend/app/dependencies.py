@@ -15,6 +15,11 @@ from app.utils.security import decode_token
 security_scheme = HTTPBearer(auto_error=False)
 
 
+def is_tenant_user(user: User) -> bool:
+    username = getattr(user, 'username', '') or ''
+    return bool(getattr(user, 'tenant_id', None)) and username.startswith('tenant')
+
+
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:

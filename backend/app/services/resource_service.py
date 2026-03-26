@@ -98,6 +98,24 @@ PRESET_DEVICES = [
         },
         "status": DeviceStatus.online,
     },
+    {
+        "name": "本机 CPU 测试节点",
+        "device_type": DeviceType.cpu_test,
+        "manufacturer": "本机容器节点",
+        "total_count": 1,
+        "available_count": 1,
+        "specs": {
+            "memory": "轻量容器共享内存",
+            "fp16_tflops": 0,
+            "fp32_tflops": 0,
+            "int8_tops": 0,
+            "memory_bandwidth": "N/A",
+            "tdp": "N/A",
+            "interconnect": "local process",
+            "architecture": "CPU test runner",
+        },
+        "status": DeviceStatus.online,
+    },
 ]
 
 
@@ -105,14 +123,20 @@ class ResourceService:
 
     @staticmethod
     def init_preset_devices(db: Session) -> None:
-        """Initialize preset compute devices if the table is empty."""
-        count = db.query(ComputeDevice).count()
-        if count > 0:
-            return
+        """Initialize preset compute devices and backfill newly added presets."""
+        existing_types = {
+            d.device_type.value if hasattr(d.device_type, 'value') else str(d.device_type)
+            for d in db.query(ComputeDevice).all()
+        }
+        changed = False
         for device_data in PRESET_DEVICES:
-            device = ComputeDevice(**device_data)
-            db.add(device)
-        db.commit()
+            device_type = device_data['device_type'].value if hasattr(device_data['device_type'], 'value') else str(device_data['device_type'])
+            if device_type in existing_types:
+                continue
+            db.add(ComputeDevice(**device_data))
+            changed = True
+        if changed:
+            db.commit()
 
     @staticmethod
     def list_devices(db: Session, tenant_id: Optional[int] = None) -> List[ComputeDevice]:

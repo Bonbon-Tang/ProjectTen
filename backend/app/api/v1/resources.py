@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db, get_current_user, is_tenant_user
 from app.models.user import User
 from app.schemas.resource import DeviceOut, DeviceStatusUpdate
 from app.services.resource_service import ResourceService
@@ -22,8 +22,10 @@ def list_devices(
 ):
     if getattr(current_user.user_type, 'value', current_user.user_type) == 'admin':
         devices = ResourceService.list_devices(db)
-    else:
+    elif is_tenant_user(current_user):
         devices = ResourceService.list_devices_for_tenant(db, current_user.tenant_id)
+    else:
+        devices = []
     items = [DeviceOut.model_validate(d).model_dump() for d in devices]
     return _ok(items)
 
@@ -48,8 +50,8 @@ def get_summary(
     user_type = getattr(current_user.user_type, 'value', current_user.user_type)
     summary = ResourceService.get_summary(
         db,
-        tenant_id=current_user.tenant_id if user_type != 'admin' else None,
-        user_type=user_type,
+        tenant_id=current_user.tenant_id if is_tenant_user(current_user) else None,
+        user_type='tenant' if is_tenant_user(current_user) else user_type,
     )
     return _ok(summary)
 
@@ -85,8 +87,22 @@ def get_device_usage(
         devices = db.query(ComputeDevice).order_by(ComputeDevice.id).all()
         tenants = db.query(Tenant).all()
         running_tasks = db.query(EvaluationTask).filter(EvaluationTask.status == TaskStatus.running).all()
+    elif is_tenant_user(current_user):
+        tenant = db.query(Tenant).filter(Tenant.id == current_user.tenant_id).first()
+        if not tenant:
+            return _ok([])
+        allocation = tenant.device_allocation or {}
+        allowed_types = list(allocation.keys())
+        if not allowed_types:
+            return _ok([])
+        devices = db.query(ComputeDevice).order_by(ComputeDevice.id).all()
+        devices = [d for d in devices if (d.device_type.value if hasattr(d.device_type, 'value') else str(d.device_type)) in allowed_types]
+        tenants = [tenant]
+        running_tasks = db.query(EvaluationTask).filter(
+            EvaluationTask.status == TaskStatus.running,
+            EvaluationTask.tenant_id == current_user.tenant_id,
+        ).all()
     else:
-        # Personal users can see the page, but GPU usage should be empty until they become a tenant with usable capacity.
         return _ok([])
 
     usage = []

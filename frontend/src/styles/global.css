@@ -382,7 +382,7 @@ body::before {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
   padding: 6px 12px;
   border-radius: 999px;
   border: 1px solid rgba(130, 219, 255, 0.32);
@@ -393,6 +393,23 @@ body::before {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.login-brand-stack {
+  position: relative;
+  z-index: 1;
+  padding-right: 8px;
+}
+
+.login-brand-stack::after {
+  content: '';
+  position: absolute;
+  top: 128px;
+  left: 2px;
+  width: 72px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(99, 219, 255, 0.96), rgba(99, 219, 255, 0.18));
 }
 
 .login-side-panel::after {
@@ -406,8 +423,29 @@ body::before {
 
 .login-form-panel {
   flex: 1;
-  padding: 60px 48px;
+  padding: 52px 42px;
   background: linear-gradient(180deg, rgba(252, 254, 255, 0.99), rgba(241, 247, 255, 0.96));
+}
+
+.login-form-shell {
+  position: relative;
+  min-height: 100%;
+  padding: 28px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 251, 255, 0.96));
+  border: 1px solid rgba(47, 124, 246, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+}
+
+.login-form-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top right, rgba(99, 219, 255, 0.08), transparent 26%),
+    linear-gradient(180deg, rgba(255,255,255,0.18), transparent 38%);
 }
 
 .login-form-panel .ant-form-item-label > label {
@@ -419,6 +457,11 @@ body::before {
 .login-form-panel .ant-input-password,
 .login-form-panel .ant-input-affix-wrapper {
   color: #10284d !important;
+}
+
+.login-form-panel .ant-input,
+.login-form-panel .ant-input-affix-wrapper {
+  min-height: 46px;
 }
 
 .login-form-panel .ant-input::placeholder,

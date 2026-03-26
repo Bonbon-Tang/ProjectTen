@@ -238,6 +238,23 @@ export default function Dashboard() {
 
   return (
     <div>
+      <div className="tech-hero" style={{ marginBottom: 20, padding: '22px 24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div>
+            <div className="tech-glow-text" style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
+              资源与任务总览
+            </div>
+          </div>
+          <div style={{ minWidth: 220, textAlign: 'right' }}>
+            <div style={{ color: '#8ca6c7', fontSize: 12, marginBottom: 8 }}>设备在线率</div>
+            <div style={{ fontSize: 30, fontWeight: 700, color: '#eaf4ff' }}>
+              {totalDevices ? Math.round((onlineDevices / totalDevices) * 100) : 0}%
+            </div>
+            <div style={{ color: '#7fcfff', fontSize: 12, marginTop: 6 }}>{onlineDevices}/{totalDevices} 台在线</div>
+          </div>
+        </div>
+      </div>
+
       <PageHeader title="工作台" breadcrumbs={[{ title: '工作台' }]} />
 
       {/* 统计卡片 */}
@@ -245,7 +262,7 @@ export default function Dashboard() {
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           {statCards.map((stat, index) => (
             <Col xs={24} sm={12} lg={6} key={index}>
-              <Card hoverable style={{ borderRadius: 8 }}>
+              <Card hoverable className="tech-stat-card" style={{ borderRadius: 18 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Statistic title={stat.title} value={stat.value} />
                   <div

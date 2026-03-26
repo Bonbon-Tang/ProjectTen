@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Alert,
   Card,
   Table,
   Input,
@@ -30,11 +31,11 @@ interface BenchmarkOperator {
   id: number;
   name: string;
   category: string;
-  fp32_latency: number;
-  fp16_latency: number;
-  int8_latency: number;
-  throughput: number;
-  memory_mb: number;
+  h100_fp32_latency: number;
+  h100_fp16_latency: number;
+  h100_int8_latency: number;
+  h100_throughput: number;
+  h100_memory_mb: number;
   input_shape: string;
   description?: string;
   tested_device_type?: string;
@@ -265,34 +266,34 @@ export default function BenchmarkList() {
     },
     {
       title: 'H100 FP32(μs)',
-      dataIndex: 'fp32_latency',
-      key: 'fp32_latency',
+      dataIndex: 'h100_fp32_latency',
+      key: 'h100_fp32_latency',
       width: 120,
-      sorter: (a, b) => (a.fp32_latency ?? 0) - (b.fp32_latency ?? 0),
+      sorter: (a, b) => (a.h100_fp32_latency ?? 0) - (b.h100_fp32_latency ?? 0),
       render: (val: number) => val != null ? val.toFixed(1) : '-',
     },
     {
       title: 'H100 FP16(μs)',
-      dataIndex: 'fp16_latency',
-      key: 'fp16_latency',
+      dataIndex: 'h100_fp16_latency',
+      key: 'h100_fp16_latency',
       width: 120,
-      sorter: (a, b) => (a.fp16_latency ?? 0) - (b.fp16_latency ?? 0),
+      sorter: (a, b) => (a.h100_fp16_latency ?? 0) - (b.h100_fp16_latency ?? 0),
       render: (val: number) => val != null ? val.toFixed(1) : '-',
     },
     {
       title: 'H100 INT8(μs)',
-      dataIndex: 'int8_latency',
-      key: 'int8_latency',
+      dataIndex: 'h100_int8_latency',
+      key: 'h100_int8_latency',
       width: 120,
-      sorter: (a, b) => (a.int8_latency ?? 0) - (b.int8_latency ?? 0),
+      sorter: (a, b) => (a.h100_int8_latency ?? 0) - (b.h100_int8_latency ?? 0),
       render: (val: number) => val != null ? val.toFixed(1) : '-',
     },
     {
       title: '吞吐量(GOPS)',
-      dataIndex: 'throughput',
-      key: 'throughput',
+      dataIndex: 'h100_throughput',
+      key: 'h100_throughput',
       width: 120,
-      sorter: (a, b) => (a.throughput ?? 0) - (b.throughput ?? 0),
+      sorter: (a, b) => (a.h100_throughput ?? 0) - (b.h100_throughput ?? 0),
       render: (val: number) => val != null ? val.toFixed(1) : '-',
     },
     {
@@ -419,6 +420,13 @@ export default function BenchmarkList() {
           </Col>
         </Row>
       </Spin>
+
+      <Alert
+        showIcon
+        type="warning"
+        style={{ marginBottom: 16, borderRadius: 8 }}
+        message="当前 H100 基线为参考公开资料与网上 benchmark 信息整理的对比基线，用于演示与评测参考，不代表当前系统实时实测结果。"
+      />
 
       {/* 筛选区 */}
       <div style={{ marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>

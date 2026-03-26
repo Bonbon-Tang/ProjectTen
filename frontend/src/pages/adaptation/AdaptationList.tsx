@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Tag, Input, Select, Space, message } from 'antd';
+import { Table, Button, Tag, Input, Modal, Select, Space, message } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '@/components/PageHeader';
-import { getAdaptations } from '@/api/adaptation';
+import { getAdaptations, setAdaptationPostActions } from '@/api/adaptation';
 
 interface AdaptTask {
   id: string;
@@ -15,6 +15,8 @@ interface AdaptTask {
   status: string;
   created_at: string;
   save_image: boolean;
+  saved_image_name?: string;
+  config?: Record<string, any>;
   tags: string[];
   result?: {
     summary?: string;
@@ -37,34 +39,80 @@ export default function AdaptationList() {
   const navigate = useNavigate();
   const [data, setData] = useState<AdaptTask[]>([]);
 
+  const fetchData = async () => {
+    try {
+      const res: any = await getAdaptations({ page: 1, page_size: 100 });
+      const payload = res?.data?.data || res?.data || res;
+      const items = payload?.items || [];
+      setData(
+        Array.isArray(items)
+          ? items.map((item: any) => ({
+              id: String(item.id),
+              name: item.name,
+              image_name: item.image_name || '-',
+              device_name: `${item.device_type} x${item.device_count}`,
+              test_mode: item.test_mode,
+              status: item.status,
+              created_at: item.created_at || '-',
+              save_image: Boolean(item.save_image),
+              saved_image_name: item.saved_image_name,
+              config: item.config || {},
+              tags: Array.isArray(item.tags) ? item.tags : [],
+              result: item.result,
+            }))
+          : [],
+      );
+    } catch {
+      message.error('加载适配任务失败');
+      setData([]);
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const res: any = await getAdaptations({ page: 1, page_size: 100 });
-        const payload = res?.data?.data || res?.data || res;
-        const items = payload?.items || [];
-        setData(
-          Array.isArray(items)
-            ? items.map((item: any) => ({
-                id: String(item.id),
-                name: item.name,
-                image_name: item.image_name || '-',
-                device_name: `${item.device_type} x${item.device_count}`,
-                test_mode: item.test_mode,
-                status: item.status,
-                created_at: item.created_at || '-',
-                save_image: Boolean(item.save_image),
-                tags: Array.isArray(item.tags) ? item.tags : [],
-                result: item.result,
-              }))
-            : [],
-        );
-      } catch {
-        message.error('加载适配任务失败');
-        setData([]);
-      }
-    })();
+    fetchData();
   }, []);
+
+  const handleTogglePostAction = async (
+    record: AdaptTask,
+    patch: { save_image?: boolean; include_in_ranking?: boolean; saved_image_name?: string },
+  ) => {
+    try {
+      await setAdaptationPostActions(record.id, {
+        save_image: patch.save_image ?? Boolean(record.save_image),
+        include_in_ranking: patch.include_in_ranking ?? (record.config?.include_in_ranking ?? true),
+        saved_image_name: patch.saved_image_name,
+      });
+      message.success('设置已更新');
+      fetchData();
+    } catch {
+      message.error('设置更新失败');
+    }
+  };
+
+  const handleSaveImage = (record: AdaptTask) => {
+    let draftName = record.saved_image_name || `${record.image_name}-adapted-${record.id}`;
+    Modal.confirm({
+      title: '保存镜像',
+      content: (
+        <div>
+          <div style={{ marginBottom: 8, color: '#5f7694' }}>请确认新镜像名称，保存后可在资产列表中查看。</div>
+          <Input defaultValue={draftName} onChange={(e) => { draftName = e.target.value; }} />
+        </div>
+      ),
+      okText: '确认保存',
+      cancelText: '取消',
+      onOk: async () => {
+        if (!draftName.trim()) {
+          message.warning('请输入新镜像名称');
+          throw new Error('empty image name');
+        }
+        await handleTogglePostAction(record, {
+          save_image: true,
+          saved_image_name: draftName.trim(),
+        });
+      },
+    });
+  };
 
   const columns: ColumnsType<AdaptTask> = [
     { title: '任务名称', dataIndex: 'name', key: 'name', render: (text) => <span style={{ fontWeight: 600 }}>{text}</span> },
@@ -91,7 +139,40 @@ export default function AdaptationList() {
       title: '镜像保存',
       dataIndex: 'save_image',
       key: 'save_image',
-      render: (save: boolean) => <Tag color={save ? 'gold' : 'default'}>{save ? '已保存' : '未保存'}</Tag>,
+      render: (save: boolean, record) => (
+        <Space direction="vertical" size={0}>
+          <Tag color={save ? 'gold' : 'default'}>{save ? '已保存' : '未保存'}</Tag>
+          {save && record.saved_image_name ? (
+            <Button
+              type="link"
+              size="small"
+              style={{ padding: 0, height: 'auto' }}
+              onClick={() => navigate(`/assets/list?keyword=${encodeURIComponent(record.saved_image_name || '')}`)}
+            >
+              {record.saved_image_name}
+            </Button>
+          ) : null}
+        </Space>
+      ),
+    },
+    {
+      title: '参与榜单',
+      dataIndex: 'config',
+      key: 'include_in_ranking',
+      render: (config: Record<string, any> | undefined, record) => {
+        const included = config?.include_in_ranking ?? true;
+        return record.status === 'completed' ? (
+          <Button
+            size="small"
+            type={included ? 'default' : 'primary'}
+            onClick={() => handleTogglePostAction(record, { include_in_ranking: !included })}
+          >
+            {included ? '取消参与' : '参与榜单'}
+          </Button>
+        ) : (
+          <Tag color={included ? 'blue' : 'default'}>{included ? '参与' : '不参与'}</Tag>
+        );
+      },
     },
     {
       title: '最终结果',
@@ -115,6 +196,28 @@ export default function AdaptationList() {
             )}
           </Space>
         );
+      },
+    },
+    {
+      title: '保存镜像',
+      key: 'save_image_action',
+      render: (_: any, record) => {
+        const saved = Boolean(record.save_image);
+        return record.status === 'completed' ? (
+          <Button
+            size="small"
+            type={saved ? 'default' : 'primary'}
+            onClick={() => {
+              if (saved) {
+                message.info('该镜像已保存，可前往资产列表查看');
+                return;
+              }
+              handleSaveImage(record);
+            }}
+          >
+            {saved ? '已保存' : '保存镜像'}
+          </Button>
+        ) : '-';
       },
     },
     { title: '创建时间', dataIndex: 'created_at', key: 'created_at' },

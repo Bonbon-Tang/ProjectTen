@@ -5,9 +5,12 @@ import json
 import math
 import random
 import re
+import subprocess
+import tempfile
 import threading
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 from sqlalchemy import func as sa_func
@@ -23,6 +26,100 @@ from app.utils.pagination import PaginationParams
 
 
 class EvaluationService:
+    CPU_TEST_RUNNER_DIR = Path('/root/.openclaw/workspace/cpu-test-runner')
+    CPU_TEST_RUNNER_PYTHON = CPU_TEST_RUNNER_DIR / '.venv' / 'bin' / 'python'
+    CPU_TEST_REPORT_DIR = Path('/root/.openclaw/workspace/ProjectTen/backend/data/cpu_test_reports')
+    CPU_TEST_SUPPORTED_OPERATORS = {"Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"}
+
+    @staticmethod
+    def _cpu_test_report_paths(task_id: int) -> tuple[Path, Path]:
+        EvaluationService.CPU_TEST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+        base = EvaluationService.CPU_TEST_REPORT_DIR / f"task_{task_id}_cpu_test_report"
+        return base.with_suffix('.txt'), base.with_suffix('.json')
+
+    @staticmethod
+    def _append_cpu_test_report_line(task_id: int, line: str) -> None:
+        txt_path, _ = EvaluationService._cpu_test_report_paths(task_id)
+        with txt_path.open('a', encoding='utf-8') as f:
+            f.write(line.rstrip('\n') + '\n')
+
+    @staticmethod
+    def _write_cpu_test_report_json(task_id: int, payload: dict) -> None:
+        _, json_path = EvaluationService._cpu_test_report_paths(task_id)
+        with json_path.open('w', encoding='utf-8') as f:
+            json.dump(payload, f, ensure_ascii=False, indent=2)
+
+    @staticmethod
+    def _run_cpu_test_operator_runner(task: EvaluationTask, selected_ops: List[Operator], operator_lib_name: Optional[str]) -> dict:
+        payload = {
+            "task_id": task.id,
+            "device_type": "cpu_test",
+            "shape": [1, 256, 56, 56],
+            "operators": [op.name for op in selected_ops if op.name in EvaluationService.CPU_TEST_SUPPORTED_OPERATORS],
+        }
+        if not payload["operators"]:
+            return {
+                "test_type": task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type),
+                "total_ops_tested": 0,
+                "passed_ops": 0,
+                "pass_rate": 0,
+                "avg_fp16_loss_rate": 0,
+                "avg_int8_loss_rate": 0,
+                "all_pass": False,
+                "operator_lib": operator_lib_name,
+                "device_type": task.device_type,
+                "runner": "cpu-test-runner",
+                "operator_results": [],
+            }
+
+        txt_path, _ = EvaluationService._cpu_test_report_paths(task.id)
+        if txt_path.exists():
+            txt_path.unlink()
+
+        EvaluationService._append_cpu_test_report_line(task.id, f"CPU Test Report | task_id={task.id}")
+        EvaluationService._append_cpu_test_report_line(task.id, f"device_type=cpu_test")
+        EvaluationService._append_cpu_test_report_line(task.id, f"operator_lib={operator_lib_name or 'numpy'}")
+        EvaluationService._append_cpu_test_report_line(task.id, f"shape={payload['shape']}")
+        EvaluationService._append_cpu_test_report_line(task.id, f"operators={', '.join(payload['operators'])}")
+        EvaluationService._append_cpu_test_report_line(task.id, "")
+
+        with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False, encoding='utf-8') as f:
+            json.dump(payload, f, ensure_ascii=False)
+            payload_path = f.name
+
+        proc = subprocess.Popen(
+            [str(EvaluationService.CPU_TEST_RUNNER_PYTHON), str(EvaluationService.CPU_TEST_RUNNER_DIR / 'runner.py'), payload_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+
+        json_result = None
+        assert proc.stdout is not None
+        for raw_line in proc.stdout:
+            line = raw_line.rstrip('\n')
+            if line.startswith('__JSON_RESULT__'):
+                json_result = json.loads(line[len('__JSON_RESULT__'):])
+                continue
+            EvaluationService._append_cpu_test_report_line(task.id, line)
+
+        return_code = proc.wait()
+        if return_code != 0:
+            raise subprocess.CalledProcessError(return_code, proc.args)
+        if json_result is None:
+            raise ValueError('cpu-test-runner did not emit JSON result')
+
+        EvaluationService._write_cpu_test_report_json(task.id, {
+            'task_id': task.id,
+            'operator_lib': operator_lib_name or 'numpy',
+            'payload': payload,
+            'runner_output': json_result,
+        })
+        EvaluationService._append_cpu_test_report_line(task.id, '')
+        EvaluationService._append_cpu_test_report_line(task.id, 'Final JSON artifact written.')
+        return json_result
+
 
     @staticmethod
     def create(db: Session, *, creator_id: int, tenant_id: Optional[int] = None, user_type: Optional[str] = None, **kwargs) -> EvaluationTask:
@@ -373,6 +470,11 @@ class EvaluationService:
                 operator_lib_name = lib_asset.name
 
         operator_results = []
+        cpu_test_result_map = {}
+        if str(task.device_type) == 'cpu_test' or getattr(task.device_type, 'value', None) == 'cpu_test':
+            runner_output = EvaluationService._run_cpu_test_operator_runner(task, selected_ops, operator_lib_name)
+            cpu_test_result_map = {item['operator_name']: item for item in runner_output.get('results', [])}
+
         for op in selected_ops:
             op_result = {
                 "operator_id": op.id,
@@ -381,43 +483,74 @@ class EvaluationService:
                 "input_shape": op.input_shape,
             }
 
-            # Always include accuracy data
-            fp32_acc = round(random.uniform(99.5, 99.99), 4)
-            fp16_acc = round(random.uniform(98.5, 99.9), 4)
-            int8_acc = round(random.uniform(96.0, 99.5), 4)
-            op_result["accuracy"] = {
-                "fp32_accuracy": fp32_acc,
-                "fp16_accuracy": fp16_acc,
-                "int8_accuracy": int8_acc,
-                "fp16_loss_rate": round((fp32_acc - fp16_acc) / fp32_acc * 100, 4),
-                "int8_loss_rate": round((fp32_acc - int8_acc) / fp32_acc * 100, 4),
-                "pass": int8_acc >= 96.0,
-            }
-
-            # If accuracy_and_performance, also include performance vs H100 baseline
-            if task_type_val in ("accuracy_and_performance", "performance_benchmark"):
-                ratio_fp32 = round(random.uniform(0.6, 1.4), 3)
-                ratio_fp16 = round(random.uniform(0.65, 1.5), 3)
-                ratio_int8 = round(random.uniform(0.7, 1.6), 3)
-                throughput_ratio = round(random.uniform(0.5, 1.3), 3)
+            if cpu_test_result_map.get(op.name):
+                item = cpu_test_result_map[op.name]
+                fp32_acc = 100.0
+                fp16_acc = round(item.get('fp16_accuracy', 1.0) * 100, 4)
+                int8_acc = None
+                fp16_loss_rate = round((1.0 - item.get('fp16_accuracy', 1.0)) * 100, 4)
+                op_result["accuracy"] = {
+                    "fp32_accuracy": fp32_acc,
+                    "fp16_accuracy": fp16_acc,
+                    "int8_accuracy": int8_acc,
+                    "fp16_loss_rate": fp16_loss_rate,
+                    "int8_loss_rate": 0,
+                    "pass": bool(item.get('accuracy_pass')),
+                    "max_abs_error": item.get('max_abs_error'),
+                    "mean_abs_error": item.get('mean_abs_error'),
+                    "input_summary": item.get('input_summary'),
+                    "output_summary": item.get('output_summary'),
+                }
                 op_result["performance"] = {
                     "h100_fp32_latency_us": op.h100_fp32_latency,
                     "h100_fp16_latency_us": op.h100_fp16_latency,
                     "h100_int8_latency_us": op.h100_int8_latency,
                     "h100_throughput_gops": op.h100_throughput,
-                    "tested_fp32_latency_us": round(op.h100_fp32_latency / ratio_fp32, 2) if op.h100_fp32_latency else None,
-                    "tested_fp16_latency_us": round(op.h100_fp16_latency / ratio_fp16, 2) if op.h100_fp16_latency else None,
-                    "tested_int8_latency_us": round(op.h100_int8_latency / ratio_int8, 2) if op.h100_int8_latency else None,
-                    "tested_throughput_gops": round(op.h100_throughput * throughput_ratio, 1) if op.h100_throughput else None,
-                    "fp32_latency_ratio": ratio_fp32,
-                    "fp16_latency_ratio": ratio_fp16,
-                    "int8_latency_ratio": ratio_int8,
-                    "throughput_ratio": throughput_ratio,
+                    "tested_fp32_latency_us": item.get('fp32_latency_us'),
+                    "tested_fp16_latency_us": item.get('fp16_latency_us'),
+                    "tested_int8_latency_us": item.get('int8_latency_us'),
+                    "tested_throughput_gops": item.get('throughput_gbps'),
+                    "fp32_latency_ratio": round(item.get('fp32_latency_us') / op.h100_fp32_latency, 3) if op.h100_fp32_latency and item.get('fp32_latency_us') else None,
+                    "fp16_latency_ratio": round(item.get('fp16_latency_us') / op.h100_fp16_latency, 3) if op.h100_fp16_latency and item.get('fp16_latency_us') else None,
+                    "int8_latency_ratio": None,
+                    "throughput_ratio": round(item.get('throughput_gbps') / op.h100_throughput, 3) if op.h100_throughput and item.get('throughput_gbps') else None,
+                    "memory_mb": item.get('memory_mb'),
+                    "runner": 'cpu-test-runner',
                 }
+            else:
+                fp32_acc = round(random.uniform(99.5, 99.99), 4)
+                fp16_acc = round(random.uniform(98.5, 99.9), 4)
+                int8_acc = round(random.uniform(96.0, 99.5), 4)
+                op_result["accuracy"] = {
+                    "fp32_accuracy": fp32_acc,
+                    "fp16_accuracy": fp16_acc,
+                    "int8_accuracy": int8_acc,
+                    "fp16_loss_rate": round((fp32_acc - fp16_acc) / fp32_acc * 100, 4),
+                    "int8_loss_rate": round((fp32_acc - int8_acc) / fp32_acc * 100, 4),
+                    "pass": int8_acc >= 96.0,
+                }
+                if task_type_val in ("accuracy_and_performance", "performance_benchmark"):
+                    ratio_fp32 = round(random.uniform(0.6, 1.4), 3)
+                    ratio_fp16 = round(random.uniform(0.65, 1.5), 3)
+                    ratio_int8 = round(random.uniform(0.7, 1.6), 3)
+                    throughput_ratio = round(random.uniform(0.5, 1.3), 3)
+                    op_result["performance"] = {
+                        "h100_fp32_latency_us": op.h100_fp32_latency,
+                        "h100_fp16_latency_us": op.h100_fp16_latency,
+                        "h100_int8_latency_us": op.h100_int8_latency,
+                        "h100_throughput_gops": op.h100_throughput,
+                        "tested_fp32_latency_us": round(op.h100_fp32_latency / ratio_fp32, 2) if op.h100_fp32_latency else None,
+                        "tested_fp16_latency_us": round(op.h100_fp16_latency / ratio_fp16, 2) if op.h100_fp16_latency else None,
+                        "tested_int8_latency_us": round(op.h100_int8_latency / ratio_int8, 2) if op.h100_int8_latency else None,
+                        "tested_throughput_gops": round(op.h100_throughput * throughput_ratio, 1) if op.h100_throughput else None,
+                        "fp32_latency_ratio": ratio_fp32,
+                        "fp16_latency_ratio": ratio_fp16,
+                        "int8_latency_ratio": ratio_int8,
+                        "throughput_ratio": throughput_ratio,
+                    }
 
             operator_results.append(op_result)
 
-            # ── Write results back to Operator table (latest) ──
             op.tested_device_type = task.device_type
             op.tested_accuracy_fp32 = fp32_acc
             op.tested_accuracy_fp16 = fp16_acc
@@ -425,7 +558,7 @@ class EvaluationService:
             op.tested_operator_lib = operator_lib_name
             op.tested_task_id = task.id
             op.tested_at = datetime.utcnow()
-            if task_type_val in ("accuracy_and_performance", "performance_benchmark") and "performance" in op_result:
+            if "performance" in op_result:
                 perf = op_result["performance"]
                 op.tested_fp32_latency = perf.get("tested_fp32_latency_us")
                 op.tested_fp16_latency = perf.get("tested_fp16_latency_us")
@@ -433,7 +566,6 @@ class EvaluationService:
                 op.tested_throughput = perf.get("tested_throughput_gops")
             db.add(op)
 
-            # ── Write per-chip per-shape results to OperatorBenchmark ──
             input_shape = op.input_shape or "default"
             device_type = task.device_type or "unknown"
             bench = db.query(OperatorBenchmark).filter(
@@ -450,13 +582,13 @@ class EvaluationService:
             bench.fp32_accuracy = fp32_acc
             bench.fp16_accuracy = fp16_acc
             bench.int8_accuracy = int8_acc
-            bench.fp16_loss_rate = op_result["accuracy"]["fp16_loss_rate"]
-            bench.int8_loss_rate = op_result["accuracy"]["int8_loss_rate"]
+            bench.fp16_loss_rate = op_result["accuracy"].get("fp16_loss_rate") or 0
+            bench.int8_loss_rate = op_result["accuracy"].get("int8_loss_rate") or 0
             bench.accuracy_pass = 1 if op_result["accuracy"]["pass"] else 0
             bench.operator_lib = operator_lib_name
             bench.task_id = task.id
             bench.tested_at = datetime.utcnow()
-            if task_type_val in ("accuracy_and_performance", "performance_benchmark") and "performance" in op_result:
+            if "performance" in op_result:
                 perf = op_result["performance"]
                 bench.fp32_latency = perf.get("tested_fp32_latency_us")
                 bench.fp16_latency = perf.get("tested_fp16_latency_us")
@@ -472,6 +604,8 @@ class EvaluationService:
         avg_fp16_loss = round(sum(r["accuracy"]["fp16_loss_rate"] for r in operator_results) / len(operator_results), 4) if operator_results else 0
         avg_int8_loss = round(sum(r["accuracy"]["int8_loss_rate"] for r in operator_results) / len(operator_results), 4) if operator_results else 0
 
+        cpu_test_mode = str(task.device_type) == 'cpu_test' or getattr(task.device_type, 'value', None) == 'cpu_test'
+        comparison_rows = [r.get('performance', {}) for r in operator_results if r.get('performance')]
         result = {
             "test_type": task_type_val,
             "total_ops_tested": len(operator_results),
@@ -482,6 +616,12 @@ class EvaluationService:
             "all_pass": all_pass,
             "operator_lib": operator_lib_name,
             "device_type": task.device_type,
+            "runner": 'cpu-test-runner' if cpu_test_mode else None,
+            "comparison_summary": {
+                "avg_fp32_ratio_vs_h100": round(sum((row.get('fp32_latency_ratio') or 0) for row in comparison_rows) / len(comparison_rows), 3) if comparison_rows else None,
+                "avg_fp16_ratio_vs_h100": round(sum((row.get('fp16_latency_ratio') or 0) for row in comparison_rows) / len(comparison_rows), 3) if comparison_rows else None,
+                "avg_throughput_ratio_vs_h100": round(sum((row.get('throughput_ratio') or 0) for row in comparison_rows) / len(comparison_rows), 3) if comparison_rows else None,
+            } if cpu_test_mode else None,
             "operator_results": operator_results,
         }
 
@@ -664,6 +804,13 @@ class EvaluationService:
             if lib_asset:
                 operator_lib_name = lib_asset.name
 
+        report_txt_path = None
+        report_json_path = None
+        if task.device_type == 'cpu_test':
+            txt_path, json_path = EvaluationService._cpu_test_report_paths(task.id)
+            report_txt_path = str(txt_path) if txt_path.exists() else None
+            report_json_path = str(json_path) if json_path.exists() else None
+
         report_content = {
             "task_name": task.name,
             "task_category": task.task_category.value if task.task_category else None,
@@ -676,6 +823,8 @@ class EvaluationService:
             "started_at": str(task.started_at),
             "completed_at": str(task.completed_at),
             "duration_seconds": (task.completed_at - task.started_at).total_seconds() if task.started_at and task.completed_at else None,
+            "report_txt_path": report_txt_path,
+            "report_json_path": report_json_path,
             "conclusion": "评测任务已完成，各项指标正常。",
         }
 

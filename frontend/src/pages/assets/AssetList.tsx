@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Table,
   Button,
@@ -17,6 +17,7 @@ import {
   Statistic,
   Badge,
   Select,
+  Tooltip,
   Typography,
 } from 'antd';
 import {
@@ -73,9 +74,11 @@ function formatFileSize(bytes: number): string {
 
 export default function AssetList() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
-  const [keyword, setKeyword] = useState('');
+  const [keywordInput, setKeywordInput] = useState(searchParams.get('keyword') || '');
+  const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
   const [data, setData] = useState<AssetItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -147,12 +150,12 @@ export default function AssetList() {
       const usageData = usageRes?.data || usageRes || [];
       setDeviceUsage(Array.isArray(usageData) ? usageData : []);
       // 获取全部数据（不分页），前端进行筛选和分页
-      // 注意：page_size 最大 100，需要多次请求获取全部数据
       const allItems: AssetItem[] = [];
       let currentPage = 1;
       const maxPageSize = 100;
+      let expectedTotal = Number.POSITIVE_INFINITY;
       
-      while (true) {
+      while (allItems.length < expectedTotal) {
         const params: any = { page: currentPage, page_size: maxPageSize };
         if (activeTab !== 'all') params.asset_type = activeTab;
         if (keyword) params.keyword = keyword;
@@ -160,15 +163,10 @@ export default function AssetList() {
         const res: any = await getAssets(params);
         const d = res?.data || res;
         const items = d?.items || [];
+        expectedTotal = d?.total || items.length;
         allItems.push(...items);
         
-        // 如果返回的数据少于 page_size，说明已经是最后一页
-        if (items.length < maxPageSize) {
-          break;
-        }
-        
-        // 防止无限循环，最多获取 10 页
-        if (currentPage >= 10) {
+        if (items.length === 0 || items.length < maxPageSize) {
           break;
         }
         currentPage++;
@@ -223,18 +221,29 @@ export default function AssetList() {
   }, [activeTab, keyword, selectedChip, selectedFramework, selectedScenario, page, pageSize]);
 
   useEffect(() => {
+    const urlKeyword = searchParams.get('keyword') || '';
+    if (urlKeyword !== keyword) {
+      setKeyword(urlKeyword);
+      setKeywordInput(urlKeyword);
+      return;
+    }
     // 筛选条件变化时重置到第一页
     if (page !== 1) {
       setPage(1);
     } else {
       fetchAssets();
     }
-  }, [activeTab, keyword, selectedChip, selectedFramework, selectedScenario]);
+  }, [activeTab, keyword, selectedChip, selectedFramework, selectedScenario, searchParams]);
   
   useEffect(() => {
     // 页码变化时获取数据
     fetchAssets();
   }, [page, pageSize]);
+
+  const handleSearch = () => {
+    setPage(1);
+    setKeyword(keywordInput.trim());
+  };
 
   const handleDelete = async (id: number) => {
     try {
@@ -336,12 +345,36 @@ export default function AssetList() {
       title: '标签',
       dataIndex: 'tags',
       key: 'tags',
-      render: (tags: string[]) =>
-        tags?.slice(0, 3).map((tag) => (
-          <Tag key={tag} style={{ marginBottom: 2 }}>
-            {tag}
-          </Tag>
-        )),
+      render: (tags: string[]) => {
+        if (!tags?.length) return null;
+        const visibleTags = tags.slice(0, 3);
+        const hiddenCount = tags.length - visibleTags.length;
+        const allTagsContent = (
+          <Space size={[4, 4]} wrap>
+            {tags.map((tag) => (
+              <Tag key={tag} style={{ marginBottom: 2 }}>
+                {tag}
+              </Tag>
+            ))}
+          </Space>
+        );
+        return (
+          <Space size={[4, 4]} wrap>
+            {visibleTags.map((tag) => (
+              <Tag key={tag} style={{ marginBottom: 2 }}>
+                {tag}
+              </Tag>
+            ))}
+            {hiddenCount > 0 ? (
+              <Tooltip title={allTagsContent} placement="topLeft">
+                <Tag color="blue" style={{ marginBottom: 2, cursor: 'pointer' }}>
+                  +{hiddenCount}
+                </Tag>
+              </Tooltip>
+            ) : null}
+          </Space>
+        );
+      },
     },
     {
       title: '共享',
@@ -548,9 +581,9 @@ export default function AssetList() {
           prefix={<SearchOutlined />}
           style={{ width: 260 }}
           allowClear
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onPressEnter={fetchAssets}
+          value={keywordInput}
+          onChange={(e) => setKeywordInput(e.target.value)}
+          onPressEnter={handleSearch}
         />
         
         {/* 镜像筛选：芯片、框架和场景 */}
@@ -583,7 +616,7 @@ export default function AssetList() {
           </>
         )}
         
-        <Button type="primary" icon={<SearchOutlined />} onClick={fetchAssets}>
+        <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
           搜索
         </Button>
         

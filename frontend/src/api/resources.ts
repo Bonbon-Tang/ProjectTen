@@ -15,3 +15,7 @@ export function getResourceSummary() {
 export function updateDeviceStatus(id: number, status: string) {
   return api.put(`/resources/devices/${id}/status`, { status });
 }
+
+export function getDeviceUsage() {
+  return api.get('/resources/device-usage');
+}

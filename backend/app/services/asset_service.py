@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.models.asset import DigitalAsset, AssetType, AssetStatus, ShareScope
@@ -47,7 +47,15 @@ class AssetService:
         if category:
             q = q.filter(DigitalAsset.category == category)
         if keyword:
-            q = q.filter(or_(DigitalAsset.name.contains(keyword), DigitalAsset.description.contains(keyword)))
+            kw = keyword.strip()
+            lowered_kw = kw.lower()
+            q = q.filter(
+                or_(
+                    func.lower(DigitalAsset.name) == lowered_kw,
+                    DigitalAsset.name.ilike(f"%{kw}%"),
+                    func.coalesce(DigitalAsset.description, "").ilike(f"%{kw}%"),
+                )
+            )
         if creator_id:
             q = q.filter(DigitalAsset.creator_id == creator_id)
         if tenant_id:

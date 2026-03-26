@@ -125,17 +125,16 @@ def get_available_images(
     """Get available images for model deployment test, optionally filtered by sub-scenario tag and chip."""
     from app.models.resource import ComputeDevice
     
-    # Device type mapping (frontend value -> Chinese name in description)
-    DEVICE_NAME_MAP = {
-        "huawei_910c": "华为昇腾 910C",
-        "huawei_910b": "华为昇腾 910B",
-        "cambrian_590": "寒武纪 MLU590",
-        "kunlun_p800": "昆仑芯 P800",
-        "hygon_bw1000": "海光 DCU BW1000",
+    # Device type mapping (frontend value -> supported chip tags / labels)
+    DEVICE_MATCH_MAP = {
+        "huawei_910c": {"tags": ["Ascend910C", "910C"], "labels": ["华为昇腾 910C", "华为昇腾910C"]},
+        "huawei_910b": {"tags": ["Ascend910B", "910B"], "labels": ["华为昇腾 910B", "华为昇腾910B"]},
+        "cambrian_590": {"tags": ["MLU590"], "labels": ["寒武纪 MLU590", "寒武纪MLU590"]},
+        "kunlun_p800": {"tags": ["P800"], "labels": ["昆仑芯 P800", "昆仑芯P800"]},
+        "hygon_bw1000": {"tags": ["BW1000"], "labels": ["海光 DCU BW1000", "海光DCU BW1000", "海光DCU BW1000"]},
     }
-    
-    # Get the Chinese name for the selected device type
-    target_chip_name = DEVICE_NAME_MAP.get(device_type) if device_type else None
+
+    target_device_match = DEVICE_MATCH_MAP.get(device_type) if device_type else None
     
     q = db.query(DigitalAsset).filter(
         DigitalAsset.asset_type == "image",
@@ -165,9 +164,13 @@ def get_available_images(
         else:
             chip_name = raw_chip
         
-        # Filter by device_type (chip) - match Chinese name
-        if target_chip_name and target_chip_name != chip_name:
-            continue
+        # Filter by device_type (chip)
+        if target_device_match:
+            chip_tags = set(str(tag) for tag in tags)
+            matched_by_tag = any(tag in chip_tags for tag in target_device_match["tags"])
+            matched_by_label = chip_name in target_device_match["labels"]
+            if not matched_by_tag and not matched_by_label:
+                continue
         
         result.append({
             "id": img.id,

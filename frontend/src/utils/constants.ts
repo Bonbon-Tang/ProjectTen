@@ -46,6 +46,7 @@ export const DEVICE_TYPES = [
   { label: '寒武纪MLU590', value: 'cambrian_590', manufacturer: '寒武纪', total: 24, color: '#0066cc' },
   { label: '昆仑芯P800', value: 'kunlun_p800', manufacturer: '昆仑芯', total: 12, color: '#00aa44' },
   { label: '海光DCU BW1000', value: 'hygon_bw1000', manufacturer: '海光', total: 8, color: '#6633cc' },
+  { label: '本机 CPU 测试节点', value: 'cpu_test', manufacturer: '本机容器节点', total: 1, color: '#8a5a00' },
 ];
 
 // 评测状态

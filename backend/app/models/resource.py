@@ -22,6 +22,7 @@ class DeviceType(str, enum.Enum):
     cambrian_590 = "cambrian_590"
     kunlun_p800 = "kunlun_p800"
     hygon_bw1000 = "hygon_bw1000"
+    cpu_test = "cpu_test"
 
 
 class DeviceStatus(str, enum.Enum):

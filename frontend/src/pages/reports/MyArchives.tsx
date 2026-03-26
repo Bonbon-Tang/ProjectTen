@@ -108,7 +108,7 @@ export default function MyArchives() {
 
   const handleDelete = async (id: number) => {
     try {
-      await deleteArchive(id);
+      await deleteArchive(String(id));
       message.success('已取消存档');
       setData((prev) => prev.filter((item) => item.id !== id));
     } catch {

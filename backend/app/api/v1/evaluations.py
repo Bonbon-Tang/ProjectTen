@@ -216,11 +216,22 @@ def get_task_logs(task_id: int, current_user: User = Depends(get_current_user),
     task = EvaluationService.get_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+
+    logs = [
+        {"timestamp": str(task.created_at), "level": "INFO", "message": f"Task '{task.name}' created"},
+    ]
+
+    if task.device_type == 'cpu_test':
+        txt_path, _ = EvaluationService._cpu_test_report_paths(task_id)
+        if txt_path.exists():
+            for line in txt_path.read_text(encoding='utf-8').splitlines():
+                if not line.strip():
+                    continue
+                logs.append({"timestamp": str(task.updated_at or task.created_at), "level": "INFO", "message": line})
+
     return _ok({
         "task_id": task_id,
-        "logs": [
-            {"timestamp": str(task.created_at), "level": "INFO", "message": f"Task '{task.name}' created"},
-        ],
+        "logs": logs,
     })
 
 

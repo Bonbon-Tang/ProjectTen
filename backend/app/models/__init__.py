@@ -10,6 +10,7 @@ from app.models.operator import Operator
 from app.models.operator_benchmark import OperatorBenchmark
 from app.models.model_benchmark import ModelBenchmark
 from app.models.tenant_application import TenantApplication
+from app.models.adaptation import AdaptationTask
 
 __all__ = [
     "User",
@@ -26,4 +27,5 @@ __all__ = [
     "OperatorBenchmark",
     "ModelBenchmark",
     "TenantApplication",
+    "AdaptationTask",
 ]
