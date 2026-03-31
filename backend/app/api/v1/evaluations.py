@@ -16,6 +16,7 @@ from app.schemas.evaluation import (
     BatchDeleteResponse,
     EvaluationStatsOut,
 )
+from app.models.evaluation import TEST_TAGS
 from app.services.evaluation_service import EvaluationService
 from app.utils.pagination import PaginationParams, paginate
 
@@ -29,6 +30,15 @@ def _ok(data=None, message: str = "success"):
 class EvaluationPostAction(BaseModel):
     save_image: bool = False
     include_in_ranking: bool = True
+
+
+@router.get("/tags")
+def get_evaluation_tags(category: Optional[str] = Query(None)):
+    if category:
+        data = {k: v for k, v in TEST_TAGS.items() if k.startswith(f"{category}.")}
+    else:
+        data = TEST_TAGS
+    return _ok(data)
 
 
 @router.get("/stats")
@@ -92,6 +102,7 @@ def list_evaluations(
     page_size: int = Query(20, ge=1, le=100),
     status: Optional[str] = None,
     task_type: Optional[str] = None,
+    primary_tag: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -104,7 +115,7 @@ def list_evaluations(
 
     if getattr(current_user.user_type, 'value', current_user.user_type) == 'admin':
         tasks, total = EvaluationService.list_tasks(
-            db, pagination, status=status, task_type=task_type,
+            db, pagination, status=status, task_type=task_type, primary_tag=primary_tag,
         )
     elif is_tenant_user(current_user):
         q = db.query(EvaluationTask)
@@ -112,6 +123,8 @@ def list_evaluations(
             q = q.filter(EvaluationTask.status == status)
         if task_type:
             q = q.filter(EvaluationTask.task_type == task_type)
+        if primary_tag:
+            q = q.filter(EvaluationTask.primary_tag == primary_tag)
         q = q.filter(
             or_(
                 EvaluationTask.creator_id == current_user.id,
@@ -126,6 +139,8 @@ def list_evaluations(
             q = q.filter(EvaluationTask.status == status)
         if task_type:
             q = q.filter(EvaluationTask.task_type == task_type)
+        if primary_tag:
+            q = q.filter(EvaluationTask.primary_tag == primary_tag)
         q = q.filter(
             or_(
                 EvaluationTask.creator_id == current_user.id,

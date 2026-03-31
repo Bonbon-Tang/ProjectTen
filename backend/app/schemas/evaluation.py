@@ -9,8 +9,10 @@ from pydantic import BaseModel
 class EvaluationCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    primary_tag: Optional[str] = None
     task_category: Optional[str] = None  # operator_test | model_test
-    task_type: str  # chip | model | framework | middleware | operator | scene + new subtypes
+    task_type: Optional[str] = None  # chip | model | framework | middleware | operator | scene + new subtypes
     create_mode: str = "template"
     priority: str = "medium"
     visibility: str = "private"
@@ -39,6 +41,8 @@ class EvaluationOut(BaseModel):
     id: int
     name: str
     description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    primary_tag: Optional[str] = None
     task_category: Optional[str] = None
     task_type: str
     create_mode: str

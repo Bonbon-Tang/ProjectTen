@@ -19,6 +19,48 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
+TEST_TAGS = {
+    "operator_test.accuracy_only": "算子精度测试",
+    "operator_test.accuracy_and_performance": "算子精度+性能测试",
+    "operator_test.performance_benchmark": "算子性能基准测试",
+    "model_test.llm": "大语言模型测试",
+    "model_test.multimodal": "多模态模型测试",
+    "model_test.speech_recognition": "语音识别测试",
+    "model_test.image_classification": "图像分类测试",
+    "model_test.object_detection": "目标检测测试",
+    "model_test.semantic_segmentation": "语义分割测试",
+    "model_test.text_generation": "文本生成测试",
+    "model_test.machine_translation": "机器翻译测试",
+    "model_test.sentiment_analysis": "情感分析测试",
+    "model_test.question_answering": "问答测试",
+    "model_test.text_summarization": "文本摘要测试",
+    "model_test.speech_synthesis": "语音合成测试",
+    "model_test.image_generation": "图像生成测试",
+    "model_test.video_understanding": "视频理解测试",
+    "model_test.ocr": "OCR测试",
+    "model_test.recommendation": "推荐系统测试",
+    "model_test.anomaly_detection": "异常检测测试",
+    "model_test.time_series": "时间序列测试",
+    "model_test.reinforcement_learning": "强化学习测试",
+    "model_test.graph_neural_network": "图神经网络测试",
+    "model_test.medical_imaging": "医疗影像测试",
+    "model_test.autonomous_driving": "自动驾驶测试",
+    "model_test.robot_control": "机器人控制测试",
+    "model_test.code_generation": "代码生成测试",
+    "model_test.knowledge_graph": "知识图谱测试",
+}
+
+TAG_TO_CATEGORY_TYPE = {
+    tag: tuple(tag.split('.', 1)) for tag in TEST_TAGS.keys()
+}
+
+
+def build_primary_tag(task_category: str | None, task_type: str | None) -> str | None:
+    if not task_category or not task_type:
+        return None
+    return f"{task_category}.{task_type}"
+
+
 class TaskCategory(str, enum.Enum):
     operator_test = "operator_test"
     model_test = "model_test"
@@ -92,6 +134,9 @@ class EvaluationTask(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(256), nullable=False)
     description = Column(Text, nullable=True)
+
+    tags = Column(JSON, nullable=True, default=list, comment="Unified tag list")
+    primary_tag = Column(String(128), nullable=True, index=True, comment="Primary execution tag")
 
     task_category = Column(Enum(TaskCategory), nullable=True, comment="operator_test or model_test")
     task_type = Column(Enum(TaskType), nullable=False)

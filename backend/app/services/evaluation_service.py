@@ -17,7 +17,10 @@ from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
-from app.models.evaluation import EvaluationTask, TaskStatus, TaskType, TaskCategory, CreateMode, Priority
+from app.models.evaluation import (
+    EvaluationTask, TaskStatus, TaskType, TaskCategory, CreateMode, Priority,
+    TEST_TAGS, TAG_TO_CATEGORY_TYPE, build_primary_tag,
+)
 from app.models.report import EvaluationReport
 from app.models.resource import ComputeDevice
 from app.models.operator import Operator
@@ -124,6 +127,21 @@ class EvaluationService:
     @staticmethod
     def create(db: Session, *, creator_id: int, tenant_id: Optional[int] = None, user_type: Optional[str] = None, **kwargs) -> EvaluationTask:
         task_category = kwargs.get("task_category")
+        task_type = kwargs.get("task_type")
+        tags = kwargs.get("tags") or []
+        primary_tag = kwargs.get("primary_tag")
+
+        if primary_tag and primary_tag in TAG_TO_CATEGORY_TYPE:
+            task_category, task_type = TAG_TO_CATEGORY_TYPE[primary_tag]
+            if primary_tag not in tags:
+                tags = [primary_tag, *tags]
+        elif task_category and task_type:
+            primary_tag = build_primary_tag(task_category, task_type)
+            if primary_tag:
+                tags = [primary_tag, *[t for t in tags if t != primary_tag]]
+
+        if primary_tag and primary_tag not in TEST_TAGS:
+            raise ValueError(f"无效的评测tag: {primary_tag}")
 
         # Validate: operator_test requires toolset_id
         if task_category == "operator_test" and not kwargs.get("toolset_id"):
@@ -144,8 +162,10 @@ class EvaluationService:
         task = EvaluationTask(
             name=kwargs["name"],
             description=kwargs.get("description"),
+            tags=tags,
+            primary_tag=primary_tag,
             task_category=TaskCategory(task_category) if task_category else None,
-            task_type=TaskType(kwargs["task_type"]),
+            task_type=TaskType(task_type),
             create_mode=CreateMode(kwargs.get("create_mode", "template")),
             priority=Priority(kwargs.get("priority", "medium")),
             config=kwargs.get("config", {}),
@@ -175,6 +195,7 @@ class EvaluationService:
         *,
         status: Optional[str] = None,
         task_type: Optional[str] = None,
+        primary_tag: Optional[str] = None,
         creator_id: Optional[int] = None,
         tenant_id: Optional[int] = None,
     ) -> Tuple[List[EvaluationTask], int]:
@@ -183,6 +204,8 @@ class EvaluationService:
             q = q.filter(EvaluationTask.status == status)
         if task_type:
             q = q.filter(EvaluationTask.task_type == task_type)
+        if primary_tag:
+            q = q.filter(EvaluationTask.primary_tag == primary_tag)
         if creator_id:
             q = q.filter(EvaluationTask.creator_id == creator_id)
         if tenant_id:
