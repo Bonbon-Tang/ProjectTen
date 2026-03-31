@@ -1,18 +1,44 @@
-# 允许所有文件上传（包括依赖）
-# 仅排除敏感文件
+# Logs
 *.log
+
+# Environment files (keep examples, ignore actual configs)
+.env
 .env.local
-.env.production
 *.pem
 *.key
 
-# Runtime and local environment artifacts
+# Python
 __pycache__/
 *.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+backend/venv/
+cpu-test-runner/.venv/
+
+# Node
+node_modules/
+frontend/dist/
+.pnpm-store/
+
+# Database
 *.sqlite3
 *.db
 *.db-journal
 backend/data/*.db
-backend/venv/
-backend/backend.log
+backend/data/*.sqlite3
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
 /tmp/
+*.tmp
+*.pid
