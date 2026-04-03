@@ -99,7 +99,8 @@ def extract_scenarios(tags: list, desc: str) -> list:
 
 def update_image_tags():
     """批量更新所有镜像的 tags"""
-    engine = create_engine('sqlite:///data/app.db')
+    from app.config import settings
+    engine = create_engine(settings.DATABASE_URL)
     
     with Session(engine) as session:
         images = session.query(DigitalAsset).filter(

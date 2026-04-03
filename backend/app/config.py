@@ -6,8 +6,10 @@ from typing import List
 
 from pydantic_settings import BaseSettings
 
+from app.db_url import normalize_database_url, sqlite_path_from_url
+
 BASE_DIR = Path(__file__).resolve().parents[1]
-DEFAULT_DB_PATH = BASE_DIR / "data" / "app.db"
+DEFAULT_DB_PATH = Path("data") / "app.db"
 
 
 class Settings(BaseSettings):
@@ -34,6 +36,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+settings.DATABASE_URL = normalize_database_url(settings.DATABASE_URL, base_dir=BASE_DIR)
 
 # Ensure data directory exists for SQLite
-Path(settings.DATABASE_URL.replace("sqlite:///", "")).parent.mkdir(parents=True, exist_ok=True)
+sqlite_path = sqlite_path_from_url(settings.DATABASE_URL)
+if sqlite_path is not None:
+    sqlite_path.parent.mkdir(parents=True, exist_ok=True)

@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app.config import settings
+from app.db_url import sqlite_path_from_url
 
 
 EVALUATION_TASKS_COLUMNS = {
@@ -23,12 +24,6 @@ ROLES_COLUMNS = {
     "permissions": "permissions JSON",
     "created_at": "created_at DATETIME",
 }
-
-
-def _sqlite_path(database_url: str) -> Path:
-    normalized = database_url.replace("sqlite+aiosqlite:///", "sqlite:///")
-    raw = normalized.replace("sqlite:///", "", 1)
-    return Path(raw)
 
 
 def _cols(cur: sqlite3.Cursor, table: str) -> set[str]:
@@ -52,7 +47,10 @@ def main() -> int:
         print("Only sqlite migration is supported by this helper.")
         return 1
 
-    db_path = _sqlite_path(settings.DATABASE_URL)
+    db_path = sqlite_path_from_url(settings.DATABASE_URL)
+    if db_path is None:
+        print("In-memory sqlite does not need file migration.")
+        return 0
     print(f"[migrate] DATABASE_URL={settings.DATABASE_URL}")
     print(f"[migrate] DB_PATH={db_path}")
 

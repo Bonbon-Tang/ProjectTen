@@ -179,7 +179,7 @@ pip install fastapi uvicorn requests python-dotenv
 
 ```bash
 # 数据库
-DATABASE_URL=sqlite+aiosqlite:///./data/app.db
+DATABASE_URL=sqlite:///data/app.db
 
 # JWT 配置
 SECRET_KEY=your-secret-key-here

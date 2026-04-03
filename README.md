@@ -77,6 +77,12 @@ npm run dev
 
 访问 http://localhost:3000
 
+### 数据库路径约定
+- 本地开发默认使用 `backend/data/app.db`
+- `.env` 中优先写相对路径：`DATABASE_URL=sqlite:///data/app.db`
+- 不建议把开发机的绝对路径写进 `.env`，否则很容易在同机多目录场景下连错库
+- 启动前可先运行 `python scripts/preflight_check.py` 确认当前连接的是哪份数据库
+
 ## 🧭 使用说明
 
 ### 默认账号

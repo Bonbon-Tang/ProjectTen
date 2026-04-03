@@ -12,7 +12,7 @@ services:
       - ./backend/data:/app/data
       - ./backend/.env:/app/.env
     environment:
-      - DATABASE_URL=sqlite+aiosqlite:///./data/app.db
+      - DATABASE_URL=sqlite:///data/app.db
     restart: unless-stopped
     networks:
       - projectten-network

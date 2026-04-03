@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app.config import settings, BASE_DIR
+from app.db_url import sqlite_path_from_url
 
 REQUIRED_TABLES = [
     "users",
@@ -25,16 +26,8 @@ REQUIRED_COLUMNS = {
 }
 
 
-def _sqlite_path(database_url: str) -> Path | None:
-    if not database_url.startswith("sqlite"):
-        return None
-    normalized = database_url.replace("sqlite+aiosqlite:///", "sqlite:///")
-    raw = normalized.replace("sqlite:///", "", 1)
-    return Path(raw)
-
-
 def main() -> int:
-    db_path = _sqlite_path(settings.DATABASE_URL)
+    db_path = sqlite_path_from_url(settings.DATABASE_URL)
     print(f"[preflight] DATABASE_URL={settings.DATABASE_URL}")
 
     if db_path is None:
