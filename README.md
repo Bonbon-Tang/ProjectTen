@@ -64,6 +64,8 @@ npm install
 # 启动后端
 cd ../backend
 source venv/bin/activate
+python scripts/preflight_check.py
+python scripts/migrate_sqlite_schema.py   # 如 preflight 提示 schema 缺失时执行
 python run.py
 
 # 启动前端（新终端）
@@ -108,6 +110,8 @@ npm run dev
 - 生产环境建议使用独立 Python 虚拟环境和 Node 运行时，不要提交 `venv/`、运行日志和本地数据库到仓库。
 - 首次部署后按需初始化示例账号与租户数据。
 - 若迁移到新服务器，按照 README 安装依赖、启动前后端即可。
+- 启动前先执行 `python scripts/preflight_check.py`，确认连接的是正确数据库。
+- 如果代码升级后旧 SQLite 库缺列，执行 `python scripts/migrate_sqlite_schema.py` 做兼容补齐。
 
 ## 📊 预置数据
 

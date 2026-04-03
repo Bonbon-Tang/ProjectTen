@@ -91,6 +91,9 @@ cp .env.example .env
 4. **初始化数据库**
 ```bash
 alembic upgrade head
+python scripts/preflight_check.py
+# 如果旧 SQLite 库缺少新字段，再执行：
+python scripts/migrate_sqlite_schema.py
 ```
 
 5. **运行种子数据（可选）**
@@ -101,7 +104,7 @@ python scripts/seed_all_chip_scenarios.py
 
 6. **启动后端**
 ```bash
-# 开发模式
+# 开发模式（包含 preflight）
 python run.py
 
 # 生产模式
