@@ -1,5 +1,23 @@
 # ProjectTen 需求变更说明
 
+## 2026-04-03 稳定性修复（数据库路径 + Schema 兼容）
+
+### 修复内容
+- 修正 `backend/.env` 中错误的 SQLite 数据库路径，避免连接到错误的 `app.db`
+- 修复 `evaluation_tasks` 表缺失 `tags` / `primary_tag` 字段导致的任务列表 500
+- 补齐 `roles` 表兼容字段，降低旧数据库与新代码模型不一致导致的运行错误
+- 恢复 admin 历史任务与相关列表接口可用性
+
+### 事故教训
+- 不能把“服务能启动”当成“数据源正确”
+- SQLite 随仓库版本演进时，必须配套 migration / schema 检查
+- 排障顺序必须固定：先查数据库路径，再查业务数据，再查 schema 漂移
+
+### 防再犯动作
+- 新增事故复盘文档：`POSTMORTEM-2026-04-03-db-path-and-schema.md`
+- 后续应补充 preflight 数据源检查和 SQLite migration 脚本
+
+
 ## 2026-03-21 需求变更
 
 ### 背景
