@@ -94,6 +94,8 @@ alembic upgrade head
 python scripts/preflight_check.py
 # 如果旧 SQLite 库缺少新字段，再执行：
 python scripts/migrate_sqlite_schema.py
+# 如果需要默认账号和本地演示租户：
+python scripts/init_demo_data.py
 ```
 
 5. **运行种子数据（可选）**

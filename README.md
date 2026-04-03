@@ -66,6 +66,7 @@ cd ../backend
 source venv/bin/activate
 python scripts/preflight_check.py
 python scripts/migrate_sqlite_schema.py   # 如 preflight 提示 schema 缺失时执行
+python scripts/init_demo_data.py          # 需要默认账号/演示数据时执行
 python run.py
 
 # 启动前端（新终端）
@@ -89,6 +90,7 @@ npm run dev
 - `admin / admin123`：管理员，可查看全局资源、审批租户申请、管理用户与租户
 - `usr1 / 123`：普通用户，仅可登录、查看 Benchmark/资产/报告，并提交“成为租户”申请
 - `tenant1 / 123`：示例租户账号，绑定租户 `tenant1`，持有 `1` 台 `huawei_910c`
+- 若数据库是新建或历史数据不完整，可执行：`python scripts/init_demo_data.py`
 
 ### 用户、租户与审批流
 - 普通用户与租户账号彻底分离：`usr1` 只是普通用户，不直接持有机器配额。
