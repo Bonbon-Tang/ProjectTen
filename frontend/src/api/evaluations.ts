@@ -15,7 +15,7 @@ export interface EvalQuery {
 export interface CreateEvalParams {
   name: string;
   description?: string;
-  task_category: 'operator_test' | 'model_test';
+  task_category: 'operator_test' | 'model_deployment_test';
   task_type: string;
   device_type: string;
   device_count: number;
