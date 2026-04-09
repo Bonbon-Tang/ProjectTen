@@ -80,13 +80,27 @@ function normalizeText(value?: string) {
   return String(value || '').trim().toLowerCase();
 }
 
+const DEVICE_CHIP_TAG_MAP: Record<string, string> = {
+  huawei_910c: '910C',
+  huawei_910b: '910B',
+  cambrian_590: 'MLU590',
+  kunlun_p800: 'P800',
+  hygon_bw1000: 'BW1000',
+};
+
 function chipLabelFromDevice(device?: DeviceInfo) {
   if (!device) return '';
   return device.name.replace(/（.*?）/g, '').trim();
 }
 
+function chipTagFromDevice(device?: DeviceInfo) {
+  if (!device) return '';
+  return DEVICE_CHIP_TAG_MAP[device.device_type] || '';
+}
+
 function chipKeyFromImage(image: ModelImageInfo) {
-  return normalizeText(image.chip_name || image.name.split('-')[0]);
+  const tags = image.tags || [];
+  return normalizeText(image.chip_name || tags[0] || image.name.split('-')[0]);
 }
 
 function middlewareLabelFromImage(image: ModelImageInfo) {
@@ -465,12 +479,12 @@ export default function EvalCreate() {
     if (taskCategory !== 'model_deployment_test') return [] as DeviceInfo[];
     if (!taskType) return onlineDevices;
     const chips = new Set(visualCandidateImages.map((img) => chipKeyFromImage(img)));
-    const matched = onlineDevices.filter((device) => chips.has(normalizeText(chipLabelFromDevice(device)) || normalizeText(chipLabelFromDevice(device))));
+    const matched = onlineDevices.filter((device) => chips.has(normalizeText(chipTagFromDevice(device))));
     return matched.length ? matched : onlineDevices;
   }, [onlineDevices, taskCategory, taskType, visualCandidateImages]);
 
   const selectedDevice = useMemo(() => deviceList.find((d) => d.device_type === selectedDeviceType), [deviceList, selectedDeviceType]);
-  const selectedDeviceChipKey = useMemo(() => normalizeText(chipLabelFromDevice(selectedDevice)), [selectedDevice]);
+  const selectedDeviceChipKey = useMemo(() => normalizeText(chipTagFromDevice(selectedDevice)), [selectedDevice]);
 
   const frameworkCandidates = useMemo(() => {
     if (taskCategory !== 'model_deployment_test' || !taskType || !selectedDeviceChipKey) return [] as { key: string; label: string; count: number; descriptions: string[] }[];
