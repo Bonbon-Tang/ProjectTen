@@ -14,7 +14,7 @@ import { MODEL_TEST_TYPES, OPERATOR_TEST_TYPES } from '@/utils/constants';
 const { Paragraph } = Typography;
 
 type AgentMode = 'evaluation' | 'adaptation';
-type EvalCategory = 'operator_test' | 'model_test';
+type EvalCategory = 'operator_test' | 'model_deployment_test';
 type SlotStep = 'mode' | 'category' | 'taskType' | 'deviceType' | 'deviceCount' | 'toolset' | 'operatorLib' | 'operatorCategories' | 'operatorCount' | 'imageId' | 'precision' | 'testMode' | 'description' | 'confirm' | 'done';
 
 interface DeviceOption {
@@ -162,7 +162,7 @@ export default function DLAgentCreate() {
                   item.category === '算子测试工具'
                     ? 'operator_test'
                     : item.category === '模型部署测试工具'
-                      ? 'model_test'
+                      ? 'model_deployment_test'
                       : 'operator_test',
               }))
             : [],
@@ -214,7 +214,7 @@ export default function DLAgentCreate() {
   }, []);
 
   useEffect(() => {
-    if (taskDraft.taskCategory !== 'model_test' || !taskDraft.taskType) {
+    if (taskDraft.taskCategory !== 'model_deployment_test' || !taskDraft.taskType) {
       setModelToolsets([]);
       return;
     }
@@ -227,7 +227,7 @@ export default function DLAgentCreate() {
               id: item.id,
               name: item.name,
               description: item.description,
-              task_category: 'model_test',
+              task_category: 'model_deployment_test',
               task_type: taskDraft.taskType,
             })),
           );
@@ -250,7 +250,7 @@ export default function DLAgentCreate() {
     if (taskDraft.taskCategory === 'operator_test') {
       return toolsets.filter((item) => item.name === 'Deeplink_op_test' || item.name.includes('Deeplink_op_test'));
     }
-    if (taskDraft.taskCategory === 'model_test') {
+    if (taskDraft.taskCategory === 'model_deployment_test') {
       return modelToolsets;
     }
     return [];
@@ -345,12 +345,12 @@ export default function DLAgentCreate() {
       askStep('operatorCategories', `第八步：请选择算子分类，支持多选。可回复如“1,3,5”或直接输入分类名；如果要按 evaluation 一致覆盖全部分类，回复“全部”或“跳过”。${options}`);
       return;
     }
-    if ((state.mode === 'adaptation' || state.taskCategory === 'model_test') && !state.imageId) {
+    if ((state.mode === 'adaptation' || state.taskCategory === 'model_deployment_test') && !state.imageId) {
       const options = imageCandidates.map((item, index) => `${index + 1}. ${item.name}`).join('；');
       askStep('imageId', `第五步：请选择镜像。候选完全来自已确认的“子场景 + 芯片”过滤结果：${options || '当前没有匹配镜像'}。当前筛选条件是 taskType=${state.taskType}，deviceType=${state.deviceType}。`);
       return;
     }
-    if (state.mode === 'evaluation' && state.taskCategory === 'model_test' && !state.toolsetId) {
+    if (state.mode === 'evaluation' && state.taskCategory === 'model_deployment_test' && !state.toolsetId) {
       if (filteredToolsets.length === 1) {
         setTaskDraft((prev) => ({ ...prev, toolsetId: filteredToolsets[0].id }));
         appendAgentMessage(`第六步：已自动选择模型部署测试工具集 ${filteredToolsets[0].name}。`);
@@ -420,7 +420,7 @@ export default function DLAgentCreate() {
         ]) as AgentMode | undefined;
         if (modeValue) {
           next.mode = modeValue;
-          next.taskCategory = modeValue === 'adaptation' ? 'model_test' : undefined;
+          next.taskCategory = modeValue === 'adaptation' ? 'model_deployment_test' : undefined;
           next.taskType = undefined;
           next.deviceType = undefined;
           next.imageId = undefined;
@@ -428,7 +428,7 @@ export default function DLAgentCreate() {
       } else if (currentStep === 'category') {
         const categoryValue = resolveByIndexOrText(raw, [
           { label: '算子测试', value: 'operator_test' },
-          { label: '模型部署测试', value: 'model_test' },
+          { label: '模型部署测试', value: 'model_deployment_test' },
         ]) as EvalCategory | undefined;
         if (categoryValue) {
           next.taskCategory = categoryValue;
@@ -518,8 +518,8 @@ export default function DLAgentCreate() {
           operator_lib_id: taskDraft.taskCategory === 'operator_test' ? taskDraft.operatorLibId : undefined,
           operator_categories: taskDraft.taskCategory === 'operator_test' && taskDraft.operatorCategories && taskDraft.operatorCategories.length > 0 ? taskDraft.operatorCategories : undefined,
           operator_count: taskDraft.taskCategory === 'operator_test' && taskDraft.operatorCount ? taskDraft.operatorCount : undefined,
-          image_id: taskDraft.taskCategory === 'model_test' ? taskDraft.imageId : undefined,
-          config: taskDraft.taskCategory === 'model_test' ? { image_id: taskDraft.imageId } : {},
+          image_id: taskDraft.taskCategory === 'model_deployment_test' ? taskDraft.imageId : undefined,
+          config: taskDraft.taskCategory === 'model_deployment_test' ? { image_id: taskDraft.imageId } : {},
         } as any);
         appendAgentMessage('真实 evaluation 任务已经创建完成，我现在带你去评测任务列表。');
         setCurrentStep('done');
