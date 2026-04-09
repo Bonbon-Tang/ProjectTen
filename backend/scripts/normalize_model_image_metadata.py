@@ -80,6 +80,16 @@ MIDDLEWARE_SET = {
     "DeepLink",
 }
 
+CHIP_FALLBACK_MIDDLEWARE = {
+    "Ascend910C": "DeepLink",
+    "Ascend910B": "DeepLink",
+    "910C": "MindSpore",
+    "910B": "MindSpore",
+    "MLU590": "PyTorch",
+    "P800": "PaddlePaddle",
+    "BW1000": "ROCm",
+}
+
 
 def to_list(tags):
     if isinstance(tags, list):
@@ -150,9 +160,12 @@ def parse_asset(img: DigitalAsset):
                 middleware = middleware or name_parts[2]
                 model = model or "-".join(name_parts[3:]).strip()
 
+    chip = chip or normalize_chip(name.split("-")[0] if name else None)
+    middleware = middleware or CHIP_FALLBACK_MIDDLEWARE.get(tags[1] if len(tags) > 1 else "") or CHIP_FALLBACK_MIDDLEWARE.get(chip)
     model = model or name or f"image-{img.id}"
-    chip = chip or "UNKNOWN_CHIP"
-    middleware = middleware or "UNKNOWN_MIDDLEWARE"
+
+    if not chip or not middleware:
+        return None, None, None, None, None
 
     new_name = f"{chip}-{middleware}-{model}"
     new_tags = [chip, middleware, *scenarios]
@@ -174,6 +187,9 @@ def main():
         changed = 0
         for img in images:
             new_name, new_tags, chip, middleware, model = parse_asset(img)
+            if not new_name:
+                print(f"SKIP #{img.id}: {img.name} (cannot safely infer chip/middleware)")
+                continue
             new_desc = f"{chip} + {middleware} + {model}"
             if img.name != new_name or to_list(img.tags) != new_tags or (img.description or "") != new_desc:
                 print(f"UPDATE #{img.id}: {img.name} -> {new_name}")
