@@ -47,11 +47,44 @@ def _ensure_list_tags(tags):
     return []
 
 
+MIDDLEWARE_TAGS = {"MindSpore", "PyTorch", "PaddlePaddle", "ROCm", "ROCm/PyTorch", "DeepLink"}
+CHIP_TAGS = {"910C", "910B", "MLU590", "P800", "BW1000", "Ascend910C", "Ascend910B", "HygonBW1000", "KunlunP800", "Cambrian590"}
+CHIP_NORMALIZE_MAP = {
+    "Ascend910C": "910C",
+    "Ascend910B": "910B",
+    "HygonBW1000": "BW1000",
+    "KunlunP800": "P800",
+    "Cambrian590": "MLU590",
+}
+
+
+def _normalize_chip_tag(tag: Optional[str]):
+    if not tag:
+        return tag
+    return CHIP_NORMALIZE_MAP.get(tag, tag)
+
+
+def _extract_tag_parts(tags: list[str]):
+    chip = None
+    middleware = None
+    scenarios = []
+    for tag in tags:
+        normalized_chip = _normalize_chip_tag(tag)
+        if not chip and normalized_chip in CHIP_TAGS | {"910C", "910B", "MLU590", "P800", "BW1000"}:
+            chip = normalized_chip
+            continue
+        if not middleware and tag in MIDDLEWARE_TAGS:
+            middleware = tag
+            continue
+        if tag in SCENARIO_TAGS:
+            scenarios.append(tag)
+    return chip, middleware, scenarios
+
+
 def _infer_chip_framework_model(img: DigitalAsset, tags: list[str]):
     description = (img.description or "").strip()
     name = (img.name or "").strip()
-    chip_name = tags[0] if len(tags) >= 1 else None
-    framework_name = tags[1] if len(tags) >= 2 else None
+    chip_name, framework_name, _ = _extract_tag_parts(tags)
     model_name = None
 
     if name:
@@ -64,7 +97,7 @@ def _infer_chip_framework_model(img: DigitalAsset, tags: list[str]):
     if description:
         desc_parts = [part.strip() for part in description.split("+") if part.strip()]
         if len(desc_parts) >= 3:
-            chip_name = chip_name or desc_parts[0]
+            chip_name = chip_name or _normalize_chip_tag(desc_parts[0])
             framework_name = framework_name or desc_parts[1]
             model_name = model_name or desc_parts[2]
 
@@ -206,21 +239,25 @@ def get_available_images(
             continue
 
         chip_name, framework_name, model_name = _infer_chip_framework_model(img, tags)
+        tag_chip, tag_middleware, scenario_tags = _extract_tag_parts(tags)
+        if not tag_chip or not tag_middleware or not scenario_tags:
+            continue
         if target_chip_tags:
-            if not tags or tags[0] not in target_chip_tags:
+            normalized_target = {_normalize_chip_tag(tag) for tag in target_chip_tags}
+            if tag_chip not in normalized_target:
                 continue
 
         result.append({
             "id": img.id,
             "name": img.name,
             "description": img.description,
-            "tags": tags,
+            "tags": [tag_chip, tag_middleware, *scenario_tags],
             "version": img.version,
-            "chip_name": chip_name,
-            "framework_name": framework_name,
-            "middleware_name": framework_name,
+            "chip_name": chip_name or tag_chip,
+            "framework_name": framework_name or tag_middleware,
+            "middleware_name": tag_middleware,
             "model_name": model_name,
-            "scenario_tags": [tag for tag in tags if tag in SCENARIO_TAGS],
+            "scenario_tags": scenario_tags,
         })
 
     return _ok(result)
