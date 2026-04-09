@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Card, Space, Tag, Typography, message } from 'antd';
-import { RobotOutlined, SendOutlined, UserOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, PartitionOutlined, RobotOutlined, SendOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '@/components/PageHeader';
 import { getAssets } from '@/api/assets';
@@ -9,9 +9,9 @@ import { getBenchmarkCategories } from '@/api/benchmark';
 import { createEvaluation } from '@/api/evaluations';
 import { getAvailableToolsets } from '@/api/modelBenchmark';
 import { getResourceSummary } from '@/api/resources';
-import { MODEL_TEST_TYPES, OPERATOR_TEST_TYPES } from '@/utils/constants';
+import { MODEL_TEST_TYPES, OPERATOR_TEST_TYPES, TASK_TYPE_PREFIX_MAP } from '@/utils/constants';
 
-const { Paragraph } = Typography;
+const { Paragraph, Text } = Typography;
 
 type AgentMode = 'evaluation' | 'adaptation';
 type EvalCategory = 'operator_test' | 'model_deployment_test';
@@ -20,6 +20,7 @@ type SlotStep = 'mode' | 'category' | 'taskType' | 'deviceType' | 'deviceCount' 
 interface DeviceOption {
   device_type: string;
   name: string;
+  manufacturer?: string;
   total_count: number;
   available_count: number;
 }
@@ -89,6 +90,129 @@ const PRECISION_OPTIONS = [
 ];
 
 const normalize = (value: string) => value.trim().toLowerCase();
+
+const chipTagMap: Record<string, string> = {
+  huawei_910c: '910C',
+  huawei_910b: '910B',
+  cambrian_590: 'MLU590',
+  kunlun_p800: 'P800',
+  hygon_bw1000: 'BW1000',
+  cpu_test: 'CPU',
+};
+
+function chipLabelFromDevice(device?: DeviceOption) {
+  if (!device) return '';
+  return device.name.replace(/（.*?）/g, '').trim();
+}
+
+function chipKeyFromImage(image: ImageOption) {
+  return normalize(image.chip_name || image.name.split('-')[0] || '');
+}
+
+function frameworkKeyFromImage(image: ImageOption) {
+  return normalize(image.framework_name || 'unknown');
+}
+
+function scenarioTagsFromImage(image: ImageOption, scenarioTagSet: Set<string>) {
+  return (image.tags || []).filter((tag) => scenarioTagSet.has(tag));
+}
+
+interface VisualStageInfo {
+  key: string;
+  title: string;
+  subtitle: string;
+  description?: string;
+  meta?: string;
+  disabled?: boolean;
+  selected?: boolean;
+  faded?: boolean;
+  onClick?: () => void;
+}
+
+function VisualStage({ title, hint, items }: { title: string; hint: string; items: VisualStageInfo[] }) {
+  return (
+    <Card
+      size="small"
+      style={{
+        borderRadius: 18,
+        background: 'linear-gradient(180deg, #fbfdff 0%, #f3f8ff 100%)',
+        border: '1px solid #d9e6ff',
+        boxShadow: '0 10px 24px rgba(27, 58, 107, 0.06)',
+      }}
+      styles={{ body: { padding: 16 } }}
+    >
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontWeight: 700, color: '#102a4f', fontSize: 16 }}>{title}</div>
+        <div style={{ fontSize: 12, color: '#60738f', marginTop: 4 }}>{hint}</div>
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          gap: 12,
+          overflowX: 'auto',
+          paddingBottom: 6,
+          scrollSnapType: 'x proximity',
+        }}
+      >
+        {items.map((item) => (
+          <div
+            key={item.key}
+            onClick={item.disabled ? undefined : item.onClick}
+            style={{
+              minWidth: 220,
+              maxWidth: 220,
+              flex: '0 0 220px',
+              borderRadius: 16,
+              padding: 14,
+              cursor: item.disabled ? 'not-allowed' : 'pointer',
+              border: item.selected ? '2px solid #1b3a6b' : '1px solid #d7deeb',
+              background: item.selected
+                ? 'linear-gradient(180deg, #e8f0ff 0%, #f7fbff 100%)'
+                : item.faded
+                  ? 'linear-gradient(180deg, #f6f7f9 0%, #eef1f5 100%)'
+                  : 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)',
+              color: item.faded ? '#9aa7b8' : '#102a4f',
+              opacity: item.disabled ? 0.45 : item.faded ? 0.7 : 1,
+              boxShadow: item.selected
+                ? '0 14px 30px rgba(27, 58, 107, 0.18)'
+                : '0 8px 18px rgba(15, 34, 64, 0.06)',
+              transition: 'all 0.2s ease',
+              scrollSnapAlign: 'start',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+              <div style={{ fontWeight: 700, fontSize: 15, lineHeight: 1.5 }}>{item.title}</div>
+              {item.selected ? <Tag color="blue" style={{ marginInlineEnd: 0, borderRadius: 999 }}>已选</Tag> : null}
+            </div>
+            <div style={{ fontSize: 12, marginTop: 8, color: item.faded ? '#9aa7b8' : '#60738f', lineHeight: 1.6 }}>{item.subtitle}</div>
+            {item.description ? (
+              <div style={{ fontSize: 12, marginTop: 10, color: item.faded ? '#a8b2be' : '#50627d', lineHeight: 1.7 }}>{item.description}</div>
+            ) : null}
+            {item.meta ? <div style={{ marginTop: 10, fontSize: 11, color: item.faded ? '#a8b2be' : '#7b8aa0' }}>{item.meta}</div> : null}
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+const stepTitleMap: Record<SlotStep, string> = {
+  mode: '选择任务模式',
+  category: '选择评测大类',
+  taskType: '选择子场景',
+  deviceType: '选择芯片设备',
+  deviceCount: '填写设备数量',
+  toolset: '选择测试工具',
+  operatorLib: '选择算子库',
+  operatorCategories: '选择算子分类',
+  operatorCount: '设置算子数量',
+  imageId: '选择镜像',
+  precision: '选择精度',
+  testMode: '选择测试模式',
+  description: '填写任务描述',
+  confirm: '确认并创建',
+  done: '任务已创建',
+};
 
 export default function DLAgentCreate() {
   const navigate = useNavigate();
@@ -246,6 +370,7 @@ export default function DLAgentCreate() {
   }, [taskDraft.taskCategory]);
 
   const selectedDevice = useMemo(() => devices.find((item) => item.device_type === taskDraft.deviceType), [devices, taskDraft.deviceType]);
+  const scenarioTagSet = useMemo(() => new Set([...MODEL_TEST_TYPES, ...OPERATOR_TEST_TYPES].map((item) => item.value)), []);
   const filteredToolsets = useMemo(() => {
     if (taskDraft.taskCategory === 'operator_test') {
       return toolsets.filter((item) => item.name === 'Deeplink_op_test' || item.name.includes('Deeplink_op_test'));
@@ -257,13 +382,6 @@ export default function DLAgentCreate() {
   }, [toolsets, modelToolsets, taskDraft.taskCategory]);
   const filteredImages = useMemo(() => {
     if (!taskDraft.taskType || !taskDraft.deviceType) return [];
-    const chipTagMap: Record<string, string> = {
-      huawei_910c: '910C',
-      huawei_910b: '910B',
-      cambrian_590: 'MLU590',
-      kunlun_p800: 'P800',
-      hygon_bw1000: 'BW1000',
-    };
     const chipTag = chipTagMap[taskDraft.deviceType] || '';
     return allImages.filter((item) => {
       const tags = item.tags || [];
@@ -274,6 +392,47 @@ export default function DLAgentCreate() {
   }, [allImages, taskDraft.taskType, taskDraft.deviceType]);
   const selectedImage = useMemo(() => filteredImages.find((item) => item.id === taskDraft.imageId), [filteredImages, taskDraft.imageId]);
   const imageCandidates = useMemo(() => filteredImages.slice(0, 5), [filteredImages]);
+  const currentStageTitle = stepTitleMap[currentStep] || '流程进行中';
+  const routePrefix = taskDraft.taskType ? TASK_TYPE_PREFIX_MAP[taskDraft.taskType] : undefined;
+
+  const visualDeviceCandidates = useMemo(() => {
+    if (taskDraft.taskCategory !== 'model_deployment_test' || !taskDraft.taskType) return [] as DeviceOption[];
+    const matchedChipKeys = new Set(
+      allImages
+        .filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.taskType!))
+        .map((img) => chipKeyFromImage(img)),
+    );
+    const online = devices.filter((device) => device.available_count > 0);
+    const matched = online.filter((device) => matchedChipKeys.has(normalize(chipLabelFromDevice(device))));
+    return matched.length ? matched : online;
+  }, [allImages, devices, scenarioTagSet, taskDraft.taskCategory, taskDraft.taskType]);
+
+  const selectedDeviceChipKey = useMemo(() => normalize(chipLabelFromDevice(selectedDevice)), [selectedDevice]);
+
+  const visualFrameworkCandidates = useMemo(() => {
+    if (taskDraft.taskCategory !== 'model_deployment_test' || !taskDraft.taskType || !selectedDeviceChipKey) return [] as { key: string; label: string; count: number }[];
+    const bucket = new Map<string, { key: string; label: string; count: number }>();
+    allImages
+      .filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.taskType!) && chipKeyFromImage(img) === selectedDeviceChipKey)
+      .forEach((img) => {
+        const key = frameworkKeyFromImage(img);
+        const prev = bucket.get(key) || { key, label: img.framework_name || '未知框架', count: 0 };
+        prev.count += 1;
+        bucket.set(key, prev);
+      });
+    return Array.from(bucket.values()).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+  }, [allImages, scenarioTagSet, selectedDeviceChipKey, taskDraft.taskCategory, taskDraft.taskType]);
+
+  const selectedFrameworkKey = useMemo(() => {
+    if (!taskDraft.imageId) return '';
+    const image = filteredImages.find((item) => item.id === taskDraft.imageId);
+    return image ? frameworkKeyFromImage(image) : '';
+  }, [filteredImages, taskDraft.imageId]);
+
+  const visualImageCandidates = useMemo(() => {
+    if (!selectedFrameworkKey) return filteredImages;
+    return filteredImages.filter((img) => frameworkKeyFromImage(img) === selectedFrameworkKey);
+  }, [filteredImages, selectedFrameworkKey]);
 
   const appendAgentMessage = (text: string) => setMessages((prev) => [...prev, { role: 'agent', text }]);
   const appendUserMessage = (text: string) => setMessages((prev) => [...prev, { role: 'user', text }]);
@@ -557,20 +716,53 @@ export default function DLAgentCreate() {
   return (
     <div>
       <PageHeader
-        title="DL智能体"
-        subtitle="按固定树状流程驱动正式任务：评测/适配 → 评测大类 → 子场景 → 芯片 → 镜像/工具。"
+        title="DL 智能体创建台"
+        subtitle="用对话式流程生成正式任务。先定模式与场景，再锁定芯片环境，最后收敛到镜像 / 工具，避免错链路与错编号。"
         breadcrumbs={[{ title: 'DL智能体' }]}
+        extra={
+          <Space wrap>
+            <Tag color="blue" icon={<PartitionOutlined />}>固定树状流程</Tag>
+            <Tag color="purple">执行字段收口</Tag>
+            <Tag color="cyan">场景编号对齐</Tag>
+          </Space>
+        }
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 320px', gap: 16 }}>
-        <Card className="tech-panel" style={{ minHeight: 640, display: 'flex', flexDirection: 'column' }}>
+      <Card
+        className="tech-panel"
+        style={{ marginBottom: 16, borderRadius: 20, background: 'linear-gradient(135deg, rgba(24, 76, 167, 0.08), rgba(79, 216, 255, 0.08))', border: '1px solid rgba(47, 124, 246, 0.14)' }}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
+          <div style={{ padding: 14, borderRadius: 16, background: 'rgba(255,255,255,0.72)' }}>
+            <div style={{ fontSize: 12, color: '#60738f', marginBottom: 6 }}>当前阶段</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#102a4f' }}>{currentStageTitle}</div>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#60738f' }}>当前 step = {currentStep}</div>
+          </div>
+          <div style={{ padding: 14, borderRadius: 16, background: 'rgba(255,255,255,0.72)' }}>
+            <div style={{ fontSize: 12, color: '#60738f', marginBottom: 6 }}>执行语义</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <Tag color="blue">taskCategory={taskDraft.taskCategory || '-'}</Tag>
+              <Tag color="gold">taskType={taskDraft.taskType || '-'}</Tag>
+              <Tag color="green">deviceType={taskDraft.deviceType || '-'}</Tag>
+            </div>
+          </div>
+          <div style={{ padding: 14, borderRadius: 16, background: 'rgba(255,255,255,0.72)' }}>
+            <div style={{ fontSize: 12, color: '#60738f', marginBottom: 6 }}>编号路由预期</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#102a4f' }}>{routePrefix ? `${routePrefix}xx / ${routePrefix}xxxx` : '等待 taskType 确认'}</div>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#60738f' }}>imageId 与 toolsetId 前缀需与 taskType 对齐</div>
+          </div>
+        </div>
+      </Card>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: 16 }}>
+        <Card className="tech-panel" style={{ minHeight: 640, display: 'flex', flexDirection: 'column', borderRadius: 20, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
             <div style={{ width: 40, height: 40, borderRadius: 14, background: 'linear-gradient(135deg, #2f7cf6, #4fd8ff)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 12px 24px rgba(79, 216, 255, 0.22)' }}>
               <RobotOutlined />
             </div>
             <div>
-              <div style={{ fontWeight: 700, color: '#102a4f' }}>DL 智能体对话框</div>
-              <div style={{ fontSize: 12, color: '#60738f' }}>没有子场景确认，就绝不会进入镜像阶段。</div>
+              <div style={{ fontWeight: 700, color: '#102a4f' }}>DL 智能体对话流</div>
+              <div style={{ fontSize: 12, color: '#60738f' }}>先确定场景，再进入资源与镜像层，不让筛选顺序跑偏。</div>
             </div>
           </div>
 
@@ -598,7 +790,7 @@ export default function DLAgentCreate() {
                 <textarea
                   value={draftText}
                   onChange={(e) => setDraftText(e.target.value)}
-                  placeholder="按当前问题输入序号、名称或任务描述；最后一步回复“确认”创建。"
+                  placeholder="按当前问题输入序号、名称或任务描述；最后一步回复“确认”即可创建正式任务。"
                   style={{
                     width: '100%',
                     minHeight: 96,
@@ -612,7 +804,7 @@ export default function DLAgentCreate() {
                   }}
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, gap: 12 }}>
-                  <div style={{ fontSize: 12, color: '#60738f' }}>当前流程是硬顺序，不会跳过子场景直接去找镜像。</div>
+                  <div style={{ fontSize: 12, color: '#60738f' }}>当前流程按“场景 → 芯片 → 镜像/工具”硬约束推进。</div>
                   <Button type="primary" icon={<SendOutlined />} onClick={handleSend} loading={loading}>发送</Button>
                 </div>
               </>
@@ -620,29 +812,119 @@ export default function DLAgentCreate() {
           </div>
         </Card>
 
-        <Card className="tech-panel">
-          <div style={{ fontWeight: 700, color: '#102a4f', marginBottom: 12 }}>流程状态</div>
-          <Space size={[6, 6]} wrap style={{ marginBottom: 12 }}>
-            {taskDraft.mode ? <Tag color="blue">mode={taskDraft.mode}</Tag> : null}
-            {taskDraft.taskCategory ? <Tag color="purple">taskCategory={taskDraft.taskCategory}</Tag> : null}
-            {taskDraft.taskType ? <Tag color="gold">taskType={taskDraft.taskType}</Tag> : null}
-            {taskDraft.deviceType ? <Tag color="green">deviceType={taskDraft.deviceType}</Tag> : null}
-            {taskDraft.imageId ? <Tag color="cyan">imageId={taskDraft.imageId}</Tag> : null}
-          </Space>
-          <Alert
-            type="warning"
-            showIcon
-            message={`调试状态：step=${currentStep} | mode=${taskDraft.mode || '-'} | taskCategory=${taskDraft.taskCategory || '-'} | taskType=${taskDraft.taskType || '-'} | deviceType=${taskDraft.deviceType || '-'} | chipTag=${({huawei_910c:'910C',huawei_910b:'910B',cambrian_590:'MLU590',kunlun_p800:'P800',hygon_bw1000:'BW1000'} as any)[taskDraft.deviceType || ''] || '-'} | scenarioTag=${taskDraft.taskType || '-'} | toolsetCandidates=${filteredToolsets.length} | allImages=${allImages.length} | imageCandidates=${imageCandidates.length} | assetLoadError=${assetLoadError || '-'}`}
-            style={{ marginBottom: 12 }}
-          />
-          <Alert
-            type="info"
-            showIcon
-            message={`镜像候选预览：${imageCandidates.length ? imageCandidates.map((item, index) => `${index + 1}.${item.name}`).join('；') : '空'}`}
-          />
-          <Paragraph style={{ color: '#60738f', marginTop: 12, marginBottom: 0 }}>
-            现在镜像只有在“模式/大类/子场景/芯片”都走完后才会出现。你刚才提到的问题，就是这次重点修复的逻辑。\n          </Paragraph>
-        </Card>
+        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+          <Card className="tech-panel" style={{ borderRadius: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <CheckCircleOutlined style={{ color: '#2f7cf6' }} />
+              <div style={{ fontWeight: 700, color: '#102a4f' }}>执行字段摘要</div>
+            </div>
+            <Space size={[6, 6]} wrap style={{ marginBottom: 12 }}>
+              {taskDraft.mode ? <Tag color="blue">mode={taskDraft.mode}</Tag> : null}
+              {taskDraft.taskCategory ? <Tag color="purple">taskCategory={taskDraft.taskCategory}</Tag> : null}
+              {taskDraft.taskType ? <Tag color="gold">taskType={taskDraft.taskType}</Tag> : null}
+              {taskDraft.deviceType ? <Tag color="green">deviceType={taskDraft.deviceType}</Tag> : null}
+              {taskDraft.imageId ? <Tag color="cyan">imageDbId={taskDraft.imageId}</Tag> : null}
+              {taskDraft.toolsetId ? <Tag color="geekblue">toolsetDbId={taskDraft.toolsetId}</Tag> : null}
+            </Space>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <div style={{ padding: 12, borderRadius: 14, background: '#f7faff', border: '1px solid #e3edff' }}>
+                <div style={{ fontSize: 12, color: '#60738f', marginBottom: 4 }}>路由规则</div>
+                <Text style={{ color: '#102a4f' }}>taskType 决定编号前缀，deviceType 只表示芯片环境，不参与场景编号推导。</Text>
+              </div>
+              <div style={{ padding: 12, borderRadius: 14, background: '#f7faff', border: '1px solid #e3edff' }}>
+                <div style={{ fontSize: 12, color: '#60738f', marginBottom: 4 }}>当前芯片标签</div>
+                <Text style={{ color: '#102a4f' }}>{taskDraft.deviceType ? chipTagMap[taskDraft.deviceType] || taskDraft.deviceType : '尚未选择设备'}</Text>
+              </div>
+              <div style={{ padding: 12, borderRadius: 14, background: '#f7faff', border: '1px solid #e3edff' }}>
+                <div style={{ fontSize: 12, color: '#60738f', marginBottom: 4 }}>候选收敛状态</div>
+                <Text style={{ color: '#102a4f' }}>工具候选 {filteredToolsets.length} 个，镜像候选 {imageCandidates.length} 个{assetLoadError ? `，资产加载异常：${assetLoadError}` : ''}</Text>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="tech-panel" style={{ borderRadius: 20 }}>
+            <div style={{ fontWeight: 700, color: '#102a4f', marginBottom: 12 }}>镜像候选预览</div>
+            <Alert
+              type="info"
+              showIcon
+              message={imageCandidates.length ? imageCandidates.map((item, index) => `${index + 1}. ${item.name}`).join('；') : '当前还没有可展示的镜像候选'}
+            />
+            <Paragraph style={{ color: '#60738f', marginTop: 12, marginBottom: 0 }}>
+              只有当模式 / 大类 / 子场景 / 芯片这几层都确认后，镜像层才会打开。这样页面观感更稳定，执行语义也更干净。
+            </Paragraph>
+          </Card>
+
+          {taskDraft.taskCategory === 'model_deployment_test' ? (
+            <Card className="tech-panel" style={{ borderRadius: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#102a4f' }}>三层图形化选择</div>
+                  <div style={{ fontSize: 12, color: '#60738f', marginTop: 4 }}>设备 → 中间层 → 镜像，未选项以灰色弱化展示，可横向拖拽查看更多。</div>
+                </div>
+                <Space wrap>
+                  <Tag color="blue">设备 {visualDeviceCandidates.length}</Tag>
+                  <Tag color="purple">中间层 {visualFrameworkCandidates.length}</Tag>
+                  <Tag color="cyan">镜像 {visualImageCandidates.length}</Tag>
+                </Space>
+              </div>
+
+              <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                <VisualStage
+                  title="第一层：设备"
+                  hint={taskDraft.taskType ? '根据已选子场景展示匹配设备；已选设备高亮，周边候选灰显。' : '先选择子场景后，这里会自动收敛设备候选。'}
+                  items={visualDeviceCandidates.length ? visualDeviceCandidates.map((device) => {
+                    const chipKey = normalize(chipLabelFromDevice(device));
+                    const relatedCount = allImages.filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.taskType || '') && chipKeyFromImage(img) === chipKey).length;
+                    return {
+                      key: device.device_type,
+                      title: chipLabelFromDevice(device),
+                      subtitle: `${device.manufacturer || '设备'} · 空闲 ${device.available_count} / 共 ${device.total_count}`,
+                      description: relatedCount > 0 ? `当前子场景下有 ${relatedCount} 个镜像候选` : '当前子场景下暂无镜像候选',
+                      selected: taskDraft.deviceType === device.device_type,
+                      faded: Boolean(taskDraft.deviceType) && taskDraft.deviceType !== device.device_type,
+                      disabled: device.available_count === 0,
+                      onClick: () => setTaskDraft((prev) => ({ ...prev, deviceType: device.device_type, imageId: undefined })),
+                    };
+                  }) : [{ key: 'empty-device', title: '暂无设备候选', subtitle: taskDraft.taskType ? '当前子场景未匹配到在线设备' : '请先选择子场景', disabled: true }]}
+                />
+
+                <VisualStage
+                  title="第二层：中间层"
+                  hint={taskDraft.deviceType ? '根据设备与子场景收敛框架/中间层。' : '先完成第一层设备选择后，这里才会激活。'}
+                  items={visualFrameworkCandidates.length ? visualFrameworkCandidates.map((item) => ({
+                    key: item.key,
+                    title: item.label,
+                    subtitle: `${item.count} 个镜像候选`,
+                    description: selectedDevice ? `基于 ${chipLabelFromDevice(selectedDevice)} 过滤` : '请先选择设备',
+                    selected: selectedFrameworkKey === item.key,
+                    faded: Boolean(selectedFrameworkKey) && selectedFrameworkKey !== item.key,
+                    disabled: !taskDraft.deviceType,
+                    onClick: () => {
+                      const firstImage = filteredImages.find((img) => frameworkKeyFromImage(img) === item.key);
+                      setTaskDraft((prev) => ({ ...prev, imageId: firstImage?.id }));
+                    },
+                  })) : [{ key: 'empty-framework', title: '暂无中间层候选', subtitle: taskDraft.deviceType ? '当前设备下没有匹配框架' : '请先选择设备', disabled: true }]}
+                />
+
+                <VisualStage
+                  title="第三层：镜像"
+                  hint={selectedFrameworkKey ? '已根据前两层结果收敛到最终镜像候选。' : '先在前两层完成选择后，这里显示镜像。'}
+                  items={visualImageCandidates.length ? visualImageCandidates.map((img) => ({
+                    key: String(img.id),
+                    title: img.model_name || img.name,
+                    subtitle: `${img.framework_name || '未知框架'} · ${img.chip_name || chipLabelFromDevice(selectedDevice) || '未知芯片'}`,
+                    description: img.description || img.name,
+                    meta: scenarioTagsFromImage(img, scenarioTagSet).join(' / ') || undefined,
+                    selected: taskDraft.imageId === img.id,
+                    faded: Boolean(taskDraft.imageId) && taskDraft.imageId !== img.id,
+                    disabled: !taskDraft.deviceType,
+                    onClick: () => setTaskDraft((prev) => ({ ...prev, imageId: img.id })),
+                  })) : [{ key: 'empty-image', title: '暂无镜像候选', subtitle: selectedFrameworkKey ? '当前条件下没有匹配镜像' : '请先选择中间层', disabled: true }]}
+                />
+              </Space>
+            </Card>
+          ) : null}
+        </Space>
       </div>
     </div>
   );

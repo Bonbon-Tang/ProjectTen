@@ -16,6 +16,7 @@ import {
   Col,
   Radio,
   Alert,
+  Statistic,
 } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { DefaultOptionType } from 'antd/es/select';
@@ -25,6 +26,7 @@ import {
   OPERATOR_TEST_TYPES,
   MODEL_TEST_TYPES,
   PRIORITY_MAP,
+  TASK_TYPE_PREFIX_MAP,
 } from '@/utils/constants';
 import { createEvaluation } from '@/api/evaluations';
 import { extractErrorMessage } from '@/utils/error';
@@ -53,6 +55,8 @@ type ModelImageInfo = {
   chip_name?: string;
   model_name?: string;
   framework_name?: string;
+  middleware_name?: string;
+  scenario_tags?: string[];
 };
 
 type OpCategoryInfo = {
@@ -85,8 +89,13 @@ function chipKeyFromImage(image: ModelImageInfo) {
   return normalizeText(image.chip_name || image.name.split('-')[0]);
 }
 
-function frameworkKeyFromImage(image: ModelImageInfo) {
-  return normalizeText(image.framework_name || 'unknown');
+function middlewareLabelFromImage(image: ModelImageInfo) {
+  const tags = image.tags || [];
+  return image.middleware_name || image.framework_name || tags[1] || '未知中间层';
+}
+
+function middlewareKeyFromImage(image: ModelImageInfo) {
+  return normalizeText(middlewareLabelFromImage(image));
 }
 
 function scenarioTagsFromImage(image: ModelImageInfo, scenarioTagSet: Set<string>) {
@@ -264,7 +273,9 @@ export default function EvalCreate() {
             tags: item.tags,
             chip_name: item.chip_name,
             framework_name: item.framework_name,
+            middleware_name: item.middleware_name,
             model_name: item.model_name,
+            scenario_tags: item.scenario_tags,
           }));
           setModelImages(mapped);
         }
@@ -300,7 +311,9 @@ export default function EvalCreate() {
               : [],
           chip_name: item.chip_name,
           framework_name: item.framework_name,
+          middleware_name: item.middleware_name,
           model_name: item.model_name,
+          scenario_tags: item.scenario_tags,
         })),
       );
     } catch {
@@ -465,8 +478,8 @@ export default function EvalCreate() {
     visualCandidateImages
       .filter((img) => chipKeyFromImage(img) === selectedDeviceChipKey)
       .forEach((img) => {
-        const key = frameworkKeyFromImage(img);
-        const label = img.framework_name || '未知框架';
+        const key = middlewareKeyFromImage(img);
+        const label = middlewareLabelFromImage(img);
         const prev = bucket.get(key) || { key, label, count: 0, descriptions: [] };
         prev.count += 1;
         if (img.description) prev.descriptions.push(img.description);
@@ -491,7 +504,7 @@ export default function EvalCreate() {
 
   const imageCandidatesByVisual = useMemo(() => {
     if (taskCategory !== 'model_deployment_test' || !taskType || !selectedDeviceChipKey || !visualFramework) return [] as ModelImageInfo[];
-    return visualCandidateImages.filter((img) => chipKeyFromImage(img) === selectedDeviceChipKey && frameworkKeyFromImage(img) === visualFramework);
+    return visualCandidateImages.filter((img) => chipKeyFromImage(img) === selectedDeviceChipKey && middlewareKeyFromImage(img) === visualFramework);
   }, [selectedDeviceChipKey, taskCategory, taskType, visualCandidateImages, visualFramework]);
 
   useEffect(() => {
@@ -604,7 +617,7 @@ export default function EvalCreate() {
     const imageItems: VisualStageInfo[] = imageCandidatesByVisual.map((img) => ({
       key: String(img.id),
       title: img.model_name || img.name,
-      subtitle: `${img.framework_name || '未知框架'} · ${img.chip_name || chipLabelFromDevice(selectedDevice) || '未知芯片'}`,
+      subtitle: `${middlewareLabelFromImage(img)} · ${img.chip_name || chipLabelFromDevice(selectedDevice) || '未知芯片'}`,
       description: img.description || img.name,
       meta: (img.tags || []).filter((tag) => scenarioTagSet.has(tag)).map((tag) => getSubTypeLabel(tag)).join(' / ') || undefined,
       selected: img.id === selectedImageId,
@@ -631,7 +644,7 @@ export default function EvalCreate() {
           </div>
           <Space direction="vertical" size={16} style={{ width: '100%' }}>
             <VisualStage title="第一层：设备" hint="先选芯片设备；已选设备会高亮，其他可用设备以灰色卡片显示。" items={deviceItems} />
-            <VisualStage title="第二层：中间层" hint={selectedDeviceType ? '根据所选设备与子场景，展示可用的中间层/框架。' : '先在第一层选择设备后，这里会显示匹配的中间层。'} items={frameworkItems.length ? frameworkItems : [{ key: 'empty-framework', title: '暂无中间层候选', subtitle: selectedDeviceType ? '当前设备下没有匹配框架' : '请先选择设备', disabled: true }]} />
+            <VisualStage title="第二层：中间层" hint={selectedDeviceType ? '根据所选设备与子场景，展示可用的中间层；逻辑与镜像 tags 第二位保持一致。' : '先在第一层选择设备后，这里会显示匹配的中间层。'} items={frameworkItems.length ? frameworkItems : [{ key: 'empty-framework', title: '暂无中间层候选', subtitle: selectedDeviceType ? '当前设备下没有匹配中间层' : '请先选择设备', disabled: true }]} />
             <VisualStage title="第三层：镜像选择" hint={visualFramework ? '根据前两层结果，展示最终可选镜像。' : '先完成前两层选择后，这里会显示镜像候选。'} items={imageItems.length ? imageItems : [{ key: 'empty-image', title: '暂无镜像候选', subtitle: visualFramework ? '当前条件下没有匹配镜像' : '请先选择中间层', disabled: true }]} />
           </Space>
         </Card>
@@ -639,8 +652,34 @@ export default function EvalCreate() {
     );
   };
 
+  const currentRoutePrefix = taskType ? TASK_TYPE_PREFIX_MAP[taskType] : undefined;
+
   const renderStep2 = () => (
-    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+      <Card
+        style={{
+          borderRadius: 18,
+          marginBottom: 20,
+          background: 'linear-gradient(135deg, rgba(24, 76, 167, 0.08), rgba(79, 216, 255, 0.08))',
+          border: '1px solid rgba(47, 124, 246, 0.14)',
+          boxShadow: '0 12px 28px rgba(27, 58, 107, 0.08)',
+        }}
+      >
+        <Row gutter={[16, 16]}>
+          <Col xs={24} md={8}>
+            <Statistic title="当前大类" value={getCategoryLabel(taskCategory) || '-'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} />
+          </Col>
+          <Col xs={24} md={8}>
+            <Statistic title="当前子场景" value={getSubTypeLabel(taskType) || '-'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} />
+          </Col>
+          <Col xs={24} md={8}>
+            <Statistic title="编号前缀" value={currentRoutePrefix || '--'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} suffix={currentRoutePrefix ? '系列' : ''} />
+          </Col>
+        </Row>
+        <div style={{ marginTop: 12, fontSize: 13, color: '#60738f', lineHeight: 1.8 }}>
+          提交页和 DL 智能体页现在遵循同一套路由语义：<b>taskType</b> 决定编号前缀，<b>deviceType</b> 只表示芯片环境，镜像与工具应对齐到同一前缀段。
+        </div>
+      </Card>
       <Form form={form} layout="vertical" preserve={true}>
         <Form.Item name="name" label="任务名称" rules={[{ required: true, message: '请输入任务名称' }]}><Input placeholder="请输入任务名称" /></Form.Item>
 
@@ -696,26 +735,27 @@ export default function EvalCreate() {
               options={imageCandidatesByVisual.map((img) => {
                 const scenarioTags = (img.tags || []).filter((tag) => scenarioTagSet.has(tag));
                 return {
-                  label: `${img.name} - ${img.model_name || '模型'} (${img.framework_name || '框架'})`,
+                  label: `${img.name} - ${img.model_name || '模型'} (${middlewareLabelFromImage(img)})`,
                   value: img.id,
-                  searchText: `${img.name} ${img.model_name || ''} ${img.framework_name || ''} ${scenarioTags.join(' ')}`,
+                  searchText: `${img.name} ${img.model_name || ''} ${middlewareLabelFromImage(img)} ${scenarioTags.join(' ')}`,
                   chip_name: img.chip_name,
                   model_name: img.model_name,
                   framework_name: img.framework_name,
+                  middleware_name: middlewareLabelFromImage(img),
                   scenarioTags,
                 };
               })}
               optionRender={(option) => {
-                const data = option.data as DefaultOptionType & { chip_name?: string; model_name?: string; framework_name?: string; scenarioTags?: string[] };
+                const data = option.data as DefaultOptionType & { chip_name?: string; model_name?: string; framework_name?: string; middleware_name?: string; scenarioTags?: string[] };
                 return (
                   <div style={{ padding: '4px 0' }}>
                     <div style={{ fontWeight: 600, color: '#102a4f', marginBottom: 4 }}>{String(data.label)}</div>
-                    <div style={{ fontSize: 12, color: '#60738f', marginBottom: data.scenarioTags?.length ? 6 : 0 }}>{data.chip_name || '芯片'} · {data.framework_name || '框架'} · {data.model_name || '模型'}</div>
+                    <div style={{ fontSize: 12, color: '#60738f', marginBottom: data.scenarioTags?.length ? 6 : 0 }}>{data.chip_name || '芯片'} · {data.middleware_name || data.framework_name || '中间层'} · {data.model_name || '模型'}</div>
                     {data.scenarioTags?.length ? <Space size={[4, 4]} wrap>{data.scenarioTags.map((tag) => <Tag key={tag} color={tag === taskType ? 'blue' : 'default'} style={{ marginInlineEnd: 0 }}>{getSubTypeLabel(tag)}</Tag>)}</Space> : null}
                   </div>
                 );
               }}
-              notFoundContent={modelImagesLoading ? '加载中...' : !form.getFieldValue('device_type') ? '请先选择设备类型' : '没有匹配的镜像，请检查芯片、中间层和子场景选择'}
+              notFoundContent={modelImagesLoading ? '加载中...' : !form.getFieldValue('device_type') ? '请先选择设备类型' : '没有匹配的镜像，请检查芯片 / 中间层 / 子场景 tag 是否一致'}
             />
           </Form.Item>
         )}
@@ -806,9 +846,14 @@ export default function EvalCreate() {
 
   return (
     <div>
-      <PageHeader title="创建评测任务" breadcrumbs={[{ title: '评测系统', path: '/evaluations/list' }, { title: '创建任务' }]} />
-      <Card style={{ borderRadius: 8 }}>
-        <Steps current={current} items={steps} style={{ marginBottom: 32, maxWidth: 700, margin: '0 auto 32px' }} />
+      <PageHeader
+        title="创建评测任务"
+        subtitle="以统一路由语义创建正式评测：先选大类与子场景，再配置设备、工具与镜像，最后完成确认提交。"
+        breadcrumbs={[{ title: '评测系统', path: '/evaluations/list' }, { title: '创建任务' }]}
+        extra={<Space wrap><Tag color="blue">统一执行字段</Tag><Tag color="purple">图形化筛选</Tag><Tag color="cyan">编号前缀对齐</Tag></Space>}
+      />
+      <Card style={{ borderRadius: 18, boxShadow: '0 12px 28px rgba(27, 58, 107, 0.08)' }}>
+        <Steps current={current} items={steps} style={{ marginBottom: 32, maxWidth: 760, margin: '0 auto 32px' }} />
         <div style={{ minHeight: 300 }}>{renderStepContent()}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32, maxWidth: 700, margin: '32px auto 0' }}>
           {current > 0 ? <Button onClick={handlePrev}>上一步</Button> : <div />}

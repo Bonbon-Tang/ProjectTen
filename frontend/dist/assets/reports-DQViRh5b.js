@@ -1,1 +1,0 @@
-import{aU as r}from"./index-CvpJdrSi.js";function o(e){return r.get(`/reports/${e}`)}function n(e){return r.get(`/reports/${e}/download`,{responseType:"blob"})}function s(e){return r.post(`/reports/${e}/archive`)}function a(e){return r.get("/reports/archives",{params:e})}function p(e){return r.delete(`/reports/archives/${e}`)}export{s as a,a as b,p as c,n as d,o as g};

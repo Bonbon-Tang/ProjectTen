@@ -1,1 +1,0 @@
-import{aU as r}from"./index-CvpJdrSi.js";function t(e){return r.get("/benchmark/operators",{params:e})}function n(){return r.get("/benchmark/operators/categories")}function o(){return r.get("/benchmark/summary")}function c(e){return r.get(`/benchmark/operators/${e}/benchmarks`)}export{o as a,t as b,c,n as g};
