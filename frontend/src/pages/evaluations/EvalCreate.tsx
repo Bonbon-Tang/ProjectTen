@@ -452,12 +452,12 @@ export default function EvalCreate() {
     if (taskCategory !== 'model_deployment_test') return [] as DeviceInfo[];
     if (!taskType) return onlineDevices;
     const chips = new Set(visualCandidateImages.map((img) => chipKeyFromImage(img)));
-    const matched = onlineDevices.filter((device) => chips.has(normalizeText(device.chip_name || chipLabelFromDevice(device)) || normalizeText(chipLabelFromDevice(device))));
+    const matched = onlineDevices.filter((device) => chips.has(normalizeText(chipLabelFromDevice(device)) || normalizeText(chipLabelFromDevice(device))));
     return matched.length ? matched : onlineDevices;
   }, [onlineDevices, taskCategory, taskType, visualCandidateImages]);
 
   const selectedDevice = useMemo(() => deviceList.find((d) => d.device_type === selectedDeviceType), [deviceList, selectedDeviceType]);
-  const selectedDeviceChipKey = useMemo(() => normalizeText(selectedDevice?.chip_name || chipLabelFromDevice(selectedDevice)), [selectedDevice]);
+  const selectedDeviceChipKey = useMemo(() => normalizeText(chipLabelFromDevice(selectedDevice)), [selectedDevice]);
 
   const frameworkCandidates = useMemo(() => {
     if (taskCategory !== 'model_deployment_test' || !taskType || !selectedDeviceChipKey) return [] as { key: string; label: string; count: number; descriptions: string[] }[];
@@ -564,7 +564,7 @@ export default function EvalCreate() {
 
     const deviceItems: VisualStageInfo[] = deviceCandidates.map((device) => {
       const selected = device.device_type === selectedDeviceType;
-      const chipKey = normalizeText(device.chip_name || chipLabelFromDevice(device));
+      const chipKey = normalizeText(chipLabelFromDevice(device));
       const availableImagesForDevice = visualCandidateImages.filter((img) => chipKeyFromImage(img) === chipKey).length;
       return {
         key: device.device_type,
