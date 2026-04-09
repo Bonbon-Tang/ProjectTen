@@ -591,7 +591,7 @@ export default function EvalCreate() {
 
     const deviceItems: VisualStageInfo[] = deviceCandidates.map((device) => {
       const selected = device.device_type === selectedDeviceType;
-      const chipKey = normalizeText(chipLabelFromDevice(device));
+      const chipKey = normalizeText(chipTagFromDevice(device));
       const availableImagesForDevice = visualCandidateImages.filter((img) => chipKeyFromImage(img) === chipKey).length;
       return {
         key: device.device_type,
@@ -631,7 +631,7 @@ export default function EvalCreate() {
     const imageItems: VisualStageInfo[] = imageCandidatesByVisual.map((img) => ({
       key: String(img.id),
       title: img.model_name || img.name,
-      subtitle: `${middlewareLabelFromImage(img)} · ${img.chip_name || chipLabelFromDevice(selectedDevice) || '未知芯片'}`,
+      subtitle: `${middlewareLabelFromImage(img)} · ${img.chip_name || img.tags?.[0] || chipTagFromDevice(selectedDevice) || chipLabelFromDevice(selectedDevice) || '未知芯片'}`,
       description: img.description || img.name,
       meta: (img.tags || []).filter((tag) => scenarioTagSet.has(tag)).map((tag) => getSubTypeLabel(tag)).join(' / ') || undefined,
       selected: img.id === selectedImageId,
