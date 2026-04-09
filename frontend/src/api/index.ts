@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { message } from 'antd';
+import { getHttpErrorMessage } from '@/utils/error';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
@@ -8,6 +9,10 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+interface RequestConfigWithToast {
+  skipErrorToast?: boolean;
+}
 
 // 请求拦截器
 api.interceptors.request.use(
@@ -28,40 +33,33 @@ api.interceptors.response.use(
   (response) => {
     const res = response.data;
     if (res.code !== undefined && res.code !== 0 && res.code !== 200) {
+      const err = new Error(res.message || '请求失败');
       message.error(res.message || '请求失败');
-      return Promise.reject(new Error(res.message || '请求失败'));
+      return Promise.reject(err);
     }
     return res;
   },
   (error) => {
     console.error('[API Error]', error);
-    if (error.response) {
-      const { status, data } = error.response;
-      console.error('[API Error Response]', status, data);
-      switch (status) {
-        case 401:
-          message.error('登录已过期，请重新登录');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-          break;
-        case 403:
-          message.error('没有访问权限');
-          break;
-        case 404:
-          message.error('请求的资源不存在');
-          break;
-        case 500:
-          message.error('服务器内部错误');
-          break;
-        default:
-          message.error(data?.message || data?.detail || '请求失败');
+
+    const config = (error.config || {}) as RequestConfigWithToast;
+    const status = error.response?.status;
+    const errorText = getHttpErrorMessage(error, '请求失败');
+
+    if (status === 401) {
+      if (!config.skipErrorToast) {
+        message.error('登录已过期，请重新登录');
       }
-    } else if (error.message.includes('timeout')) {
-      message.error('请求超时，请稍后重试');
-    } else {
-      message.error('网络异常，请检查网络连接');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+      return Promise.reject(error);
     }
+
+    if (!config.skipErrorToast) {
+      message.error(errorText);
+    }
+
     return Promise.reject(error);
   },
 );

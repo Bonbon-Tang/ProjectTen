@@ -27,6 +27,7 @@ import {
   PRIORITY_MAP,
 } from '@/utils/constants';
 import { createEvaluation } from '@/api/evaluations';
+import { extractErrorMessage } from '@/utils/error';
 import { getAssets } from '@/api/assets';
 import { getResourceSummary } from '@/api/resources';
 import { getBenchmarkCategories, getBenchmarkSummary } from '@/api/benchmark';
@@ -125,8 +126,8 @@ export default function EvalCreate() {
   // 从 GET /api/v1/assets?asset_type=toolset 获取工具集, 按category分组
   const fetchToolsets = (scenarioType?: string) => {
     setToolsetsLoading(true);
-    if (scenarioType && taskCategory === 'model_test') {
-      // For model_test, use the new endpoint that filters by task_type
+    if (scenarioType && taskCategory === 'model_deployment_test') {
+      // For model_deployment_test, use the new endpoint that filters by task_type
       getAvailableToolsets(scenarioType)
         .then((res: any) => {
           const list = res?.data || res || [];
@@ -215,9 +216,9 @@ export default function EvalCreate() {
     // Don't fetch toolsets and images on mount - wait for taskType selection
   }, []);
 
-  // Fetch toolsets and images when taskType changes (for model_test)
+  // Fetch toolsets and images when taskType changes (for model_deployment_test)
   useEffect(() => {
-    if (taskCategory === 'model_test' && taskType) {
+    if (taskCategory === 'model_deployment_test' && taskType) {
       fetchToolsets(taskType);
       // Don't fetch images yet - wait for device selection
     } else if (taskCategory === 'operator_test') {
@@ -235,7 +236,7 @@ export default function EvalCreate() {
   // 子类型列表
   const subTypes = useMemo(() => {
     if (taskCategory === 'operator_test') return OPERATOR_TEST_TYPES;
-    if (taskCategory === 'model_test') return MODEL_TEST_TYPES;
+    if (taskCategory === 'model_deployment_test') return MODEL_TEST_TYPES;
     return [];
   }, [taskCategory]);
 
@@ -346,7 +347,7 @@ export default function EvalCreate() {
       const params: any = {
         name: values.name,
         description: values.description || undefined,
-        task_category: taskCategory as 'operator_test' | 'model_test',
+        task_category: taskCategory as 'operator_test' | 'model_deployment_test',
         task_type: taskType,
         device_type: values.device_type,
         device_count: deviceCount,
@@ -368,8 +369,8 @@ export default function EvalCreate() {
         }
       }
 
-      // Include image_id for model_test
-      if (taskCategory === 'model_test' && values.image_id) {
+      // Include image_id for model_deployment_test
+      if (taskCategory === 'model_deployment_test' && values.image_id) {
         params.image_id = values.image_id;
       }
       const res: any = await createEvaluation(params);
@@ -380,8 +381,8 @@ export default function EvalCreate() {
       } else {
         navigate('/evaluations/list');
       }
-    } catch {
-      message.error('创建任务失败，请重试');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '创建任务失败，请重试'));
     } finally {
       setLoading(false);
     }
@@ -486,7 +487,7 @@ export default function EvalCreate() {
       <div style={{ textAlign: 'center', marginBottom: 16, color: '#666' }}>
         当前大类：<Tag color="blue">{getCategoryLabel(taskCategory)}</Tag>
       </div>
-      {taskCategory === 'model_test' && (
+      {taskCategory === 'model_deployment_test' && (
         <div style={{ maxWidth: 400, margin: '0 auto 20px' }}>
           <Input
             prefix={<SearchOutlined />}
@@ -594,8 +595,8 @@ export default function EvalCreate() {
               form.setFieldsValue({
                 name: generateDefaultName(deviceType),
               });
-              // For model_test, fetch images when device is selected
-              if (taskCategory === 'model_test' && taskType && deviceType) {
+              // For model_deployment_test, fetch images when device is selected
+              if (taskCategory === 'model_deployment_test' && taskType && deviceType) {
                 fetchModelImages(taskType, deviceType);
               }
             }}
@@ -900,7 +901,7 @@ export default function EvalCreate() {
                 </Descriptions.Item>
               </>
             )}
-            {taskCategory === 'model_test' && (
+            {taskCategory === 'model_deployment_test' && (
               <Descriptions.Item label="部署镜像">
                 {(() => {
                   const img = modelImages.find((m) => m.id === values.image_id);

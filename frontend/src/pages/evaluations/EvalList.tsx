@@ -30,6 +30,7 @@ import {
   batchDeleteEvaluations,
   setEvaluationPostActions,
 } from '@/api/evaluations';
+import { extractErrorMessage } from '@/utils/error';
 import dayjs from 'dayjs';
 
 const { RangePicker } = DatePicker;
@@ -53,7 +54,7 @@ interface EvalItem {
   created_at: string;
   progress?: number;
   config?: Record<string, any>;
-  // Image and model info for model_test
+  // Image and model info for model_deployment_test
   image_name?: string;
   model_name?: string;
   chip_name?: string;
@@ -144,8 +145,8 @@ export default function EvalList() {
           message.success('删除成功');
           fetchData();
           setSelectedRowKeys((prev) => prev.filter((k) => k !== record.id));
-        } catch {
-          message.error('删除失败');
+        } catch (error) {
+          message.error(extractErrorMessage(error, '删除失败'));
         }
       },
     });
@@ -187,8 +188,8 @@ export default function EvalList() {
           message.success(`成功删除 ${deletableItems.length} 个任务`);
           setSelectedRowKeys([]);
           fetchData();
-        } catch {
-          message.error('批量删除失败');
+        } catch (error) {
+          message.error(extractErrorMessage(error, '批量删除失败'));
         } finally {
           setBatchDeleting(false);
         }
@@ -201,8 +202,8 @@ export default function EvalList() {
       await startEvaluation(id);
       message.success('任务已启动');
       fetchData();
-    } catch {
-      message.error('启动失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '启动失败'));
     }
   };
 
@@ -211,8 +212,8 @@ export default function EvalList() {
       await stopEvaluation(id);
       message.success('任务已停止');
       fetchData();
-    } catch {
-      message.error('停止失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '停止失败'));
     }
   };
 
@@ -221,8 +222,8 @@ export default function EvalList() {
       await retryEvaluation(id);
       message.success('任务已重新启动');
       fetchData();
-    } catch {
-      message.error('重试失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '重试失败'));
     }
   };
 
@@ -255,8 +256,8 @@ export default function EvalList() {
           });
           message.success('设置已保存');
           fetchData();
-        } catch {
-          message.error('保存设置失败');
+        } catch (error) {
+          message.error(extractErrorMessage(error, '保存设置失败'));
         }
       },
     });
@@ -353,7 +354,7 @@ export default function EvalList() {
               停止
             </Button>
           )}
-          {record.status === 'completed' && record.task_category === 'model_test' && (
+          {record.status === 'completed' && record.task_category === 'model_deployment_test' && (
             <Button type="link" size="small" onClick={() => handlePostActions(record)}>
               完成后操作
             </Button>

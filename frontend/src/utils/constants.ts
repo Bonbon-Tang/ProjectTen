@@ -1,13 +1,43 @@
 // 评测大类
 export const EVAL_CATEGORIES = [
   { label: '算子测试', value: 'operator_test', icon: '🔧' },
-  { label: '模型部署测试', value: 'model_test', icon: '🤖' },
+  { label: '模型部署测试', value: 'model_deployment_test', icon: '🤖' },
 ];
+
+export const TASK_TYPE_PREFIX_MAP: Record<string, string> = {
+  operator_perf_accuracy: '01',
+  operator_accuracy: '01',
+  llm: '02',
+  speech_recognition: '03',
+  multimodal: '04',
+  image_classification: '05',
+  object_detection: '06',
+  semantic_segmentation: '07',
+  text_generation: '08',
+  machine_translation: '09',
+  sentiment_analysis: '10',
+  question_answering: '11',
+  text_summarization: '12',
+  speech_synthesis: '13',
+  image_generation: '14',
+  video_understanding: '15',
+  ocr: '16',
+  recommendation: '17',
+  anomaly_detection: '18',
+  time_series: '19',
+  reinforcement_learning: '20',
+  graph_neural_network: '21',
+  medical_imaging: '22',
+  autonomous_driving: '23',
+  robot_control: '24',
+  code_generation: '25',
+  knowledge_graph: '26',
+};
 
 // 算子测试子类型
 export const OPERATOR_TEST_TYPES = [
-  { label: '测精度', value: 'accuracy_only', description: '验证算子在国产芯片上的精度，对比FP32/FP16/INT8结果' },
-  { label: '测精度+性能', value: 'accuracy_and_performance', description: '精度验证 + 性能Benchmark，对比H100基线数据' },
+  { label: '测精度', value: 'operator_accuracy', description: '验证算子在国产芯片上的精度，对比FP32/FP16/INT8结果' },
+  { label: '测精度+性能', value: 'operator_perf_accuracy', description: '精度验证 + 性能Benchmark，对比H100基线数据' },
 ];
 
 // 模型测试子类型（25类子场景）

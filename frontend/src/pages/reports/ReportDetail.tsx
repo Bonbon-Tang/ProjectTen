@@ -129,7 +129,7 @@ export default function ReportDetail() {
   const content = parsedContent || {};
   const metrics = content.metrics || {};
   const isOperatorTest = content.task_category === 'operator_test';
-  const isAccuracyAndPerf = content.task_type === 'accuracy_and_performance';
+  const isAccuracyAndPerf = content.task_type === 'operator_perf_accuracy';
   const operatorResults = metrics.operator_results || [];
   const device = DEVICE_TYPES.find((d) => d.value === content.device_type);
   const durationMin = content.duration_seconds ? (content.duration_seconds / 60).toFixed(1) : null;
@@ -195,7 +195,7 @@ export default function ReportDetail() {
     },
   ];
 
-  // Add performance columns if accuracy_and_performance
+  // Add performance columns if operator_perf_accuracy
   if (isAccuracyAndPerf) {
     operatorColumns.push(
       {
@@ -293,7 +293,7 @@ export default function ReportDetail() {
           <Descriptions.Item label="任务名称">{content.task_name}</Descriptions.Item>
           <Descriptions.Item label="评测类型">
             {isOperatorTest
-              ? (content.task_type === 'accuracy_and_performance' ? '精度+性能' : '精度测试')
+              ? (content.task_type === 'operator_perf_accuracy' ? '精度+性能' : '精度测试')
               : content.task_type
             }
           </Descriptions.Item>

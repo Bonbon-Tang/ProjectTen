@@ -4,6 +4,7 @@ import { message } from 'antd';
 import useAuthStore from '@/stores/authStore';
 import { login as loginApi, logout as logoutApi, getCurrentUser, type LoginParams } from '@/api/auth';
 import api from '@/api/index';
+import { extractErrorMessage } from '@/utils/error';
 
 export function useAuth() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export function useAuth() {
           message.error('登录失败：未获取到令牌');
         }
       } catch (error: any) {
-        message.error(error?.response?.data?.detail || error?.message || '登录失败，请检查用户名和密码');
+        message.error(extractErrorMessage(error, '登录失败，请检查用户名和密码'));
         throw error;
       }
     },

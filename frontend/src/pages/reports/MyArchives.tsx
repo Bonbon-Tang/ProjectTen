@@ -35,8 +35,8 @@ interface ArchiveItem {
 
 // 合并子类型用于显示
 const ALL_SUB_TYPES = [
-  { label: '测精度', value: 'accuracy_only' },
-  { label: '测精度 + 性能', value: 'accuracy_and_performance' },
+  { label: '测精度', value: 'operator_accuracy' },
+  { label: '测精度 + 性能', value: 'operator_perf_accuracy' },
   { label: '大语言模型', value: 'llm' },
   { label: '多模态模型', value: 'multimodal' },
   { label: '语音识别', value: 'speech_recognition' },

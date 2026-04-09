@@ -154,7 +154,7 @@ def list_evaluations(
     items = []
     for task in tasks:
         item = EvaluationOut.model_validate(task).model_dump()
-        # Add image and model name info for model_test tasks
+        # Add image and model name info for model_deployment_test tasks
         if task.image_id:
             image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
             if image:

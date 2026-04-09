@@ -430,8 +430,8 @@ class EvaluationService:
             EvaluationService._release_devices(db, task)
             db.commit()
 
-            # Write model benchmark if model_test with image
-            if task_category == TaskCategory.model_test and task.image_id:
+            # Write model benchmark if model_deployment_test with image
+            if task_category == TaskCategory.model_deployment_test and task.image_id:
                 EvaluationService._write_model_benchmark(db, task, metrics)
 
             # Auto-generate evaluation report
@@ -552,7 +552,7 @@ class EvaluationService:
                     "int8_loss_rate": round((fp32_acc - int8_acc) / fp32_acc * 100, 4),
                     "pass": int8_acc >= 96.0,
                 }
-                if task_type_val in ("accuracy_and_performance", "performance_benchmark"):
+                if task_type_val in ("operator_perf_accuracy", "performance_benchmark"):
                     ratio_fp32 = round(random.uniform(0.6, 1.4), 3)
                     ratio_fp16 = round(random.uniform(0.65, 1.5), 3)
                     ratio_int8 = round(random.uniform(0.7, 1.6), 3)

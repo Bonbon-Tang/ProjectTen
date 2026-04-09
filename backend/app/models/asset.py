@@ -52,6 +52,7 @@ class DigitalAsset(Base):
     asset_type = Column(Enum(AssetType), nullable=False)
     category = Column(String(64), nullable=True)
     tags = Column(JSON, default=list)
+    asset_code = Column(String(16), nullable=True, index=True, comment="业务编号：镜像用 imageId，工具用 toolsetId")
 
     version = Column(String(32), default="1.0.0")
     file_path = Column(String(512), nullable=True)

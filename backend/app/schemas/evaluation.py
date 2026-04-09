@@ -11,8 +11,10 @@ class EvaluationCreate(BaseModel):
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     primary_tag: Optional[str] = None
-    task_category: Optional[str] = None  # operator_test | model_test
-    task_type: Optional[str] = None  # chip | model | framework | middleware | operator | scene + new subtypes
+    task_category: Optional[str] = None  # operator_test | model_deployment_test
+    task_type: Optional[str] = None  # operator subtypes or deployment scenario subtypes
+    image_code: Optional[str] = None
+    toolset_code: Optional[str] = None
     create_mode: str = "template"
     priority: str = "medium"
     visibility: str = "private"
@@ -40,6 +42,8 @@ class EvaluationUpdate(BaseModel):
 class EvaluationOut(BaseModel):
     id: int
     name: str
+    image_code: Optional[str] = None
+    toolset_code: Optional[str] = None
     description: Optional[str] = None
     tags: Optional[List[str]] = None
     primary_tag: Optional[str] = None

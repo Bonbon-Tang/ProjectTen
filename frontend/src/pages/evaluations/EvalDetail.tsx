@@ -47,6 +47,7 @@ import {
   getEvaluationLogs,
 } from '@/api/evaluations';
 import { archiveReport, downloadReport } from '@/api/reports';
+import { extractErrorMessage } from '@/utils/error';
 import dayjs from 'dayjs';
 
 const { Text } = Typography;
@@ -106,7 +107,7 @@ export default function EvalDetail() {
           id: id || '1',
           name: '评测任务',
           description: '',
-          task_category: 'model_test',
+          task_category: 'model_deployment_test',
           task_type: 'llm',
           status: 'running',
           priority: 'high',
@@ -195,8 +196,8 @@ export default function EvalDetail() {
       await startEvaluation(id!);
       message.success('任务已启动');
       setDetail((prev: any) => ({ ...prev, status: 'running', progress: 0 }));
-    } catch {
-      message.error('启动失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '启动失败'));
     } finally {
       setActionLoading(false);
     }
@@ -208,8 +209,8 @@ export default function EvalDetail() {
       await stopEvaluation(id!);
       message.success('任务已停止');
       setDetail((prev: any) => ({ ...prev, status: 'terminated' }));
-    } catch {
-      message.error('停止失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '停止失败'));
     } finally {
       setActionLoading(false);
     }
@@ -221,8 +222,8 @@ export default function EvalDetail() {
       await retryEvaluation(id!);
       message.success('任务已重新启动');
       setDetail((prev: any) => ({ ...prev, status: 'queued', progress: 0 }));
-    } catch {
-      message.error('重试失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '重试失败'));
     } finally {
       setActionLoading(false);
     }
@@ -234,8 +235,8 @@ export default function EvalDetail() {
       await deleteEvaluation(id!);
       message.success('任务已删除');
       navigate('/evaluations/list');
-    } catch {
-      message.error('删除失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '删除失败'));
     } finally {
       setActionLoading(false);
     }
@@ -249,8 +250,8 @@ export default function EvalDetail() {
     try {
       await archiveReport(detail.report_id);
       message.success('已保存到个人存档');
-    } catch {
-      message.error('保存存档失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '保存存档失败'));
     }
   };
 
@@ -271,8 +272,8 @@ export default function EvalDetail() {
       link.click();
       window.URL.revokeObjectURL(url);
       message.success('报告已下载');
-    } catch {
-      message.error('下载失败');
+    } catch (error) {
+      message.error(extractErrorMessage(error, '下载失败'));
     }
   };
 
@@ -297,7 +298,7 @@ export default function EvalDetail() {
   const isRunning = detail.status === 'running';
   const isFailed = detail.status === 'failed' || detail.status === 'terminated';
   const isOperatorTest = detail.task_category === 'operator_test';
-  const isAccuracyAndPerf = detail.task_type === 'accuracy_and_performance';
+  const isAccuracyAndPerf = detail.task_type === 'operator_perf_accuracy';
 
   // 模型测试结果 - from metrics
   const modelResults =
