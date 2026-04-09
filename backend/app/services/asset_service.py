@@ -2,6 +2,51 @@ from __future__ import annotations
 
 from typing import List, Optional, Tuple
 
+SCENARIO_TAGS = {
+    "llm", "multimodal", "image_classification", "object_detection", "semantic_segmentation",
+    "speech_recognition", "speech_synthesis", "ocr", "image_generation", "text_generation",
+    "machine_translation", "sentiment_analysis", "question_answering", "text_summarization",
+    "video_understanding", "recommendation", "anomaly_detection", "time_series",
+    "reinforcement_learning", "graph_neural_network", "medical_imaging", "autonomous_driving",
+    "robot_control", "code_generation", "knowledge_graph",
+}
+CHIP_ALIAS = {
+    "华为昇腾910C": "910C", "华为昇腾 910C": "910C", "Ascend910C": "910C", "910C": "910C",
+    "华为昇腾910B": "910B", "华为昇腾 910B": "910B", "Ascend910B": "910B", "910B": "910B",
+    "寒武纪MLU590": "MLU590", "寒武纪 MLU590": "MLU590", "MLU590": "MLU590",
+    "昆仑芯P800": "P800", "昆仑芯 P800": "P800", "P800": "P800",
+    "海光DCU BW1000": "BW1000", "海光 DCU BW1000": "BW1000", "HygonBW1000": "BW1000", "BW1000": "BW1000",
+}
+MIDDLEWARE_TAGS = {"MindSpore", "PyTorch", "PaddlePaddle", "ROCm", "ROCm/PyTorch", "DeepLink"}
+
+
+def _normalize_chip(tag: Optional[str]) -> Optional[str]:
+    if not tag:
+        return None
+    return CHIP_ALIAS.get(tag, tag)
+
+
+def _normalize_image_asset(asset: DigitalAsset) -> DigitalAsset:
+    if asset.asset_type != AssetType.image:
+        return asset
+    tags = asset.tags if isinstance(asset.tags, list) else []
+    chip = None
+    middleware = None
+    scenarios = []
+    for tag in tags:
+        normalized = _normalize_chip(tag)
+        if not chip and normalized in {"910C", "910B", "MLU590", "P800", "BW1000"}:
+            chip = normalized
+            continue
+        if not middleware and tag in MIDDLEWARE_TAGS:
+            middleware = tag
+            continue
+        if tag in SCENARIO_TAGS and tag not in scenarios:
+            scenarios.append(tag)
+    if chip and middleware and scenarios:
+        asset.tags = [chip, middleware, *scenarios]
+    return asset
+
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
@@ -62,6 +107,7 @@ class AssetService:
             q = q.filter(DigitalAsset.tenant_id == tenant_id)
         total = q.count()
         items = q.order_by(DigitalAsset.created_at.desc()).offset(pagination.offset).limit(pagination.limit).all()
+        items = [_normalize_image_asset(item) for item in items]
         return items, total
 
     @staticmethod

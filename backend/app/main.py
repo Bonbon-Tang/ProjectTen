@@ -175,33 +175,29 @@ def _init_model_images(db):
     from app.models.asset import DigitalAsset
 
     images = [
-        # LLM images
-        {"name": "Ascend910C-MindSpore-Qwen2-72B", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "Qwen2-72B", "tags": ["llm", "text_generation", "code_generation"], "device": "huawei_910c"},
-        {"name": "Ascend910C-PyTorch-LLaMA3-70B", "chip": "华为昇腾910C", "framework": "PyTorch", "model": "LLaMA3-70B", "tags": ["llm", "text_generation"], "device": "huawei_910c"},
-        {"name": "Ascend910B-MindSpore-ChatGLM4-9B", "chip": "华为昇腾910B", "framework": "MindSpore", "model": "ChatGLM4-9B", "tags": ["llm", "text_generation", "question_answering"], "device": "huawei_910b"},
-        {"name": "MLU590-PyTorch-Qwen2-7B", "chip": "寒武纪MLU590", "framework": "PyTorch", "model": "Qwen2-7B", "tags": ["llm", "text_generation"], "device": "cambrian_590"},
-        {"name": "P800-PaddlePaddle-ERNIE-Bot", "chip": "昆仑芯P800", "framework": "PaddlePaddle", "model": "ERNIE-Bot", "tags": ["llm", "text_generation", "question_answering"], "device": "kunlun_p800"},
-        {"name": "BW1000-ROCm-LLaMA3-8B", "chip": "海光DCU BW1000", "framework": "ROCm/PyTorch", "model": "LLaMA3-8B", "tags": ["llm", "text_generation"], "device": "hygon_bw1000"},
-        # Multimodal
-        {"name": "Ascend910C-MindSpore-InternVL2-26B", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "InternVL2-26B", "tags": ["multimodal"], "device": "huawei_910c"},
-        {"name": "MLU590-PyTorch-Qwen-VL-Chat", "chip": "寒武纪MLU590", "framework": "PyTorch", "model": "Qwen-VL-Chat", "tags": ["multimodal"], "device": "cambrian_590"},
-        # CV
-        {"name": "Ascend910C-MindSpore-YOLOv8", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "YOLOv8-X", "tags": ["object_detection", "image_classification"], "device": "huawei_910c"},
-        {"name": "MLU590-PyTorch-ResNet152", "chip": "寒武纪MLU590", "framework": "PyTorch", "model": "ResNet152", "tags": ["image_classification"], "device": "cambrian_590"},
-        {"name": "P800-PaddlePaddle-PP-YOLOE", "chip": "昆仑芯P800", "framework": "PaddlePaddle", "model": "PP-YOLOE+", "tags": ["object_detection"], "device": "kunlun_p800"},
-        # Speech
-        {"name": "Ascend910B-MindSpore-Paraformer", "chip": "华为昇腾910B", "framework": "MindSpore", "model": "Paraformer-Large", "tags": ["speech_recognition"], "device": "huawei_910b"},
-        {"name": "MLU590-PyTorch-Whisper-Large", "chip": "寒武纪MLU590", "framework": "PyTorch", "model": "Whisper-Large-v3", "tags": ["speech_recognition", "speech_synthesis"], "device": "cambrian_590"},
-        # Image generation
-        {"name": "Ascend910C-MindSpore-SDXL", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "Stable-Diffusion-XL", "tags": ["image_generation"], "device": "huawei_910c"},
-        # OCR
-        {"name": "P800-PaddlePaddle-PaddleOCR", "chip": "昆仑芯P800", "framework": "PaddlePaddle", "model": "PaddleOCR-v4", "tags": ["ocr"], "device": "kunlun_p800"},
-        # Segmentation
-        {"name": "Ascend910C-MindSpore-SAM", "chip": "华为昇腾910C", "framework": "MindSpore", "model": "SAM-ViT-H", "tags": ["semantic_segmentation"], "device": "huawei_910c"},
+        {"name": "910C-MindSpore-Qwen2-72B", "chip": "910C", "framework": "MindSpore", "model": "Qwen2-72B", "tags": ["910C", "MindSpore", "llm", "text_generation", "code_generation"], "device": "huawei_910c"},
+        {"name": "910C-PyTorch-LLaMA3-70B", "chip": "910C", "framework": "PyTorch", "model": "LLaMA3-70B", "tags": ["910C", "PyTorch", "llm", "text_generation"], "device": "huawei_910c"},
+        {"name": "910B-MindSpore-ChatGLM4-9B", "chip": "910B", "framework": "MindSpore", "model": "ChatGLM4-9B", "tags": ["910B", "MindSpore", "llm", "text_generation", "question_answering"], "device": "huawei_910b"},
+        {"name": "MLU590-PyTorch-Qwen2-7B", "chip": "MLU590", "framework": "PyTorch", "model": "Qwen2-7B", "tags": ["MLU590", "PyTorch", "llm", "text_generation"], "device": "cambrian_590"},
+        {"name": "P800-PaddlePaddle-ERNIE-Bot", "chip": "P800", "framework": "PaddlePaddle", "model": "ERNIE-Bot", "tags": ["P800", "PaddlePaddle", "llm", "text_generation", "question_answering"], "device": "kunlun_p800"},
+        {"name": "BW1000-ROCm/PyTorch-LLaMA3-8B", "chip": "BW1000", "framework": "ROCm/PyTorch", "model": "LLaMA3-8B", "tags": ["BW1000", "ROCm/PyTorch", "llm", "text_generation"], "device": "hygon_bw1000"},
+        {"name": "910C-MindSpore-InternVL2-26B", "chip": "910C", "framework": "MindSpore", "model": "InternVL2-26B", "tags": ["910C", "MindSpore", "multimodal"], "device": "huawei_910c"},
+        {"name": "MLU590-PyTorch-Qwen-VL-Chat", "chip": "MLU590", "framework": "PyTorch", "model": "Qwen-VL-Chat", "tags": ["MLU590", "PyTorch", "multimodal"], "device": "cambrian_590"},
+        {"name": "910C-MindSpore-YOLOv8-X", "chip": "910C", "framework": "MindSpore", "model": "YOLOv8-X", "tags": ["910C", "MindSpore", "object_detection", "image_classification"], "device": "huawei_910c"},
+        {"name": "MLU590-PyTorch-ResNet152", "chip": "MLU590", "framework": "PyTorch", "model": "ResNet152", "tags": ["MLU590", "PyTorch", "image_classification"], "device": "cambrian_590"},
+        {"name": "P800-PaddlePaddle-PP-YOLOE+", "chip": "P800", "framework": "PaddlePaddle", "model": "PP-YOLOE+", "tags": ["P800", "PaddlePaddle", "object_detection"], "device": "kunlun_p800"},
+        {"name": "910B-MindSpore-Paraformer-Large", "chip": "910B", "framework": "MindSpore", "model": "Paraformer-Large", "tags": ["910B", "MindSpore", "speech_recognition"], "device": "huawei_910b"},
+        {"name": "MLU590-PyTorch-Whisper-Large-v3", "chip": "MLU590", "framework": "PyTorch", "model": "Whisper-Large-v3", "tags": ["MLU590", "PyTorch", "speech_recognition", "speech_synthesis"], "device": "cambrian_590"},
+        {"name": "910C-MindSpore-Stable-Diffusion-XL", "chip": "910C", "framework": "MindSpore", "model": "Stable-Diffusion-XL", "tags": ["910C", "MindSpore", "image_generation"], "device": "huawei_910c"},
+        {"name": "P800-PaddlePaddle-PaddleOCR-v4", "chip": "P800", "framework": "PaddlePaddle", "model": "PaddleOCR-v4", "tags": ["P800", "PaddlePaddle", "ocr"], "device": "kunlun_p800"},
+        {"name": "910C-MindSpore-SAM-ViT-H", "chip": "910C", "framework": "MindSpore", "model": "SAM-ViT-H", "tags": ["910C", "MindSpore", "semantic_segmentation"], "device": "huawei_910c"},
     ]
 
     for img in images:
-        existing = db.query(DigitalAsset).filter(DigitalAsset.name == img["name"]).first()
+        existing = db.query(DigitalAsset).filter(
+            DigitalAsset.asset_type == "image",
+            DigitalAsset.name == img["name"]
+        ).first()
         if existing:
             continue
         asset = DigitalAsset(
