@@ -33,6 +33,25 @@ class EvaluationService:
     CPU_TEST_RUNNER_PYTHON = CPU_TEST_RUNNER_DIR / '.venv' / 'bin' / 'python'
     CPU_TEST_REPORT_DIR = Path('/root/.openclaw/workspace/ProjectTen/backend/data/cpu_test_reports')
     CPU_TEST_SUPPORTED_OPERATORS = {"Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"}
+    LEGACY_TASK_CATEGORY_MAP = {
+        'model_test': 'model_deployment_test',
+    }
+    LEGACY_TASK_TYPE_MAP = {
+        'accuracy_and_performance': 'operator_perf_accuracy',
+        'accuracy_only': 'operator_accuracy',
+    }
+
+    @staticmethod
+    def _normalize_task_category(value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        return EvaluationService.LEGACY_TASK_CATEGORY_MAP.get(value, value)
+
+    @staticmethod
+    def _normalize_task_type(value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        return EvaluationService.LEGACY_TASK_TYPE_MAP.get(value, value)
 
     @staticmethod
     def _cpu_test_report_paths(task_id: int) -> tuple[Path, Path]:
@@ -126,8 +145,8 @@ class EvaluationService:
 
     @staticmethod
     def create(db: Session, *, creator_id: int, tenant_id: Optional[int] = None, user_type: Optional[str] = None, **kwargs) -> EvaluationTask:
-        task_category = kwargs.get("task_category")
-        task_type = kwargs.get("task_type")
+        task_category = EvaluationService._normalize_task_category(kwargs.get("task_category"))
+        task_type = EvaluationService._normalize_task_type(kwargs.get("task_type"))
         tags = kwargs.get("tags") or []
         primary_tag = kwargs.get("primary_tag")
 
@@ -203,7 +222,7 @@ class EvaluationService:
         if status:
             q = q.filter(EvaluationTask.status == status)
         if task_type:
-            q = q.filter(EvaluationTask.task_type == task_type)
+            q = q.filter(EvaluationTask.task_type == EvaluationService._normalize_task_type(task_type))
         if primary_tag:
             q = q.filter(EvaluationTask.primary_tag == primary_tag)
         if creator_id:
