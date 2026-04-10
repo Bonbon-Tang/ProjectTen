@@ -249,6 +249,7 @@ def get_available_images(
 
         result.append({
             "id": img.id,
+            "asset_code": img.asset_code,
             "name": img.name,
             "description": img.description,
             "tags": [tag_chip, tag_middleware, *scenario_tags],
@@ -284,6 +285,7 @@ def get_available_toolsets(
             continue
         result.append({
             "id": ts.id,
+            "asset_code": ts.asset_code,
             "name": ts.name,
             "description": ts.description,
             "category": category,

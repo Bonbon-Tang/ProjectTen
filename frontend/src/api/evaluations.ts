@@ -21,6 +21,9 @@ export interface CreateEvalParams {
   device_count: number;
   visibility?: 'private' | 'platform';
   toolset_id?: number;
+  toolset_code?: string;
+  image_id?: number;
+  image_code?: string;
   priority: 'high' | 'medium' | 'low';
   config?: Record<string, any>;
   operator_count?: number;

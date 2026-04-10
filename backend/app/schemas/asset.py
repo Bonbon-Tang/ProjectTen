@@ -37,6 +37,7 @@ class AssetOut(BaseModel):
     asset_type: str
     category: Optional[str] = None
     tags: List[str] = []
+    asset_code: Optional[str] = None
     version: str
     file_path: Optional[str] = None
     file_size: float

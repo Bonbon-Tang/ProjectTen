@@ -25,6 +25,7 @@ from app.models.report import EvaluationReport
 from app.models.resource import ComputeDevice
 from app.models.operator import Operator
 from app.models.operator_benchmark import OperatorBenchmark
+from app.models.asset import DigitalAsset
 from app.utils.pagination import PaginationParams
 
 
@@ -40,6 +41,35 @@ class EvaluationService:
         'accuracy_and_performance': 'operator_perf_accuracy',
         'accuracy_only': 'operator_accuracy',
     }
+    TASK_TYPE_PREFIX_MAP = {
+        'operator_perf_accuracy': '01',
+        'operator_accuracy': '01',
+        'llm': '02',
+        'speech_recognition': '03',
+        'multimodal': '04',
+        'image_classification': '05',
+        'object_detection': '06',
+        'semantic_segmentation': '07',
+        'text_generation': '08',
+        'machine_translation': '09',
+        'sentiment_analysis': '10',
+        'question_answering': '11',
+        'text_summarization': '12',
+        'speech_synthesis': '13',
+        'image_generation': '14',
+        'video_understanding': '15',
+        'ocr': '16',
+        'recommendation': '17',
+        'anomaly_detection': '18',
+        'time_series': '19',
+        'reinforcement_learning': '20',
+        'graph_neural_network': '21',
+        'medical_imaging': '22',
+        'autonomous_driving': '23',
+        'robot_control': '24',
+        'code_generation': '25',
+        'knowledge_graph': '26',
+    }
 
     @staticmethod
     def _normalize_task_category(value: Optional[str]) -> Optional[str]:
@@ -52,6 +82,33 @@ class EvaluationService:
         if value is None:
             return None
         return EvaluationService.LEGACY_TASK_TYPE_MAP.get(value, value)
+
+    @staticmethod
+    def _expected_prefix(task_type: Optional[str]) -> Optional[str]:
+        if not task_type:
+            return None
+        return EvaluationService.TASK_TYPE_PREFIX_MAP.get(task_type)
+
+    @staticmethod
+    def _resolve_asset_by_code(db: Session, asset_code: Optional[str], asset_type: Optional[str] = None) -> Optional[DigitalAsset]:
+        if not asset_code:
+            return None
+        q = db.query(DigitalAsset).filter(DigitalAsset.asset_code == asset_code)
+        if asset_type:
+            q = q.filter(DigitalAsset.asset_type == asset_type)
+        return q.first()
+
+    @staticmethod
+    def _validate_asset_code_prefix(*, task_type: Optional[str], image_code: Optional[str], toolset_code: Optional[str]) -> None:
+        expected_prefix = EvaluationService._expected_prefix(task_type)
+        if not expected_prefix:
+            return
+        if image_code and not image_code.startswith(expected_prefix):
+            raise ValueError(f"镜像业务编号前缀不匹配：taskType={task_type} 要求 imageId 以 {expected_prefix} 开头，当前为 {image_code}")
+        if toolset_code and not toolset_code.startswith(expected_prefix):
+            raise ValueError(f"工具业务编号前缀不匹配：taskType={task_type} 要求 toolsetId 以 {expected_prefix} 开头，当前为 {toolset_code}")
+        if image_code and toolset_code and image_code[:2] != toolset_code[:2]:
+            raise ValueError(f"镜像与工具业务编号前缀不一致：imageId={image_code}, toolsetId={toolset_code}")
 
     @staticmethod
     def _cpu_test_report_paths(task_id: int) -> tuple[Path, Path]:
@@ -162,9 +219,47 @@ class EvaluationService:
         if primary_tag and primary_tag not in TEST_TAGS:
             raise ValueError(f"无效的评测tag: {primary_tag}")
 
+        image_code = kwargs.get("image_code")
+        toolset_code = kwargs.get("toolset_code")
+
+        resolved_image = None
+        resolved_toolset = None
+
+        if image_code:
+            resolved_image = EvaluationService._resolve_asset_by_code(db, image_code, "image")
+            if not resolved_image:
+                raise ValueError(f"镜像业务编号不存在: {image_code}")
+            kwargs["image_id"] = resolved_image.id
+        elif kwargs.get("image_id"):
+            resolved_image = db.query(DigitalAsset).filter(
+                DigitalAsset.id == kwargs.get("image_id"),
+                DigitalAsset.asset_type == "image",
+            ).first()
+            if resolved_image:
+                image_code = resolved_image.asset_code
+
+        if toolset_code:
+            resolved_toolset = EvaluationService._resolve_asset_by_code(db, toolset_code, "toolset")
+            if not resolved_toolset:
+                raise ValueError(f"工具业务编号不存在: {toolset_code}")
+            kwargs["toolset_id"] = resolved_toolset.id
+        elif kwargs.get("toolset_id"):
+            resolved_toolset = db.query(DigitalAsset).filter(
+                DigitalAsset.id == kwargs.get("toolset_id"),
+                DigitalAsset.asset_type == "toolset",
+            ).first()
+            if resolved_toolset:
+                toolset_code = resolved_toolset.asset_code
+
+        EvaluationService._validate_asset_code_prefix(
+            task_type=task_type,
+            image_code=image_code,
+            toolset_code=toolset_code,
+        )
+
         # Validate: operator_test requires toolset_id
         if task_category == "operator_test" and not kwargs.get("toolset_id"):
-            raise ValueError("算子评测任务必须关联工具集(toolset_id)，请选择 Deeplink_op_test 或其他算子测试工具")
+            raise ValueError("算子评测任务必须关联工具集(toolset_id/toolset_code)，请选择 Deeplink_op_test 或其他算子测试工具")
 
         # Validate device availability at creation time
         device_type = kwargs.get("device_type")
@@ -194,6 +289,8 @@ class EvaluationService:
             device_type=kwargs.get("device_type"),
             device_count=kwargs.get("device_count") or 1,
             visibility=kwargs.get("visibility", "private"),
+            image_code=image_code,
+            toolset_code=toolset_code,
             toolset_id=kwargs.get("toolset_id"),
             operator_count=kwargs.get("operator_count"),
             operator_categories=kwargs.get("operator_categories"),

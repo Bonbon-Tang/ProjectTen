@@ -49,6 +49,7 @@ type DeviceInfo = {
 
 type ModelImageInfo = {
   id: number;
+  asset_code?: string;
   name: string;
   description?: string;
   tags?: string[];
@@ -193,8 +194,8 @@ export default function EvalCreate() {
   const [taskType, setTaskType] = useState<string>('');
   const [typeSearch, setTypeSearch] = useState('');
 
-  const [operatorToolsets, setOperatorToolsets] = useState<{ id: number; name: string }[]>([]);
-  const [modelToolsets, setModelToolsets] = useState<{ id: number; name: string }[]>([]);
+  const [operatorToolsets, setOperatorToolsets] = useState<{ id: number; name: string; asset_code?: string }[]>([]);
+  const [modelToolsets, setModelToolsets] = useState<{ id: number; name: string; asset_code?: string }[]>([]);
   const [toolsetsLoading, setToolsetsLoading] = useState(false);
   const [operatorLibs, setOperatorLibs] = useState<{ id: number; name: string; description?: string }[]>([]);
   const [operatorLibsLoading, setOperatorLibsLoading] = useState(false);
@@ -233,7 +234,7 @@ export default function EvalCreate() {
       getAvailableToolsets(scenarioType)
         .then((res: any) => {
           const list = res?.data || res || [];
-          if (Array.isArray(list)) setModelToolsets(list.map((item: any) => ({ id: item.id, name: item.name })));
+          if (Array.isArray(list)) setModelToolsets(list.map((item: any) => ({ id: item.id, name: item.name, asset_code: item.asset_code })));
         })
         .catch(() => {})
         .finally(() => setToolsetsLoading(false));
@@ -242,14 +243,14 @@ export default function EvalCreate() {
         .then((res: any) => {
           const list = res?.data?.items || res?.items || res?.data || [];
           if (Array.isArray(list)) {
-            const opTools: { id: number; name: string }[] = [];
-            const modelTools: { id: number; name: string }[] = [];
+            const opTools: { id: number; name: string; asset_code?: string }[] = [];
+            const modelTools: { id: number; name: string; asset_code?: string }[] = [];
             list.forEach((item: any) => {
-              if (item.category === '算子测试工具') opTools.push({ id: item.id, name: item.name });
-              else if (item.category === '模型部署测试工具') modelTools.push({ id: item.id, name: item.name });
+              if (item.category === '算子测试工具') opTools.push({ id: item.id, name: item.name, asset_code: item.asset_code });
+              else if (item.category === '模型部署测试工具') modelTools.push({ id: item.id, name: item.name, asset_code: item.asset_code });
               else {
-                opTools.push({ id: item.id, name: item.name });
-                modelTools.push({ id: item.id, name: item.name });
+                opTools.push({ id: item.id, name: item.name, asset_code: item.asset_code });
+                modelTools.push({ id: item.id, name: item.name, asset_code: item.asset_code });
               }
             });
             setOperatorToolsets(opTools);
@@ -282,6 +283,7 @@ export default function EvalCreate() {
         if (Array.isArray(list)) {
           const mapped = list.map((item: any) => ({
             id: item.id,
+            asset_code: item.asset_code,
             name: item.name,
             description: item.description,
             tags: item.tags,
@@ -316,6 +318,7 @@ export default function EvalCreate() {
       setAllModelImages(
         allItems.map((item: any) => ({
           id: item.id,
+          asset_code: item.asset_code,
           name: item.name,
           description: item.description,
           tags: Array.isArray(item.tags)
@@ -434,6 +437,9 @@ export default function EvalCreate() {
 
     setLoading(true);
     try {
+      const allToolsets = [...operatorToolsets, ...modelToolsets];
+      const selectedToolset = allToolsets.find((t) => t.id === values.toolset_id);
+      const selectedImage = allModelImages.find((m) => m.id === values.image_id) || modelImages.find((m) => m.id === values.image_id);
       const params: any = {
         name: values.name,
         description: values.description || undefined,
@@ -443,6 +449,7 @@ export default function EvalCreate() {
         device_count: deviceCount,
         visibility: values.visibility || 'private',
         toolset_id: values.toolset_id,
+        toolset_code: selectedToolset?.asset_code,
         priority: values.priority,
       };
       if (taskCategory === 'operator_test') {
@@ -450,7 +457,10 @@ export default function EvalCreate() {
         if (values.operator_categories?.length) params.operator_categories = values.operator_categories;
         if (values.operator_lib_id) params.operator_lib_id = values.operator_lib_id;
       }
-      if (taskCategory === 'model_deployment_test' && values.image_id) params.image_id = values.image_id;
+      if (taskCategory === 'model_deployment_test' && values.image_id) {
+        params.image_id = values.image_id;
+        params.image_code = selectedImage?.asset_code;
+      }
       const res: any = await createEvaluation(params);
       message.success('评测任务创建成功！');
       const newId = res?.data?.id || res?.id;

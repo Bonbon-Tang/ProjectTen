@@ -27,6 +27,7 @@ interface DeviceOption {
 
 interface ImageOption {
   id: number;
+  asset_code?: string;
   name: string;
   description?: string;
   tags?: string[];
@@ -37,6 +38,7 @@ interface ImageOption {
 
 interface ToolsetOption {
   id: number;
+  asset_code?: string;
   name: string;
   description?: string;
   task_category?: string;
@@ -66,10 +68,12 @@ interface TaskDraft {
   deviceType?: string;
   deviceCount?: number;
   toolsetId?: number;
+  toolsetCode?: string;
   operatorLibId?: number;
   operatorCategories?: string[];
   operatorCount?: number;
   imageId?: number;
+  imageCode?: string;
   precision?: string;
   testMode?: string;
   description?: string;
@@ -280,6 +284,7 @@ export default function DLAgentCreate() {
           Array.isArray(toolsetItems)
             ? toolsetItems.map((item: any) => ({
                 id: item.id,
+                asset_code: item.asset_code,
                 name: item.name,
                 description: item.description,
                 task_category:
@@ -317,6 +322,7 @@ export default function DLAgentCreate() {
                 }
                 return {
                   id: item.id,
+                  asset_code: item.asset_code,
                   name: item.name,
                   description: item.description,
                   tags: parsedTags,
@@ -349,6 +355,7 @@ export default function DLAgentCreate() {
           setModelToolsets(
             list.map((item: any) => ({
               id: item.id,
+              asset_code: item.asset_code,
               name: item.name,
               description: item.description,
               task_category: 'model_deployment_test',
@@ -614,7 +621,10 @@ export default function DLAgentCreate() {
         if (m) next.deviceCount = Number(m[0]);
       } else if (currentStep === 'toolset') {
         const toolsetValue = resolveByIndexOrText(raw, filteredToolsets.map((item) => ({ label: item.name, value: item.id })));
-        if (typeof toolsetValue === 'number') next.toolsetId = toolsetValue;
+        if (typeof toolsetValue === 'number') {
+          next.toolsetId = toolsetValue;
+          next.toolsetCode = filteredToolsets.find((item) => item.id === toolsetValue)?.asset_code;
+        }
       } else if (currentStep === 'operatorLib') {
         const operatorLibValue = resolveByIndexOrText(raw, operatorLibs.map((item) => ({ label: item.name, value: item.id })));
         if (typeof operatorLibValue === 'number') next.operatorLibId = operatorLibValue;
@@ -639,7 +649,10 @@ export default function DLAgentCreate() {
         }
       } else if (currentStep === 'imageId') {
         const imageValue = resolveByIndexOrText(raw, imageCandidates.map((item) => ({ label: item.name, value: item.id })));
-        if (typeof imageValue === 'number') next.imageId = imageValue;
+        if (typeof imageValue === 'number') {
+          next.imageId = imageValue;
+          next.imageCode = imageCandidates.find((item) => item.id === imageValue)?.asset_code;
+        }
       } else if (currentStep === 'precision') {
         const precisionValue = resolveByIndexOrText(raw, PRECISION_OPTIONS.map((item) => ({ label: item.label, value: item.value })));
         if (typeof precisionValue === 'string') next.precision = precisionValue;
@@ -663,6 +676,8 @@ export default function DLAgentCreate() {
     setLoading(true);
     try {
       if (taskDraft.mode === 'evaluation') {
+        const selectedToolset = filteredToolsets.find((item) => item.id === taskDraft.toolsetId);
+        const selectedImage = imageCandidates.find((item) => item.id === taskDraft.imageId) || filteredImages.find((item) => item.id === taskDraft.imageId);
         const taskName = `${taskDraft.taskCategory === 'operator_test' ? '算子评测' : '模型评测'}-${taskDraft.taskType}-${Date.now()}`;
         await createEvaluation({
           name: taskName,
@@ -674,11 +689,13 @@ export default function DLAgentCreate() {
           visibility: 'private',
           priority: 'medium',
           toolset_id: taskDraft.toolsetId,
+          toolset_code: taskDraft.toolsetCode || selectedToolset?.asset_code,
           operator_lib_id: taskDraft.taskCategory === 'operator_test' ? taskDraft.operatorLibId : undefined,
           operator_categories: taskDraft.taskCategory === 'operator_test' && taskDraft.operatorCategories && taskDraft.operatorCategories.length > 0 ? taskDraft.operatorCategories : undefined,
           operator_count: taskDraft.taskCategory === 'operator_test' && taskDraft.operatorCount ? taskDraft.operatorCount : undefined,
           image_id: taskDraft.taskCategory === 'model_deployment_test' ? taskDraft.imageId : undefined,
-          config: taskDraft.taskCategory === 'model_deployment_test' ? { image_id: taskDraft.imageId } : {},
+          image_code: taskDraft.taskCategory === 'model_deployment_test' ? (taskDraft.imageCode || selectedImage?.asset_code) : undefined,
+          config: taskDraft.taskCategory === 'model_deployment_test' ? { image_id: taskDraft.imageId, image_code: taskDraft.imageCode || selectedImage?.asset_code } : {},
         } as any);
         appendAgentMessage('真实 evaluation 任务已经创建完成，我现在带你去评测任务列表。');
         setCurrentStep('done');
