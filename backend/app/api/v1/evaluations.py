@@ -194,22 +194,51 @@ def list_evaluations(
         total = q.count()
         tasks = q.order_by(EvaluationTask.created_at.desc()).offset(pagination.offset).limit(pagination.limit).all()
     
-    # Build response with image/model info
+    # Build unified response items
     items = []
     for task in tasks:
-        item = EvaluationOut.model_validate(task).model_dump()
-        # Add image and model name info for model_deployment_test tasks
+        task_category = task.task_category.value if hasattr(task.task_category, 'value') else (str(task.task_category) if task.task_category else None)
+        task_type = task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type)
+        device_type = task.device_type
+
+        unified_task = "operator" if task_category == "operator_test" else "model_deployment"
+        unified_scenario = "operator_accuracy_performance" if task_type == "operator_perf_accuracy" else task_type
+
+        item = {
+            "id": task.id,
+            "name": task.name,
+            "description": task.description,
+            "task": unified_task,
+            "scenario": unified_scenario,
+            "chips": device_type,
+            "chip_num": task.device_count or 1,
+            "image_id": task.image_id,
+            "tool_id": task.toolset_id,
+            "status": task.status.value if hasattr(task.status, 'value') else str(task.status),
+            "priority": task.priority.value if hasattr(task.priority, 'value') else str(task.priority),
+            "progress": task.progress or 0,
+            "visibility": task.visibility,
+            "operator_count": task.operator_count,
+            "operator_categories": task.operator_categories,
+            "operator_lib_id": task.operator_lib_id,
+            "creator_id": task.creator_id,
+            "tenant_id": task.tenant_id,
+            "created_at": task.created_at,
+            "updated_at": task.updated_at,
+        }
+
+        # extra display fields
         if task.image_id:
             image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
             if image:
                 item["image_name"] = image.name
-                # Parse model name from image name (format: "Chip + Framework + Model")
                 parts = image.name.split(" + ")
                 item["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
                 item["chip_name"] = parts[0].strip() if parts else image.name
                 item["framework_name"] = parts[1].strip() if len(parts) > 1 else None
+
         items.append(item)
-    
+
     return _ok(paginate(items, total, page, page_size))
 
 
@@ -226,7 +255,35 @@ def get_evaluation(task_id: int, current_user: User = Depends(get_current_user),
             raise HTTPException(status_code=403, detail='No permission to access this task')
     # Refresh to get latest progress from DB
     db.refresh(task)
-    data = EvaluationOut.model_validate(task).model_dump()
+
+    task_category = task.task_category.value if hasattr(task.task_category, 'value') else (str(task.task_category) if task.task_category else None)
+    task_type = task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type)
+
+    unified_task = "operator" if task_category == "operator_test" else "model_deployment"
+    unified_scenario = "operator_accuracy_performance" if task_type == "operator_perf_accuracy" else task_type
+
+    data = {
+        "id": task.id,
+        "name": task.name,
+        "description": task.description,
+        "task": unified_task,
+        "scenario": unified_scenario,
+        "chips": task.device_type,
+        "chip_num": task.device_count or 1,
+        "image_id": task.image_id,
+        "tool_id": task.toolset_id,
+        "status": task.status.value if hasattr(task.status, 'value') else str(task.status),
+        "priority": task.priority.value if hasattr(task.priority, 'value') else str(task.priority),
+        "progress": task.progress or 0,
+        "visibility": task.visibility,
+        "operator_count": task.operator_count,
+        "operator_categories": task.operator_categories,
+        "operator_lib_id": task.operator_lib_id,
+        "creator_id": task.creator_id,
+        "tenant_id": task.tenant_id,
+        "created_at": task.created_at,
+        "updated_at": task.updated_at,
+    }
     # Attach report_id if a report exists for this task
     from app.models.report import EvaluationReport
     report = db.query(EvaluationReport).filter(EvaluationReport.task_id == task_id).first()
