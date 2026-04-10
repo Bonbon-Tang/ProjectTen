@@ -45,16 +45,32 @@ function getSubTypeLabel(val: string): string {
 interface EvalItem {
   id: string;
   name: string;
-  task_category: string;
-  task_type: string;
-  device_type: string;
+  description?: string;
+
+  // unified routing core
+  task: 'operator' | 'model_deployment';
+  scenario: string;
+  chips: string;
+  chip_num: number;
+  image_id?: number;
+  tool_id?: number;
+
+  // status/meta
   status: string;
   priority: string;
-  creator: string;
+  visibility?: string;
+  creator_id?: number;
   created_at: string;
+  updated_at?: string;
   progress?: number;
   config?: Record<string, any>;
-  // Image and model info for model_deployment_test
+
+  // operator-only
+  operator_count?: number;
+  operator_categories?: string[];
+  operator_lib_id?: number;
+
+  // extra display fields
   image_name?: string;
   model_name?: string;
   chip_name?: string;
@@ -68,8 +84,8 @@ export default function EvalList() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [filters, setFilters] = useState<{
     status?: string;
-    task_category?: string;
-    device_type?: string;
+    task?: string;
+    chips?: string;
     keyword?: string;
   }>({});
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
@@ -277,25 +293,29 @@ export default function EvalList() {
     },
     {
       title: '评测大类',
-      dataIndex: 'task_category',
-      key: 'task_category',
+      dataIndex: 'task',
+      key: 'task',
       width: 110,
       render: (val: string) => {
-        const cat = EVAL_CATEGORIES.find((c) => c.value === val);
-        return cat ? <Tag>{cat.icon} {cat.label}</Tag> : <Tag>{val}</Tag>;
+        const label = val === 'operator' ? '算子测试' : '模型部署测试';
+        const icon = val === 'operator' ? '🧩' : '🤖';
+        return <Tag>{icon} {label}</Tag>;
       },
     },
     {
       title: '子场景',
-      dataIndex: 'task_type',
-      key: 'task_type',
-      width: 140,
-      render: (val: string) => <Tag color="geekblue">{getSubTypeLabel(val)}</Tag>,
+      dataIndex: 'scenario',
+      key: 'scenario',
+      width: 160,
+      render: (val: string) => {
+        const legacy = val === 'operator_accuracy_performance' ? 'operator_perf_accuracy' : val;
+        return <Tag color="geekblue">{getSubTypeLabel(legacy)}</Tag>;
+      },
     },
     {
       title: '设备类型',
-      dataIndex: 'device_type',
-      key: 'device_type',
+      dataIndex: 'chips',
+      key: 'chips',
       width: 140,
       render: (val: string) => {
         const d = DEVICE_TYPES.find((dv) => dv.value === val);
@@ -354,7 +374,7 @@ export default function EvalList() {
               停止
             </Button>
           )}
-          {record.status === 'completed' && record.task_category === 'model_deployment_test' && (
+          {record.status === 'completed' && record.task === 'model_deployment' && (
             <Button type="link" size="small" onClick={() => handlePostActions(record)}>
               完成后操作
             </Button>
@@ -419,16 +439,19 @@ export default function EvalList() {
         />
         <Select
           placeholder="评测大类"
-          style={{ width: 140 }}
+          style={{ width: 160 }}
           allowClear
-          onChange={(value) => setFilters({ ...filters, task_category: value })}
-          options={EVAL_CATEGORIES.map((c) => ({ label: `${c.icon} ${c.label}`, value: c.value }))}
+          onChange={(value) => setFilters({ ...filters, task: value })}
+          options={[
+            { label: '🧩 算子测试', value: 'operator' },
+            { label: '🤖 模型部署测试', value: 'model_deployment' },
+          ]}
         />
         <Select
           placeholder="设备类型"
           style={{ width: 160 }}
           allowClear
-          onChange={(value) => setFilters({ ...filters, device_type: value })}
+          onChange={(value) => setFilters({ ...filters, chips: value })}
           options={DEVICE_TYPES.map((d) => ({ label: d.label, value: d.value }))}
         />
         <Select
