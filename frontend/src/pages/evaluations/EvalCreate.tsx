@@ -440,26 +440,24 @@ export default function EvalCreate() {
       const allToolsets = [...operatorToolsets, ...modelToolsets];
       const selectedToolset = allToolsets.find((t) => t.id === values.toolset_id);
       const selectedImage = allModelImages.find((m) => m.id === values.image_id) || modelImages.find((m) => m.id === values.image_id);
+      // Unified routing payload v2 (frontend must send only these fields)
       const params: any = {
         name: values.name,
         description: values.description || undefined,
-        task_category: taskCategory as 'operator_test' | 'model_deployment_test',
-        task_type: taskType,
-        device_type: values.device_type,
-        device_count: deviceCount,
+        task: taskCategory === 'operator_test' ? 'operator' : 'model_deployment',
+        scenario: taskType === 'operator_perf_accuracy' ? 'operator_accuracy_performance' : taskType,
+        chips: values.device_type,
+        chip_num: deviceCount,
         visibility: values.visibility || 'private',
-        toolset_id: values.toolset_id,
-        toolset_code: selectedToolset?.asset_code,
         priority: values.priority,
+        tool_id: values.toolset_id,
+        image_id: taskCategory === 'model_deployment_test' ? values.image_id : undefined,
       };
+
       if (taskCategory === 'operator_test') {
         if (values.operator_count) params.operator_count = values.operator_count;
         if (values.operator_categories?.length) params.operator_categories = values.operator_categories;
         if (values.operator_lib_id) params.operator_lib_id = values.operator_lib_id;
-      }
-      if (taskCategory === 'model_deployment_test' && values.image_id) {
-        params.image_id = values.image_id;
-        params.image_code = selectedImage?.asset_code;
       }
       const res: any = await createEvaluation(params);
       message.success('评测任务创建成功！');

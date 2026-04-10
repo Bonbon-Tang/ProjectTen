@@ -682,20 +682,17 @@ export default function DLAgentCreate() {
         await createEvaluation({
           name: taskName,
           description: taskDraft.description || undefined,
-          task_category: taskDraft.taskCategory,
-          task_type: taskDraft.taskType,
-          device_type: taskDraft.deviceType,
-          device_count: taskDraft.deviceCount || 1,
+          task: taskDraft.taskCategory === 'operator_test' ? 'operator' : 'model_deployment',
+          scenario: taskDraft.taskType === 'operator_perf_accuracy' ? 'operator_accuracy_performance' : taskDraft.taskType,
+          chips: taskDraft.deviceType,
+          chip_num: taskDraft.deviceCount || 1,
           visibility: 'private',
           priority: 'medium',
-          toolset_id: taskDraft.toolsetId,
-          toolset_code: taskDraft.toolsetCode || selectedToolset?.asset_code,
+          tool_id: taskDraft.toolsetId,
+          image_id: taskDraft.taskCategory === 'model_deployment_test' ? taskDraft.imageId : undefined,
           operator_lib_id: taskDraft.taskCategory === 'operator_test' ? taskDraft.operatorLibId : undefined,
           operator_categories: taskDraft.taskCategory === 'operator_test' && taskDraft.operatorCategories && taskDraft.operatorCategories.length > 0 ? taskDraft.operatorCategories : undefined,
           operator_count: taskDraft.taskCategory === 'operator_test' && taskDraft.operatorCount ? taskDraft.operatorCount : undefined,
-          image_id: taskDraft.taskCategory === 'model_deployment_test' ? taskDraft.imageId : undefined,
-          image_code: taskDraft.taskCategory === 'model_deployment_test' ? (taskDraft.imageCode || selectedImage?.asset_code) : undefined,
-          config: taskDraft.taskCategory === 'model_deployment_test' ? { image_id: taskDraft.imageId, image_code: taskDraft.imageCode || selectedImage?.asset_code } : {},
         } as any);
         appendAgentMessage('真实 evaluation 任务已经创建完成，我现在带你去评测任务列表。');
         setCurrentStep('done');

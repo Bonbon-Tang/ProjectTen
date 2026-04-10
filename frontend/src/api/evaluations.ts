@@ -12,24 +12,34 @@ export interface EvalQuery {
   end_time?: string;
 }
 
-export interface CreateEvalParams {
+// Unified routing payload v2 (frontends must send ONLY these fields)
+export interface UnifiedEvalRoutingParams {
+  /** operator: 算子评测 | model_deployment: 模型部署评测 */
+  task: 'operator' | 'model_deployment';
+  /** 子场景：operator_accuracy / operator_accuracy_performance / llm / speech_recognition / ... */
+  scenario: string;
+  /** 芯片 tag（与资产 tags 对齐），例如 huawei_910c */
+  chips: string;
+  /** 芯片数量 */
+  chip_num: number;
+  /** 镜像资产数据库 id（模型部署必填，算子评测不传） */
+  image_id?: number;
+  /** 工具资产数据库 id（算子/模型部署都可填，算子评测必填） */
+  tool_id?: number;
+
+  // Meta
   name: string;
   description?: string;
-  task_category: 'operator_test' | 'model_deployment_test';
-  task_type: string;
-  device_type: string;
-  device_count: number;
   visibility?: 'private' | 'platform';
-  toolset_id?: number;
-  toolset_code?: string;
-  image_id?: number;
-  image_code?: string;
   priority: 'high' | 'medium' | 'low';
-  config?: Record<string, any>;
+
+  // Operator-only options
   operator_count?: number;
   operator_categories?: string[];
   operator_lib_id?: number;
 }
+
+type CreateEvalParams = UnifiedEvalRoutingParams;
 
 export function getEvaluations(params: EvalQuery) {
   return api.get('/evaluations/', { params });

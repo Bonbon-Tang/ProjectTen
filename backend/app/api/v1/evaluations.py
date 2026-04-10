@@ -16,6 +16,7 @@ from app.schemas.evaluation import (
     BatchDeleteResponse,
     EvaluationStatsOut,
 )
+from app.services.routing_normalizer import normalize_unified_payload
 from app.models.evaluation import TEST_TAGS
 from app.services.evaluation_service import EvaluationService
 from app.utils.pagination import PaginationParams, paginate
@@ -77,22 +78,65 @@ def create_evaluation(body: EvaluationCreate, request: Request,
                       current_user: User = Depends(get_current_user),
                       db: Session = Depends(get_db)):
     import logging
-    logging.info(f"CREATE EVAL body: {body.model_dump()}")
+    raw = body.model_dump()
+    logging.info(f"CREATE EVAL unified body: {raw}")
+
     if not (getattr(current_user.user_type, 'value', current_user.user_type) == 'admin' or is_tenant_user(current_user)):
         raise HTTPException(status_code=403, detail='Only admin or tenant users can create evaluations')
+
     try:
+        norm = normalize_unified_payload(raw)
         task = EvaluationService.create(
             db,
             creator_id=current_user.id,
             tenant_id=current_user.tenant_id,
-            **body.model_dump(),
+            name=norm.name,
+            description=norm.description,
+            visibility=norm.visibility,
+            priority=norm.priority,
+            task_category=norm.task_category,
+            task_type=norm.task_type,
+            device_type=norm.device_type,
+            device_count=norm.device_count,
+            image_id=norm.image_id,
+            toolset_id=norm.toolset_id,
+            # operator-only
+            operator_count=norm.operator_count,
+            operator_categories=norm.operator_categories,
+            operator_lib_id=norm.operator_lib_id,
+            # unified schema uses no extra config at the boundary
+            config={},
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
     write_audit_log(db, user_id=current_user.id, action="create_evaluation", resource_type="evaluation",
                     resource_id=task.id, ip_address=request.client.host if request.client else None)
-    return _ok(EvaluationOut.model_validate(task).model_dump())
+
+    # Return unified response payload (v2)
+    payload = {
+        "id": task.id,
+        "name": task.name,
+        "description": task.description,
+        "task": raw.get("task"),
+        "scenario": raw.get("scenario"),
+        "chips": raw.get("chips"),
+        "chip_num": raw.get("chip_num") or 1,
+        "image_id": norm.image_id,
+        "tool_id": norm.toolset_id,
+        "status": task.status.value if hasattr(task.status, 'value') else str(task.status),
+        "priority": task.priority.value if hasattr(task.priority, 'value') else str(task.priority),
+        "progress": task.progress or 0,
+        "visibility": task.visibility,
+        "operator_count": task.operator_count,
+        "operator_categories": task.operator_categories,
+        "operator_lib_id": task.operator_lib_id,
+        "creator_id": task.creator_id,
+        "tenant_id": task.tenant_id,
+        "created_at": task.created_at,
+        "updated_at": task.updated_at,
+    }
+    return _ok(EvaluationOut.model_validate(payload).model_dump())
 
 
 @router.get("/")

@@ -11,25 +11,54 @@
 
 ---
 
-## 一、核心字段（最终执行层）
+## 一、统一接口字段（Frontend → Backend）
 
-最终执行任务时，统一使用以下 5 个核心字段：
+无论是 **DL 智能体创建** 还是 **评测创建页创建**，最终提交给后端的 JSON 统一为如下字段（v2）：
 
-- `imageId`：镜像业务编号
-- `deviceType`：芯片型号/设备类型
-- `taskCategory`：测试大类
-- `taskType`：测试小类/子场景
-- `toolsetId`：测试工具业务编号
+- `task`：评测大类
+  - `operator`（算子评测）
+  - `model_deployment`（模型部署评测）
+- `scenario`：子场景
+  - 算子：`operator_accuracy` / `operator_accuracy_performance`
+  - 模型：`llm` / `speech_recognition` / `multimodal` / ...
+- `chips`：芯片 tag（与资源/资产 tag 对齐），例如 `huawei_910c`
+- `chip_num`：芯片数量（对应资源申请数量）
+- `image_id`：镜像资产数据库 id（仅模型部署必填）
+- `tool_id`：工具资产数据库 id（算子评测必填；模型部署可选/推荐）
 
-推荐任务执行 JSON：
+推荐提交 JSON（模型部署示例）：
 
 ```json
 {
-  "imageId": "030012",
-  "deviceType": "huawei_910c",
-  "taskCategory": "model_deployment_test",
-  "taskType": "speech_recognition",
-  "toolsetId": "0301"
+  "name": "模型评测-llm-1712740800000",
+  "description": "可选",
+  "task": "model_deployment",
+  "scenario": "llm",
+  "chips": "huawei_910c",
+  "chip_num": 1,
+  "image_id": 70,
+  "tool_id": 27,
+  "visibility": "private",
+  "priority": "medium"
+}
+```
+
+算子评测示例：
+
+```json
+{
+  "name": "算子评测-operator_accuracy_performance-1712740800000",
+  "description": "可选",
+  "task": "operator",
+  "scenario": "operator_accuracy_performance",
+  "chips": "huawei_910c",
+  "chip_num": 1,
+  "tool_id": 1,
+  "visibility": "private",
+  "priority": "medium",
+  "operator_lib_id": 2,
+  "operator_categories": ["卷积类", "激活函数类"],
+  "operator_count": 50
 }
 ```
 

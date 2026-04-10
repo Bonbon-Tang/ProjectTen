@@ -7,29 +7,30 @@ from pydantic import BaseModel
 
 
 class EvaluationCreate(BaseModel):
+    """Unified routing payload (v2).
+
+    Frontend MUST send ONLY these normalized fields.
+    Backend will persist normalized fields into EvaluationTask.
+    """
+
+    # Meta
     name: str
     description: Optional[str] = None
-    tags: Optional[List[str]] = None
-    primary_tag: Optional[str] = None
-    task_category: Optional[str] = None  # operator_test | model_deployment_test
-    task_type: Optional[str] = None  # operator subtypes or deployment scenario subtypes
-    image_code: Optional[str] = None
-    toolset_code: Optional[str] = None
-    create_mode: str = "template"
-    priority: str = "medium"
     visibility: str = "private"
-    config: Dict[str, Any] = {}
-    resource_spec: Optional[Dict[str, Any]] = None
-    is_custom_billing: bool = False
-    max_retries: int = 3
-    device_type: Optional[str] = None
-    device_count: Optional[int] = 1
-    toolset_id: Optional[int] = None
-    operator_count: Optional[int] = None  # Number of operators to test (None = all matching)
-    operator_categories: Optional[List[str]] = None  # Operator categories to test (None = all)
-    operator_lib_id: Optional[int] = None  # Operator library asset ID
-    image_id: Optional[int] = None  # Model deployment image ID
-    image_name: Optional[str] = None  # Denormalized image name for display
+    priority: str = "medium"
+
+    # Unified routing core
+    task: str  # operator | model_deployment
+    scenario: str  # operator_accuracy | operator_accuracy_performance | llm | ...
+    chips: str  # chip tag, e.g. huawei_910c
+    chip_num: int = 1
+    image_id: Optional[int] = None
+    tool_id: Optional[int] = None
+
+    # Operator-only options
+    operator_count: Optional[int] = None
+    operator_categories: Optional[List[str]] = None
+    operator_lib_id: Optional[int] = None
 
 
 class EvaluationUpdate(BaseModel):
@@ -40,38 +41,37 @@ class EvaluationUpdate(BaseModel):
 
 
 class EvaluationOut(BaseModel):
+    """Unified response payload (v2).
+
+    For UI display we still keep additional metadata fields, but routing core is normalized.
+    """
+
     id: int
     name: str
-    image_code: Optional[str] = None
-    toolset_code: Optional[str] = None
     description: Optional[str] = None
-    tags: Optional[List[str]] = None
-    primary_tag: Optional[str] = None
-    task_category: Optional[str] = None
-    task_type: str
-    create_mode: str
+
+    # unified routing core
+    task: str
+    scenario: str
+    chips: str
+    chip_num: int
+    image_id: Optional[int] = None
+    tool_id: Optional[int] = None
+
+    # meta/status
     status: str
     priority: str
     progress: int = 0
-    device_type: Optional[str] = None
-    device_count: int = 1
     visibility: str = "private"
-    toolset_id: Optional[int] = None
+
+    # operator-only
     operator_count: Optional[int] = None
     operator_categories: Optional[List[str]] = None
     operator_lib_id: Optional[int] = None
-    image_id: Optional[int] = None
-    config: Dict[str, Any] = {}
-    result: Optional[Dict[str, Any]] = None
-    resource_spec: Optional[Dict[str, Any]] = None
-    metrics: Optional[Dict[str, Any]] = None
+
+    # timestamps/owner
     creator_id: int
     tenant_id: Optional[int] = None
-    is_custom_billing: bool
-    retry_count: int
-    max_retries: int
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
