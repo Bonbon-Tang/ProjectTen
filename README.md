@@ -30,6 +30,20 @@ Then open:
 
 Logs are written to `./logs/`.
 
+## Docker (optional)
+
+Docker 相关文件统一放在：`deploy/docker/`
+
+启动：
+```bash
+docker compose -f deploy/docker/docker-compose.yml up --build -d
+```
+
+停止：
+```bash
+docker compose -f deploy/docker/docker-compose.yml down
+```
+
 ## Per-service
 
 ### Backend
