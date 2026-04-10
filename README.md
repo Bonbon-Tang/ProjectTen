@@ -1,6 +1,10 @@
 # ProjectTen
 
-ProjectTen is a lightweight evaluation platform (backend + frontend).
+ProjectTen 是一个轻量的评测平台（FastAPI 后端 + Vite/React 前端），用于创建评测任务、管理评测记录与查看结果。
+
+- 后端：提供评测/资产/报告等 API
+- 前端：提供创建评测、列表/详情、报告浏览等页面
+- 评测路由：项目内已逐步统一为单一 JSON 协议（详见本文档与 `PROJECT_NOTES.md`）
 
 ## Requirements
 
@@ -44,7 +48,10 @@ bash frontend/scripts/start.sh
 
 ## Notes
 
-- This repo does **not** commit local runtime artifacts (venv, __pycache__, node_modules, dist, local sqlite db).
-- Ports can be overridden via env vars:
+- 本仓库不提交本地运行产物（venv、__pycache__、node_modules、dist、本地 sqlite db 等）。
+- 历史零散文档已归并到：
+  - `PROJECT_NOTES.md`（按性质分类的统一入口，建议只维护这一份）
+  - `docs/legacy/`（原始历史文档存档，可按需删除）
+- 端口可通过环境变量覆盖：
   - backend: `HOST`, `PORT`, `RELOAD`
   - frontend: `HOST`, `PORT`
