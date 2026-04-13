@@ -1,7 +1,7 @@
 import api from './index';
 
 export interface RankingQuery {
-  task_type: string;
+  scenario: string;
   eval_method?: string;
   sort_by?: string;
   page?: number;
@@ -20,10 +20,10 @@ export function getModelBenchmarkSummary() {
   return api.get('/model-benchmark/summary');
 }
 
-export function getAvailableImages(task_type?: string, device_type?: string) {
-  return api.get('/model-benchmark/images', { params: { task_type, device_type } });
+export function getAvailableImages(scenario?: string, chips?: string) {
+  return api.get('/model-benchmark/images', { params: { scenario, chips } });
 }
 
-export function getAvailableToolsets(task_type?: string) {
-  return api.get('/model-benchmark/toolsets', { params: { task_type } });
+export function getAvailableToolsets(scenario?: string) {
+  return api.get('/model-benchmark/toolsets', { params: { scenario } });
 }

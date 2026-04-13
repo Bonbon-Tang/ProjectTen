@@ -20,6 +20,30 @@ def _ok(data=None, message: str = "success"):
     return {"code": 0, "message": message, "data": data}
 
 
+def _to_unified_task_fields(task):
+    if not task:
+        return {
+            "task": None,
+            "scenario": None,
+            "chips": None,
+            "chip_num": None,
+            "tool_id": None,
+            "image_id": None,
+        }
+    task_category = task.task_category.value if hasattr(task.task_category, 'value') else (str(task.task_category) if task.task_category else None)
+    task_type = task.task_type.value if hasattr(task.task_type, 'value') else (str(task.task_type) if task.task_type else None)
+    unified_task = "operator" if task_category == "operator_test" else ("model_deployment" if task_category else None)
+    unified_scenario = "operator_accuracy_performance" if task_type == "operator_perf_accuracy" else task_type
+    return {
+        "task": unified_task,
+        "scenario": unified_scenario,
+        "chips": task.device_type,
+        "chip_num": task.device_count,
+        "tool_id": task.toolset_id,
+        "image_id": task.image_id,
+    }
+
+
 @router.post("/generate/{task_id}")
 def generate_report(task_id: int, body: ReportGenerate, request: Request,
                     current_user: User = Depends(get_current_user),
@@ -80,12 +104,9 @@ def list_reports(
             "is_public": report.is_public,
             "created_at": report.created_at.isoformat() if report.created_at else None,
             "updated_at": report.updated_at.isoformat() if report.updated_at else None,
-            # Task info
             "eval_name": task.name if task else None,
-            "task_category": task.task_category if task else None,
-            "task_type": task.task_type if task else None,
-            "device_type": task.device_type if task else None,
             "progress": task.progress if task else None,
+            **_to_unified_task_fields(task),
         }
         # Add image and model name info if task has image_id
         if task and task.image_id:
@@ -136,17 +157,13 @@ def list_archives(
             "report_id": archive.report_id,
             "note": archive.note,
             "archived_at": archive.archived_at.isoformat() if archive.archived_at else None,
-            # Report info
             "report_title": report.title if report else None,
             "report_type": report.report_type if report else None,
             "report_status": report.status if report else None,
             "task_id": report.task_id if report else None,
-            # Task info (same as list_reports)
             "eval_name": task.name if task else None,
-            "task_category": task.task_category.value if task and task.task_category else None,
-            "task_type": task.task_type.value if task and task.task_type else None,
-            "device_type": task.device_type if task else None,
             "progress": task.progress if task else None,
+            **_to_unified_task_fields(task),
         }
         
         # Add image and model name info if task has image_id

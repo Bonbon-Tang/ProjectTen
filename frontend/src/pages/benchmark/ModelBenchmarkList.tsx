@@ -22,7 +22,7 @@ import { DEVICE_TYPES } from '@/utils/constants';
 const { Text } = Typography;
 
 interface ScenarioInfo {
-  task_type: string;
+  scenario: string;
   count: number;
 }
 
@@ -110,7 +110,7 @@ function getDeviceLabel(chips: string) {
 }
 
 function createPlaceholderScenario(scenario: string): ScenarioInfo {
-  return { task_type: scenario, count: 0 };
+  return { scenario, count: 0 };
 }
 
 export default function ModelBenchmarkList() {
@@ -129,18 +129,18 @@ export default function ModelBenchmarkList() {
       const list = res?.data || res || [];
       const existingMap = new Map<string, ScenarioInfo>();
       if (Array.isArray(list)) {
-        list.forEach((item: ScenarioInfo) => existingMap.set(item.task_type, item));
+        list.forEach((item: ScenarioInfo) => existingMap.set(item.scenario, item));
       }
       const merged = ALL_SCENARIOS.map((scenario) => existingMap.get(scenario) || createPlaceholderScenario(scenario));
       setScenarios(merged);
       if (!selectedScenario && merged.length > 0) {
-        setSelectedScenario(merged[0].task_type);
+        setSelectedScenario(merged[0].scenario);
       }
     } catch {
       const merged = ALL_SCENARIOS.map(createPlaceholderScenario);
       setScenarios(merged);
       if (!selectedScenario && merged.length > 0) {
-        setSelectedScenario(merged[0].task_type);
+        setSelectedScenario(merged[0].scenario);
       }
     }
   }, [selectedScenario]);
@@ -167,7 +167,7 @@ export default function ModelBenchmarkList() {
     setRankingLoading(true);
     try {
       const res: any = await getModelBenchmarkRanking({
-        task_type: selectedScenario,
+        scenario: selectedScenario,
         eval_method: 'standard',
         sort_by: sortBy,
         page: 1,
@@ -193,7 +193,7 @@ export default function ModelBenchmarkList() {
 
   const topThree = useMemo(() => ranking.slice(0, 3), [ranking]);
   const selectedScenarioInfo = useMemo(
-    () => scenarios.find((item) => item.task_type === selectedScenario),
+    () => scenarios.find((item) => item.scenario === selectedScenario),
     [scenarios, selectedScenario],
   );
 
@@ -312,8 +312,8 @@ export default function ModelBenchmarkList() {
   );
 
   const scenarioTabs = scenarios.map((s) => ({
-    key: s.task_type,
-    label: `${getScenarioLabel(s.task_type)}${s.count > 0 ? ` (${s.count})` : ' · 待位'}`,
+    key: s.scenario,
+    label: `${getScenarioLabel(s.scenario)}${s.count > 0 ? ` (${s.count})` : ' · 待位'}`,
   }));
 
   return (
@@ -355,20 +355,20 @@ export default function ModelBenchmarkList() {
 
       <div className="benchmark-lane-grid">
         {scenarios.map((scenario) => {
-          const isActive = scenario.task_type === selectedScenario;
+          const isActive = scenario.scenario === selectedScenario;
           const pending = scenario.count === 0;
           return (
             <div
-              key={scenario.task_type}
+              key={scenario.scenario}
               className={`benchmark-lane-card ${pending ? 'pending' : 'active'}`}
               onClick={() => {
-                setSelectedScenario(scenario.task_type);
+                setSelectedScenario(scenario.scenario);
                 setExpandedRowKeys([]);
               }}
               style={{ cursor: 'pointer', outline: isActive ? '2px solid #225fd6' : 'none' }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                <div style={{ fontWeight: 700, color: '#0b1c34' }}>{getScenarioLabel(scenario.task_type)}</div>
+                <div style={{ fontWeight: 700, color: '#0b1c34' }}>{getScenarioLabel(scenario.scenario)}</div>
                 <Tag color={pending ? 'default' : 'blue'}>{pending ? '待位' : `${scenario.count}项`}</Tag>
               </div>
               <div style={{ color: '#5d7492', fontSize: 12 }}>

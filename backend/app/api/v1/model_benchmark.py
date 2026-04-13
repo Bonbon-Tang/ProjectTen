@@ -131,13 +131,14 @@ def get_scenarios(
         .order_by(sa_func.count(ModelBenchmark.id).desc())
         .all()
     )
-    scenarios = [{"task_type": tt, "count": cnt} for tt, cnt in results]
+    scenarios = [{"scenario": tt, "count": cnt} for tt, cnt in results]
     return _ok(scenarios)
 
 
 @router.get("/ranking")
 def get_ranking(
-    task_type: str = Query(..., description="Sub-scenario type"),
+    scenario: Optional[str] = Query(None, description="Unified v2 scenario"),
+    task_type: Optional[str] = Query(None, description="Legacy sub-scenario type"),
     eval_method: str = Query("standard", description="Evaluation method"),
     sort_by: str = Query("accuracy", description="Sort field"),
     page: int = Query(1, ge=1),
@@ -146,8 +147,9 @@ def get_ranking(
     db: Session = Depends(get_db),
 ):
     """Get model benchmark ranking for a sub-scenario, sorted by accuracy desc."""
+    resolved_scenario = scenario or task_type
     q = db.query(ModelBenchmark).filter(
-        ModelBenchmark.task_type == task_type,
+        ModelBenchmark.task_type == resolved_scenario,
         ModelBenchmark.eval_method == eval_method,
     )
     total = q.count()
@@ -194,7 +196,7 @@ def get_ranking(
         "total": total,
         "page": page,
         "page_size": page_size,
-        "task_type": task_type,
+        "scenario": resolved_scenario,
         "eval_method": eval_method,
     })
 
@@ -218,13 +220,17 @@ def get_model_benchmark_summary(
 
 @router.get("/images")
 def get_available_images(
+    scenario: Optional[str] = None,
+    chips: Optional[str] = None,
     task_type: Optional[str] = None,
     device_type: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get available images for model deployment test, optionally filtered by sub-scenario tag and chip."""
-    target_chip_tags = set(DEVICE_TAG_MAP.get(device_type, [])) if device_type else set()
+    """Get available images for model deployment test, optionally filtered by unified v2 scenario/chips."""
+    resolved_scenario = scenario or task_type
+    resolved_chips = chips or device_type
+    target_chip_tags = set(DEVICE_TAG_MAP.get(resolved_chips, [])) if resolved_chips else set()
 
     q = db.query(DigitalAsset).filter(
         DigitalAsset.asset_type == "image",
@@ -235,7 +241,7 @@ def get_available_images(
     result = []
     for img in images:
         tags = _ensure_list_tags(img.tags)
-        if task_type and task_type not in tags:
+        if resolved_scenario and resolved_scenario not in tags:
             continue
 
         chip_name, framework_name, model_name = _infer_chip_framework_model(img, tags)
@@ -266,11 +272,12 @@ def get_available_images(
 
 @router.get("/toolsets")
 def get_available_toolsets(
+    scenario: Optional[str] = None,
     task_type: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get available toolsets for model deployment test, optionally filtered by sub-scenario tag."""
+    """Get available toolsets for model deployment test, optionally filtered by unified v2 scenario."""
     q = db.query(DigitalAsset).filter(
         DigitalAsset.asset_type == "toolset",
         DigitalAsset.status == "active",
@@ -281,7 +288,7 @@ def get_available_toolsets(
     for ts in toolsets:
         tags = _ensure_list_tags(ts.tags)
         category = ts.category or ""
-        if task_type and task_type not in tags:
+        if resolved_scenario and resolved_scenario not in tags:
             continue
         result.append({
             "id": ts.id,
