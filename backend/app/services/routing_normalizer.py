@@ -5,13 +5,13 @@ from typing import Any, Dict, Optional, Tuple
 
 
 TASK_MAP = {
-    # unified.task -> legacy task_category
+    # public v2 task -> internal category
     "operator": "operator_test",
     "model_deployment": "model_deployment_test",
 }
 
 SCENARIO_MAP = {
-    # unified.scenario -> legacy task_type
+    # public v2 scenario -> internal subtype
     "operator_accuracy": "operator_accuracy",
     "operator_accuracy_performance": "operator_perf_accuracy",
     "LLM": "llm",
@@ -21,12 +21,12 @@ SCENARIO_MAP = {
 
 @dataclass(frozen=True)
 class NormalizedRouting:
-    task_category: str
-    task_type: str
-    device_type: str
-    device_count: int
+    internal_task_category: str
+    internal_task_type: str
+    internal_device_type: str
+    internal_device_count: int
     image_id: Optional[int]
-    toolset_id: Optional[int]
+    tool_id: Optional[int]
 
     # keep for downstream
     name: str
@@ -45,10 +45,11 @@ def normalize_unified_payload(payload: Dict[str, Any]) -> NormalizedRouting:
       task, scenario, chips, chip_num, image_id, tool_id, name, ...
 
     Returns normalized internal fields:
-      task_category, task_type, device_type, device_count, image_id, toolset_id
+      internal_task_category, internal_task_type, internal_device_type,
+      internal_device_count, image_id, tool_id
 
-    NOTE: The project asked for "no legacy fields" at API boundary.
-    Internally we still map to existing DB/model fields.
+    NOTE: API boundary only accepts v2 fields.
+    Existing persistence layer still uses current model/service field names underneath.
     """
 
     task = payload.get("task")
@@ -64,8 +65,8 @@ def normalize_unified_payload(payload: Dict[str, Any]) -> NormalizedRouting:
     if task not in TASK_MAP:
         raise ValueError(f"无效 task: {task}")
 
-    task_category = TASK_MAP[task]
-    task_type = SCENARIO_MAP.get(scenario, scenario)
+    internal_task_category = TASK_MAP[task]
+    internal_task_type = SCENARIO_MAP.get(scenario, scenario)
 
     try:
         device_count = int(chip_num)
@@ -76,22 +77,22 @@ def normalize_unified_payload(payload: Dict[str, Any]) -> NormalizedRouting:
     tool_id = payload.get("tool_id")
 
     # Validation by category
-    if task_category == "operator_test":
+    if internal_task_category == "operator_test":
         if not tool_id:
             raise ValueError("算子评测必须提供 tool_id")
         # operator test does not require image
         image_id = None
-    elif task_category == "model_deployment_test":
+    elif internal_task_category == "model_deployment_test":
         if not image_id:
             raise ValueError("模型部署评测必须提供 image_id")
 
     return NormalizedRouting(
-        task_category=task_category,
-        task_type=task_type,
-        device_type=chips,
-        device_count=device_count,
+        internal_task_category=internal_task_category,
+        internal_task_type=internal_task_type,
+        internal_device_type=chips,
+        internal_device_count=device_count,
         image_id=image_id,
-        toolset_id=tool_id,
+        tool_id=tool_id,
         name=payload.get("name") or "",
         description=payload.get("description"),
         visibility=payload.get("visibility") or "private",

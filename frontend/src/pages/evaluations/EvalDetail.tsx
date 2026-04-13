@@ -52,10 +52,10 @@ import dayjs from 'dayjs';
 
 const { Text } = Typography;
 
-// 获取子类型标签
-function getSubTypeLabel(category: string, taskType: string): string {
+// 获取子场景标签
+function getScenarioLabel(category: string, scenario: string): string {
   const list = category === 'operator_test' ? OPERATOR_TEST_TYPES : MODEL_TEST_TYPES;
-  return list.find((t) => t.value === taskType)?.label || taskType;
+  return list.find((t) => t.value === scenario)?.label || scenario;
 }
 
 function getCategoryLabel(val: string): string {
@@ -609,7 +609,7 @@ export default function EvalDetail() {
           </Descriptions.Item>
           <Descriptions.Item label="子场景">
             <Tag color="geekblue">
-              {getSubTypeLabel(detail.task_category, detail.task_type)}
+              {getScenarioLabel(detail.task_category, detail.task_type)}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="设备类型">
@@ -782,7 +782,7 @@ export default function EvalDetail() {
       {/* 评测结果 - 算子测试 */}
       {isCompleted && isOperatorTest && (
         <Card
-          title={`评测结果 - 算子测试（${getSubTypeLabel(detail.task_category, detail.task_type)}）`}
+          title={`评测结果 - 算子测试（${getScenarioLabel(detail.task_category, detail.task_type)}）`}
           style={{ marginBottom: 16, borderRadius: 8 }}
         >
           {/* 汇总统计 */}

@@ -1,50 +1,78 @@
-# ProjectTen 子场景编号段对照表 v1
+# ProjectTen 子场景编号段对照表（v2 对齐说明）
 
-> 说明：本表用于 `taskType`、`imageId`、`toolsetId` 的统一路由与校验。
+> 本文件保留原路径仅用于兼容历史链接，内容已按 v2 语义重写。
+> 
+> **唯一主规范**：`docs/legacy/TASK_ROUTING_SPEC_V2.md`
 
-## 编号规则
+## v2 执行字段
 
-- 镜像编号：`SSNNNN`
-  - `SS`：场景编号段
-  - `NNNN`：该场景下镜像流水号
-- 工具编号：`SSNN`
-  - `SS`：场景编号段
-  - `NN`：该场景下工具流水号
+- `task`
+- `scenario`
+- `chips`
+- `chip_num`
+- `image_id`
+- `tool_id`
 
-## 场景对照表（v1）
+## 字段语义
 
-| 场景段 | taskCategory | taskType | 中文名 | imageId 示例 | toolsetId 示例 |
-|---|---|---|---|---|---|
-| 01 | operator_test | operator_perf_accuracy / operator_accuracy | 算子测试 | 010001 | 0101 |
-| 02 | model_deployment_test | llm | 语言 / LLM | 020001 | 0201 |
-| 03 | model_deployment_test | speech_recognition | 语音识别 | 030001 | 0301 |
-| 04 | model_deployment_test | multimodal | 多模态 | 040001 | 0401 |
-| 05 | model_deployment_test | image_classification | 图像分类 | 050001 | 0501 |
-| 06 | model_deployment_test | object_detection | 目标检测 | 060001 | 0601 |
-| 07 | model_deployment_test | semantic_segmentation | 语义分割 | 070001 | 0701 |
-| 08 | model_deployment_test | text_generation | 文本生成 | 080001 | 0801 |
-| 09 | model_deployment_test | machine_translation | 机器翻译 | 090001 | 0901 |
-| 10 | model_deployment_test | sentiment_analysis | 情感分析 | 100001 | 1001 |
-| 11 | model_deployment_test | question_answering | 问答系统 | 110001 | 1101 |
-| 12 | model_deployment_test | text_summarization | 文本摘要 | 120001 | 1201 |
-| 13 | model_deployment_test | speech_synthesis | 语音合成 | 130001 | 1301 |
-| 14 | model_deployment_test | image_generation | 图像生成 | 140001 | 1401 |
-| 15 | model_deployment_test | video_understanding | 视频理解 | 150001 | 1501 |
-| 16 | model_deployment_test | ocr | OCR | 160001 | 1601 |
-| 17 | model_deployment_test | recommendation | 推荐系统 | 170001 | 1701 |
-| 18 | model_deployment_test | anomaly_detection | 异常检测 | 180001 | 1801 |
-| 19 | model_deployment_test | time_series | 时序预测 | 190001 | 1901 |
-| 20 | model_deployment_test | reinforcement_learning | 强化学习 | 200001 | 2001 |
-| 21 | model_deployment_test | graph_neural_network | 图神经网络 | 210001 | 2101 |
-| 22 | model_deployment_test | medical_imaging | 医学影像 | 220001 | 2201 |
-| 23 | model_deployment_test | autonomous_driving | 自动驾驶 | 230001 | 2301 |
-| 24 | model_deployment_test | robot_control | 机器人控制 | 240001 | 2401 |
-| 25 | model_deployment_test | code_generation | 代码生成 | 250001 | 2501 |
-| 26 | model_deployment_test | knowledge_graph | 知识图谱 | 260001 | 2601 |
+- `task`
+  - `operator`
+  - `model_deployment`
+- `scenario`
+  - 算子：`operator_accuracy` / `operator_accuracy_performance`
+  - 模型：`llm` / `speech_recognition` / `multimodal` / ...
+- `chips`
+  - 与资源/资产系统一致的芯片 tag，例如 `huawei_910c`
+- `chip_num`
+  - 设备数量
+- `image_id`
+  - 资产数据库中的镜像 id
+- `tool_id`
+  - 资产数据库中的工具 id
+
+## 路由与编号段关系
+
+虽然 v2 执行 JSON 不再直接使用旧业务编号字段作为主字段，但系统内部仍可根据 `scenario` 推导对应编号段，用于：
+
+1. 资产编码前缀校验
+2. 镜像/工具是否与同一子场景对齐的校验
+3. 历史兼容展示
+
+## scenario 对照表
+
+| 编号段 | task | scenario | 中文名 |
+|---|---|---|---|
+| 01 | operator | operator_accuracy / operator_accuracy_performance | 算子测试 |
+| 02 | model_deployment | llm | 语言 / LLM |
+| 03 | model_deployment | speech_recognition | 语音识别 |
+| 04 | model_deployment | multimodal | 多模态 |
+| 05 | model_deployment | image_classification | 图像分类 |
+| 06 | model_deployment | object_detection | 目标检测 |
+| 07 | model_deployment | semantic_segmentation | 语义分割 |
+| 08 | model_deployment | text_generation | 文本生成 |
+| 09 | model_deployment | machine_translation | 机器翻译 |
+| 10 | model_deployment | sentiment_analysis | 情感分析 |
+| 11 | model_deployment | question_answering | 问答系统 |
+| 12 | model_deployment | text_summarization | 文本摘要 |
+| 13 | model_deployment | speech_synthesis | 语音合成 |
+| 14 | model_deployment | image_generation | 图像生成 |
+| 15 | model_deployment | video_understanding | 视频理解 |
+| 16 | model_deployment | ocr | OCR |
+| 17 | model_deployment | recommendation | 推荐系统 |
+| 18 | model_deployment | anomaly_detection | 异常检测 |
+| 19 | model_deployment | time_series | 时序预测 |
+| 20 | model_deployment | reinforcement_learning | 强化学习 |
+| 21 | model_deployment | graph_neural_network | 图神经网络 |
+| 22 | model_deployment | medical_imaging | 医学影像 |
+| 23 | model_deployment | autonomous_driving | 自动驾驶 |
+| 24 | model_deployment | robot_control | 机器人控制 |
+| 25 | model_deployment | code_generation | 代码生成 |
+| 26 | model_deployment | knowledge_graph | 知识图谱 |
 
 ## 强校验
 
-1. `taskType` 必须映射到唯一场景段 `SS`
-2. `imageId[:2] == toolsetId[:2]`
-3. `imageId[:2]` / `toolsetId[:2]` 必须与 `taskType` 对应场景段一致
-4. `deviceType` 仅表示芯片环境，不参与 `SS` 推导
+1. `scenario` 必须映射到唯一编号段 `SS`
+2. 若存在历史资产编码，则镜像与工具编码前缀必须一致
+3. 历史资产编码前缀必须与 `scenario` 对应编号段一致
+4. `chips` 仅表示芯片环境，不参与 `SS` 推导
+5. 执行阶段以 `image_id` / `tool_id` 为准，不以旧业务编号字段作为执行主字段

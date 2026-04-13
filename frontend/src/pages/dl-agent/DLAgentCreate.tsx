@@ -14,8 +14,8 @@ import { MODEL_TEST_TYPES, OPERATOR_TEST_TYPES, TASK_TYPE_PREFIX_MAP } from '@/u
 const { Paragraph, Text } = Typography;
 
 type AgentMode = 'evaluation' | 'adaptation';
-type EvalCategory = 'operator_test' | 'model_deployment_test';
-type SlotStep = 'mode' | 'category' | 'taskType' | 'deviceType' | 'deviceCount' | 'toolset' | 'operatorLib' | 'operatorCategories' | 'operatorCount' | 'imageId' | 'precision' | 'testMode' | 'description' | 'confirm' | 'done';
+type EvalKind = 'operator_test' | 'model_deployment_test';
+type SlotStep = 'mode' | 'category' | 'scenario' | 'chips' | 'chip_num' | 'tool' | 'operatorLib' | 'operatorCategories' | 'operatorCount' | 'image' | 'precision' | 'testMode' | 'description' | 'confirm' | 'done';
 
 interface DeviceOption {
   device_type: string;
@@ -63,17 +63,17 @@ interface ChatMessage {
 
 interface TaskDraft {
   mode?: AgentMode;
-  taskCategory?: EvalCategory;
-  taskType?: string;
-  deviceType?: string;
-  deviceCount?: number;
-  toolsetId?: number;
-  toolsetCode?: string;
+  taskKind?: EvalKind;
+  scenario?: string;
+  chips?: string;
+  chip_num?: number;
+  tool_id?: number;
+  tool_code?: string;
   operatorLibId?: number;
   operatorCategories?: string[];
   operatorCount?: number;
-  imageId?: number;
-  imageCode?: string;
+  image_id?: number;
+  image_code?: string;
   precision?: string;
   testMode?: string;
   description?: string;
@@ -203,14 +203,14 @@ function VisualStage({ title, hint, items }: { title: string; hint: string; item
 const stepTitleMap: Record<SlotStep, string> = {
   mode: '选择任务模式',
   category: '选择评测大类',
-  taskType: '选择子场景',
-  deviceType: '选择芯片设备',
-  deviceCount: '填写设备数量',
-  toolset: '选择测试工具',
+  scenario: '选择子场景',
+  chips: '选择芯片设备',
+  chip_num: '填写设备数量',
+  tool: '选择测试工具',
   operatorLib: '选择算子库',
   operatorCategories: '选择算子分类',
   operatorCount: '设置算子数量',
-  imageId: '选择镜像',
+  image: '选择镜像',
   precision: '选择精度',
   testMode: '选择测试模式',
   description: '填写任务描述',
@@ -230,7 +230,7 @@ export default function DLAgentCreate() {
     },
   ]);
   const [taskDraft, setTaskDraft] = useState<TaskDraft>({
-    deviceCount: 1,
+    chip_num: 1,
     precision: 'bf16',
     testMode: 'standard',
   });
@@ -254,7 +254,7 @@ export default function DLAgentCreate() {
       }
 
       try {
-        const toolsetRes: any = await getAssets({ asset_type: 'toolset', page: 1, page_size: 100 });
+        const toolsetRes: any = await getAssets({ asset_type: 'tool', page: 1, page_size: 100 });
         const operatorLibRes: any = await getAssets({ asset_type: 'operator', category: '算子库', page: 1, page_size: 100 });
         const operatorCategoryRes: any = await getBenchmarkCategories();
 
@@ -344,11 +344,11 @@ export default function DLAgentCreate() {
   }, []);
 
   useEffect(() => {
-    if (taskDraft.taskCategory !== 'model_deployment_test' || !taskDraft.taskType) {
+    if (taskDraft.taskKind !== 'model_deployment_test' || !taskDraft.scenario) {
       setModelToolsets([]);
       return;
     }
-    getAvailableToolsets(taskDraft.taskType)
+    getAvailableToolsets(taskDraft.scenario)
       .then((res: any) => {
         const list = res?.data || res || [];
         if (Array.isArray(list)) {
@@ -359,7 +359,7 @@ export default function DLAgentCreate() {
               name: item.name,
               description: item.description,
               task_category: 'model_deployment_test',
-              task_type: taskDraft.taskType,
+              task_type: taskDraft.scenario,
             })),
           );
         } else {
@@ -369,58 +369,58 @@ export default function DLAgentCreate() {
       .catch(() => {
         setModelToolsets([]);
       });
-  }, [taskDraft.taskCategory, taskDraft.taskType]);
+  }, [taskDraft.taskKind, taskDraft.scenario]);
 
-  const taskTypeOptions = useMemo(() => {
-    if (taskDraft.taskCategory === 'operator_test') return OPERATOR_TEST_TYPES;
+  const scenarioOptions = useMemo(() => {
+    if (taskDraft.taskKind === 'operator_test') return OPERATOR_TEST_TYPES;
     return MODEL_TEST_TYPES;
-  }, [taskDraft.taskCategory]);
+  }, [taskDraft.taskKind]);
 
-  const selectedDevice = useMemo(() => devices.find((item) => item.device_type === taskDraft.deviceType), [devices, taskDraft.deviceType]);
+  const selectedDevice = useMemo(() => devices.find((item) => item.device_type === taskDraft.chips), [devices, taskDraft.chips]);
   const scenarioTagSet = useMemo(() => new Set([...MODEL_TEST_TYPES, ...OPERATOR_TEST_TYPES].map((item) => item.value)), []);
   const filteredToolsets = useMemo(() => {
-    if (taskDraft.taskCategory === 'operator_test') {
+    if (taskDraft.taskKind === 'operator_test') {
       return toolsets.filter((item) => item.name === 'Deeplink_op_test' || item.name.includes('Deeplink_op_test'));
     }
-    if (taskDraft.taskCategory === 'model_deployment_test') {
+    if (taskDraft.taskKind === 'model_deployment_test') {
       return modelToolsets;
     }
     return [];
-  }, [toolsets, modelToolsets, taskDraft.taskCategory]);
+  }, [toolsets, modelToolsets, taskDraft.taskKind]);
   const filteredImages = useMemo(() => {
-    if (!taskDraft.taskType || !taskDraft.deviceType) return [];
-    const chipTag = chipTagMap[taskDraft.deviceType] || '';
+    if (!taskDraft.scenario || !taskDraft.chips) return [];
+    const chipTag = chipTagMap[taskDraft.chips] || '';
     return allImages.filter((item) => {
       const tags = item.tags || [];
       const matchChip = chipTag ? tags.includes(chipTag) : false;
-      const matchScenario = taskDraft.taskType ? tags.includes(taskDraft.taskType) : false;
+      const matchScenario = taskDraft.scenario ? tags.includes(taskDraft.scenario) : false;
       return matchChip && matchScenario;
     });
-  }, [allImages, taskDraft.taskType, taskDraft.deviceType]);
-  const selectedImage = useMemo(() => filteredImages.find((item) => item.id === taskDraft.imageId), [filteredImages, taskDraft.imageId]);
+  }, [allImages, taskDraft.scenario, taskDraft.chips]);
+  const selectedImage = useMemo(() => filteredImages.find((item) => item.id === taskDraft.image_id), [filteredImages, taskDraft.image_id]);
   const imageCandidates = useMemo(() => filteredImages.slice(0, 5), [filteredImages]);
   const currentStageTitle = stepTitleMap[currentStep] || '流程进行中';
-  const routePrefix = taskDraft.taskType ? TASK_TYPE_PREFIX_MAP[taskDraft.taskType] : undefined;
+  const routePrefix = taskDraft.scenario ? TASK_TYPE_PREFIX_MAP[taskDraft.scenario] : undefined;
 
   const visualDeviceCandidates = useMemo(() => {
-    if (taskDraft.taskCategory !== 'model_deployment_test' || !taskDraft.taskType) return [] as DeviceOption[];
+    if (taskDraft.taskKind !== 'model_deployment_test' || !taskDraft.scenario) return [] as DeviceOption[];
     const matchedChipKeys = new Set(
       allImages
-        .filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.taskType!))
+        .filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.scenario!))
         .map((img) => chipKeyFromImage(img)),
     );
     const online = devices.filter((device) => device.available_count > 0);
     const matched = online.filter((device) => matchedChipKeys.has(normalize(chipLabelFromDevice(device))));
     return matched.length ? matched : online;
-  }, [allImages, devices, scenarioTagSet, taskDraft.taskCategory, taskDraft.taskType]);
+  }, [allImages, devices, scenarioTagSet, taskDraft.taskKind, taskDraft.scenario]);
 
   const selectedDeviceChipKey = useMemo(() => normalize(chipLabelFromDevice(selectedDevice)), [selectedDevice]);
 
   const visualFrameworkCandidates = useMemo(() => {
-    if (taskDraft.taskCategory !== 'model_deployment_test' || !taskDraft.taskType || !selectedDeviceChipKey) return [] as { key: string; label: string; count: number }[];
+    if (taskDraft.taskKind !== 'model_deployment_test' || !taskDraft.scenario || !selectedDeviceChipKey) return [] as { key: string; label: string; count: number }[];
     const bucket = new Map<string, { key: string; label: string; count: number }>();
     allImages
-      .filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.taskType!) && chipKeyFromImage(img) === selectedDeviceChipKey)
+      .filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.scenario!) && chipKeyFromImage(img) === selectedDeviceChipKey)
       .forEach((img) => {
         const key = frameworkKeyFromImage(img);
         const prev = bucket.get(key) || { key, label: img.framework_name || '未知框架', count: 0 };
@@ -428,13 +428,13 @@ export default function DLAgentCreate() {
         bucket.set(key, prev);
       });
     return Array.from(bucket.values()).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
-  }, [allImages, scenarioTagSet, selectedDeviceChipKey, taskDraft.taskCategory, taskDraft.taskType]);
+  }, [allImages, scenarioTagSet, selectedDeviceChipKey, taskDraft.taskKind, taskDraft.scenario]);
 
   const selectedFrameworkKey = useMemo(() => {
-    if (!taskDraft.imageId) return '';
-    const image = filteredImages.find((item) => item.id === taskDraft.imageId);
+    if (!taskDraft.image_id) return '';
+    const image = filteredImages.find((item) => item.id === taskDraft.image_id);
     return image ? frameworkKeyFromImage(image) : '';
-  }, [filteredImages, taskDraft.imageId]);
+  }, [filteredImages, taskDraft.image_id]);
 
   const visualImageCandidates = useMemo(() => {
     if (!selectedFrameworkKey) return filteredImages;
@@ -452,17 +452,17 @@ export default function DLAgentCreate() {
   };
 
   const buildPreview = () => {
-    const taskTypeLabel = taskTypeOptions.find((item) => item.value === taskDraft.taskType)?.label || taskDraft.taskType || '未选择';
+    const scenarioLabel = scenarioOptions.find((item) => item.value === taskDraft.scenario)?.label || taskDraft.scenario || '未选择';
     return [
       `模式：${taskDraft.mode === 'evaluation' ? '评测' : '适配'}`,
-      taskDraft.mode === 'evaluation' ? `评测大类：${taskDraft.taskCategory === 'operator_test' ? '算子测试' : '模型部署测试'}` : '适配流程',
-      `子场景：${taskTypeLabel}`,
-      `芯片/设备：${selectedDevice?.name || taskDraft.deviceType || '未选择'}`,
-      taskDraft.mode === 'evaluation' ? `设备数量：${taskDraft.deviceCount || 1} 台` : null,
-      taskDraft.taskCategory === 'operator_test' ? `工具集：${filteredToolsets.find((item) => item.id === taskDraft.toolsetId)?.name || '未选择'}` : `镜像：${selectedImage?.name || '未选择'}`,
-      taskDraft.taskCategory === 'operator_test' ? `算子库：${operatorLibs.find((item) => item.id === taskDraft.operatorLibId)?.name || '未选择'}` : null,
-      taskDraft.taskCategory === 'operator_test' ? `算子分类：${taskDraft.operatorCategories && taskDraft.operatorCategories.length > 0 ? taskDraft.operatorCategories.join('、') : '全部分类'}` : null,
-      taskDraft.taskCategory === 'operator_test' ? `测试算子数量：${taskDraft.operatorCount && taskDraft.operatorCount > 0 ? `${taskDraft.operatorCount} 个` : '全部匹配算子'}` : null,
+      taskDraft.mode === 'evaluation' ? `评测大类：${taskDraft.taskKind === 'operator_test' ? '算子测试' : '模型部署测试'}` : '适配流程',
+      `子场景：${scenarioLabel}`,
+      `芯片/设备：${selectedDevice?.name || taskDraft.chips || '未选择'}`,
+      taskDraft.mode === 'evaluation' ? `设备数量：${taskDraft.chip_num || 1} 台` : null,
+      taskDraft.taskKind === 'operator_test' ? `工具集：${filteredToolsets.find((item) => item.id === taskDraft.tool_id)?.name || '未选择'}` : `镜像：${selectedImage?.name || '未选择'}`,
+      taskDraft.taskKind === 'operator_test' ? `算子库：${operatorLibs.find((item) => item.id === taskDraft.operatorLibId)?.name || '未选择'}` : null,
+      taskDraft.taskKind === 'operator_test' ? `算子分类：${taskDraft.operatorCategories && taskDraft.operatorCategories.length > 0 ? taskDraft.operatorCategories.join('、') : '全部分类'}` : null,
+      taskDraft.taskKind === 'operator_test' ? `测试算子数量：${taskDraft.operatorCount && taskDraft.operatorCount > 0 ? `${taskDraft.operatorCount} 个` : '全部匹配算子'}` : null,
       taskDraft.mode === 'adaptation' ? `精度：${(taskDraft.precision || '').toUpperCase()}` : null,
       taskDraft.mode === 'adaptation' ? `测试模式：${TEST_MODE_OPTIONS.find((item) => item.value === taskDraft.testMode)?.label || taskDraft.testMode}` : null,
     ].filter(Boolean).join('\n');
@@ -473,57 +473,57 @@ export default function DLAgentCreate() {
       askStep('mode', '第一步：请选择任务模式。1. 评测  2. 适配');
       return;
     }
-    if (state.mode === 'evaluation' && !state.taskCategory) {
+    if (state.mode === 'evaluation' && !state.taskKind) {
       askStep('category', '第二步：请选择评测大类。1. 算子测试  2. 模型部署测试');
       return;
     }
-    if (!state.taskType) {
-      const options = taskTypeOptions.map((item, index) => `${index + 1}. ${item.label}（tag: ${item.value}）`).join('；');
-      askStep('taskType', `第三步：请选择子场景。${options}。注意：内部会严格使用括号里的 tag 值做镜像筛选。`);
+    if (!state.scenario) {
+      const options = scenarioOptions.map((item, index) => `${index + 1}. ${item.label}（tag: ${item.value}）`).join('；');
+      askStep('scenario', `第三步：请选择子场景。${options}。注意：内部会严格使用括号里的 tag 值做镜像筛选。`);
       return;
     }
-    if (!state.deviceType) {
+    if (!state.chips) {
       const options = devices.map((item, index) => `${index + 1}. ${item.name}（value: ${item.device_type}）`).join('；');
-      askStep('deviceType', `第四步：请选择芯片/设备。${options}。注意：内部会严格使用括号里的 value 做镜像筛选。`);
+      askStep('chips', `第四步：请选择芯片/设备。${options}。注意：内部会严格使用括号里的 value 做镜像筛选。`);
       return;
     }
-    if (state.mode === 'evaluation' && !state.deviceCount) {
-      askStep('deviceCount', '第五步：请输入设备数量，例如 1。');
+    if (state.mode === 'evaluation' && !state.chip_num) {
+      askStep('chip_num', '第五步：请输入设备数量，例如 1。');
       return;
     }
-    if (state.mode === 'evaluation' && state.taskCategory === 'operator_test' && !state.toolsetId) {
+    if (state.mode === 'evaluation' && state.taskKind === 'operator_test' && !state.tool_id) {
       if (filteredToolsets.length === 1) {
-        setTaskDraft((prev) => ({ ...prev, toolsetId: filteredToolsets[0].id }));
+        setTaskDraft((prev) => ({ ...prev, tool_id: filteredToolsets[0].id }));
         appendAgentMessage(`第六步：已自动选择正式工具集 ${filteredToolsets[0].name}。`);
         return;
       }
       const options = filteredToolsets.map((item, index) => `${index + 1}. ${item.name}`).join('；');
-      askStep('toolset', `第六步：请选择工具集。算子评测当前仅使用正式工具集：${options || '暂无匹配工具集'}`);
+      askStep('tool', `第六步：请选择工具集。算子评测当前仅使用正式工具集：${options || '暂无匹配工具集'}`);
       return;
     }
-    if (state.mode === 'evaluation' && state.taskCategory === 'operator_test' && !state.operatorLibId) {
+    if (state.mode === 'evaluation' && state.taskKind === 'operator_test' && !state.operatorLibId) {
       const options = operatorLibs.map((item, index) => `${index + 1}. ${item.name}`).join('；');
       askStep('operatorLib', `第七步：请选择算子库。${options || '暂无算子库'}`);
       return;
     }
-    if (state.mode === 'evaluation' && state.taskCategory === 'operator_test' && state.operatorCategories === undefined) {
+    if (state.mode === 'evaluation' && state.taskKind === 'operator_test' && state.operatorCategories === undefined) {
       const options = operatorCategories.map((item, index) => `${index + 1}. ${item.category}（${item.count}个）`).join('；');
       askStep('operatorCategories', `第八步：请选择算子分类，支持多选。可回复如“1,3,5”或直接输入分类名；如果要按 evaluation 一致覆盖全部分类，回复“全部”或“跳过”。${options}`);
       return;
     }
-    if ((state.mode === 'adaptation' || state.taskCategory === 'model_deployment_test') && !state.imageId) {
+    if ((state.mode === 'adaptation' || state.taskKind === 'model_deployment_test') && !state.image_id) {
       const options = imageCandidates.map((item, index) => `${index + 1}. ${item.name}`).join('；');
-      askStep('imageId', `第五步：请选择镜像。候选完全来自已确认的“子场景 + 芯片”过滤结果：${options || '当前没有匹配镜像'}。当前筛选条件是 taskType=${state.taskType}，deviceType=${state.deviceType}。`);
+      askStep('image', `第五步：请选择镜像。候选完全来自已确认的“子场景 + 芯片”过滤结果：${options || '当前没有匹配镜像'}。当前筛选条件是 scenario=${state.scenario}，chips=${state.chips}。`);
       return;
     }
-    if (state.mode === 'evaluation' && state.taskCategory === 'model_deployment_test' && !state.toolsetId) {
+    if (state.mode === 'evaluation' && state.taskKind === 'model_deployment_test' && !state.tool_id) {
       if (filteredToolsets.length === 1) {
-        setTaskDraft((prev) => ({ ...prev, toolsetId: filteredToolsets[0].id }));
+        setTaskDraft((prev) => ({ ...prev, tool_id: filteredToolsets[0].id }));
         appendAgentMessage(`第六步：已自动选择模型部署测试工具集 ${filteredToolsets[0].name}。`);
         return;
       }
       const options = filteredToolsets.map((item, index) => `${index + 1}. ${item.name}`).join('；');
-      askStep('toolset', `第六步：请选择模型部署测试工具集。${options || '暂无匹配工具集'}`);
+      askStep('tool', `第六步：请选择模型部署测试工具集。${options || '暂无匹配工具集'}`);
       return;
     }
     if (state.mode === 'adaptation' && !state.precision) {
@@ -562,7 +562,7 @@ export default function DLAgentCreate() {
 
     const text = normalize(raw);
     if (text === '重来' || text === '重新开始') {
-      setTaskDraft({ deviceCount: 1, precision: 'bf16', testMode: 'standard' });
+      setTaskDraft({ chip_num: 1, precision: 'bf16', testMode: 'standard' });
       askedStepRef.current = null;
       setCurrentStep('mode');
       appendAgentMessage('好的，重新开始。');
@@ -586,44 +586,44 @@ export default function DLAgentCreate() {
         ]) as AgentMode | undefined;
         if (modeValue) {
           next.mode = modeValue;
-          next.taskCategory = modeValue === 'adaptation' ? 'model_deployment_test' : undefined;
-          next.taskType = undefined;
-          next.deviceType = undefined;
-          next.imageId = undefined;
+          next.taskKind = modeValue === 'adaptation' ? 'model_deployment_test' : undefined;
+          next.scenario = undefined;
+          next.chips = undefined;
+          next.image_id = undefined;
         }
       } else if (currentStep === 'category') {
         const categoryValue = resolveByIndexOrText(raw, [
           { label: '算子测试', value: 'operator_test' },
           { label: '模型部署测试', value: 'model_deployment_test' },
-        ]) as EvalCategory | undefined;
+        ]) as EvalKind | undefined;
         if (categoryValue) {
-          next.taskCategory = categoryValue;
-          next.taskType = undefined;
-          next.deviceType = undefined;
-          next.imageId = undefined;
-          next.toolsetId = undefined;
+          next.taskKind = categoryValue;
+          next.scenario = undefined;
+          next.chips = undefined;
+          next.image_id = undefined;
+          next.tool_id = undefined;
         }
-      } else if (currentStep === 'taskType') {
-        const taskTypeValue = resolveByIndexOrText(raw, taskTypeOptions.map((item) => ({ label: item.label, value: item.value })));
-        if (typeof taskTypeValue === 'string') {
-          next.taskType = taskTypeValue;
-          next.deviceType = undefined;
-          next.imageId = undefined;
+      } else if (currentStep === 'scenario') {
+        const scenarioValue = resolveByIndexOrText(raw, scenarioOptions.map((item) => ({ label: item.label, value: item.value })));
+        if (typeof scenarioValue === 'string') {
+          next.scenario = scenarioValue;
+          next.chips = undefined;
+          next.image_id = undefined;
         }
-      } else if (currentStep === 'deviceType') {
+      } else if (currentStep === 'chips') {
         const deviceValue = resolveByIndexOrText(raw, devices.map((item) => ({ label: item.name, value: item.device_type })));
         if (typeof deviceValue === 'string') {
-          next.deviceType = deviceValue;
-          next.imageId = undefined;
+          next.chips = deviceValue;
+          next.image_id = undefined;
         }
-      } else if (currentStep === 'deviceCount') {
+      } else if (currentStep === 'chip_num') {
         const m = text.match(/\d+/);
-        if (m) next.deviceCount = Number(m[0]);
-      } else if (currentStep === 'toolset') {
+        if (m) next.chip_num = Number(m[0]);
+      } else if (currentStep === 'tool') {
         const toolsetValue = resolveByIndexOrText(raw, filteredToolsets.map((item) => ({ label: item.name, value: item.id })));
         if (typeof toolsetValue === 'number') {
-          next.toolsetId = toolsetValue;
-          next.toolsetCode = filteredToolsets.find((item) => item.id === toolsetValue)?.asset_code;
+          next.tool_id = toolsetValue;
+          next.tool_code = filteredToolsets.find((item) => item.id === toolsetValue)?.asset_code;
         }
       } else if (currentStep === 'operatorLib') {
         const operatorLibValue = resolveByIndexOrText(raw, operatorLibs.map((item) => ({ label: item.name, value: item.id })));
@@ -647,11 +647,11 @@ export default function DLAgentCreate() {
           const m = text.match(/\d+/);
           if (m) next.operatorCount = Number(m[0]);
         }
-      } else if (currentStep === 'imageId') {
+      } else if (currentStep === 'image') {
         const imageValue = resolveByIndexOrText(raw, imageCandidates.map((item) => ({ label: item.name, value: item.id })));
         if (typeof imageValue === 'number') {
-          next.imageId = imageValue;
-          next.imageCode = imageCandidates.find((item) => item.id === imageValue)?.asset_code;
+          next.image_id = imageValue;
+          next.image_code = imageCandidates.find((item) => item.id === imageValue)?.asset_code;
         }
       } else if (currentStep === 'precision') {
         const precisionValue = resolveByIndexOrText(raw, PRECISION_OPTIONS.map((item) => ({ label: item.label, value: item.value })));
@@ -672,44 +672,44 @@ export default function DLAgentCreate() {
   }, [taskDraft, devices, toolsets, operatorLibs, operatorCategories, allImages]);
 
   const handleSubmit = async () => {
-    if (!taskDraft.mode || !taskDraft.taskType || !taskDraft.deviceType) return;
+    if (!taskDraft.mode || !taskDraft.scenario || !taskDraft.chips) return;
     setLoading(true);
     try {
       if (taskDraft.mode === 'evaluation') {
-        const selectedToolset = filteredToolsets.find((item) => item.id === taskDraft.toolsetId);
-        const selectedImage = imageCandidates.find((item) => item.id === taskDraft.imageId) || filteredImages.find((item) => item.id === taskDraft.imageId);
-        const taskName = `${taskDraft.taskCategory === 'operator_test' ? '算子评测' : '模型评测'}-${taskDraft.taskType}-${Date.now()}`;
+        const selectedToolset = filteredToolsets.find((item) => item.id === taskDraft.tool_id);
+        const selectedImage = imageCandidates.find((item) => item.id === taskDraft.image_id) || filteredImages.find((item) => item.id === taskDraft.image_id);
+        const taskName = `${taskDraft.taskKind === 'operator_test' ? '算子评测' : '模型评测'}-${taskDraft.scenario}-${Date.now()}`;
         await createEvaluation({
           name: taskName,
           description: taskDraft.description || undefined,
-          task: taskDraft.taskCategory === 'operator_test' ? 'operator' : 'model_deployment',
-          scenario: taskDraft.taskType === 'operator_perf_accuracy' ? 'operator_accuracy_performance' : taskDraft.taskType,
-          chips: taskDraft.deviceType,
-          chip_num: taskDraft.deviceCount || 1,
+          task: taskDraft.taskKind === 'operator_test' ? 'operator' : 'model_deployment',
+          scenario: taskDraft.scenario === 'operator_perf_accuracy' ? 'operator_accuracy_performance' : taskDraft.scenario,
+          chips: taskDraft.chips,
+          chip_num: taskDraft.chip_num || 1,
           visibility: 'private',
           priority: 'medium',
-          tool_id: taskDraft.toolsetId,
-          image_id: taskDraft.taskCategory === 'model_deployment_test' ? taskDraft.imageId : undefined,
-          operator_lib_id: taskDraft.taskCategory === 'operator_test' ? taskDraft.operatorLibId : undefined,
-          operator_categories: taskDraft.taskCategory === 'operator_test' && taskDraft.operatorCategories && taskDraft.operatorCategories.length > 0 ? taskDraft.operatorCategories : undefined,
-          operator_count: taskDraft.taskCategory === 'operator_test' && taskDraft.operatorCount ? taskDraft.operatorCount : undefined,
+          tool_id: taskDraft.tool_id,
+          image_id: taskDraft.taskKind === 'model_deployment_test' ? taskDraft.image_id : undefined,
+          operator_lib_id: taskDraft.taskKind === 'operator_test' ? taskDraft.operatorLibId : undefined,
+          operator_categories: taskDraft.taskKind === 'operator_test' && taskDraft.operatorCategories && taskDraft.operatorCategories.length > 0 ? taskDraft.operatorCategories : undefined,
+          operator_count: taskDraft.taskKind === 'operator_test' && taskDraft.operatorCount ? taskDraft.operatorCount : undefined,
         } as any);
         appendAgentMessage('真实 evaluation 任务已经创建完成，我现在带你去评测任务列表。');
         setCurrentStep('done');
         message.success('DL智能体已驱动 evaluation 创建');
         setTimeout(() => navigate('/evaluations/list'), 800);
       } else {
-        const taskName = `DL智能体-适配任务-${taskDraft.imageId}`;
+        const taskName = `DL智能体-适配任务-${taskDraft.image_id}`;
         await createAdaptation({
           name: taskName,
-          image_id: taskDraft.imageId!,
-          device_type: taskDraft.deviceType,
+          image_id: taskDraft.image_id!,
+          device_type: taskDraft.chips,
           device_count: 1,
           test_mode: taskDraft.testMode || 'standard',
           precision: taskDraft.precision || 'bf16',
           save_image: false,
           config: {
-            scenario_type: taskDraft.taskType,
+            scenario_type: taskDraft.scenario,
             include_in_ranking: true,
             user_prompt: taskDraft.description || undefined,
           },
@@ -755,15 +755,15 @@ export default function DLAgentCreate() {
           <div style={{ padding: 14, borderRadius: 16, background: 'rgba(255,255,255,0.72)' }}>
             <div style={{ fontSize: 12, color: '#60738f', marginBottom: 6 }}>执行语义</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              <Tag color="blue">taskCategory={taskDraft.taskCategory || '-'}</Tag>
-              <Tag color="gold">taskType={taskDraft.taskType || '-'}</Tag>
-              <Tag color="green">deviceType={taskDraft.deviceType || '-'}</Tag>
+              <Tag color="blue">taskKind={taskDraft.taskKind || '-'}</Tag>
+              <Tag color="gold">scenario={taskDraft.scenario || '-'}</Tag>
+              <Tag color="green">chips={taskDraft.chips || '-'}</Tag>
             </div>
           </div>
           <div style={{ padding: 14, borderRadius: 16, background: 'rgba(255,255,255,0.72)' }}>
             <div style={{ fontSize: 12, color: '#60738f', marginBottom: 6 }}>编号路由预期</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: '#102a4f' }}>{routePrefix ? `${routePrefix}xx / ${routePrefix}xxxx` : '等待 taskType 确认'}</div>
-            <div style={{ marginTop: 8, fontSize: 12, color: '#60738f' }}>imageId 与 toolsetId 前缀需与 taskType 对齐</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#102a4f' }}>{routePrefix ? `${routePrefix}xx / ${routePrefix}xxxx` : '等待 scenario 确认'}</div>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#60738f' }}>image_id 与 tool_id 前缀需与 scenario 对齐</div>
           </div>
         </div>
       </Card>
@@ -834,20 +834,20 @@ export default function DLAgentCreate() {
             </div>
             <Space size={[6, 6]} wrap style={{ marginBottom: 12 }}>
               {taskDraft.mode ? <Tag color="blue">mode={taskDraft.mode}</Tag> : null}
-              {taskDraft.taskCategory ? <Tag color="purple">taskCategory={taskDraft.taskCategory}</Tag> : null}
-              {taskDraft.taskType ? <Tag color="gold">taskType={taskDraft.taskType}</Tag> : null}
-              {taskDraft.deviceType ? <Tag color="green">deviceType={taskDraft.deviceType}</Tag> : null}
-              {taskDraft.imageId ? <Tag color="cyan">imageDbId={taskDraft.imageId}</Tag> : null}
-              {taskDraft.toolsetId ? <Tag color="geekblue">toolsetDbId={taskDraft.toolsetId}</Tag> : null}
+              {taskDraft.taskKind ? <Tag color="purple">taskKind={taskDraft.taskKind}</Tag> : null}
+              {taskDraft.scenario ? <Tag color="gold">scenario={taskDraft.scenario}</Tag> : null}
+              {taskDraft.chips ? <Tag color="green">chips={taskDraft.chips}</Tag> : null}
+              {taskDraft.image_id ? <Tag color="cyan">imageDbId={taskDraft.image_id}</Tag> : null}
+              {taskDraft.tool_id ? <Tag color="geekblue">toolsetDbId={taskDraft.tool_id}</Tag> : null}
             </Space>
             <div style={{ display: 'grid', gap: 10 }}>
               <div style={{ padding: 12, borderRadius: 14, background: '#f7faff', border: '1px solid #e3edff' }}>
                 <div style={{ fontSize: 12, color: '#60738f', marginBottom: 4 }}>路由规则</div>
-                <Text style={{ color: '#102a4f' }}>taskType 决定编号前缀，deviceType 只表示芯片环境，不参与场景编号推导。</Text>
+                <Text style={{ color: '#102a4f' }}>scenario 决定编号前缀，chips 只表示芯片环境，不参与场景编号推导。</Text>
               </div>
               <div style={{ padding: 12, borderRadius: 14, background: '#f7faff', border: '1px solid #e3edff' }}>
                 <div style={{ fontSize: 12, color: '#60738f', marginBottom: 4 }}>当前芯片标签</div>
-                <Text style={{ color: '#102a4f' }}>{taskDraft.deviceType ? chipTagMap[taskDraft.deviceType] || taskDraft.deviceType : '尚未选择设备'}</Text>
+                <Text style={{ color: '#102a4f' }}>{taskDraft.chips ? chipTagMap[taskDraft.chips] || taskDraft.chips : '尚未选择设备'}</Text>
               </div>
               <div style={{ padding: 12, borderRadius: 14, background: '#f7faff', border: '1px solid #e3edff' }}>
                 <div style={{ fontSize: 12, color: '#60738f', marginBottom: 4 }}>候选收敛状态</div>
@@ -868,7 +868,7 @@ export default function DLAgentCreate() {
             </Paragraph>
           </Card>
 
-          {taskDraft.taskCategory === 'model_deployment_test' ? (
+          {taskDraft.taskKind === 'model_deployment_test' ? (
             <Card className="tech-panel" style={{ borderRadius: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
                 <div>
@@ -885,26 +885,26 @@ export default function DLAgentCreate() {
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
                 <VisualStage
                   title="第一层：设备"
-                  hint={taskDraft.taskType ? '根据已选子场景展示匹配设备；已选设备高亮，周边候选灰显。' : '先选择子场景后，这里会自动收敛设备候选。'}
+                  hint={taskDraft.scenario ? '根据已选子场景展示匹配设备；已选设备高亮，周边候选灰显。' : '先选择子场景后，这里会自动收敛设备候选。'}
                   items={visualDeviceCandidates.length ? visualDeviceCandidates.map((device) => {
                     const chipKey = normalize(chipLabelFromDevice(device));
-                    const relatedCount = allImages.filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.taskType || '') && chipKeyFromImage(img) === chipKey).length;
+                    const relatedCount = allImages.filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskDraft.scenario || '') && chipKeyFromImage(img) === chipKey).length;
                     return {
                       key: device.device_type,
                       title: chipLabelFromDevice(device),
                       subtitle: `${device.manufacturer || '设备'} · 空闲 ${device.available_count} / 共 ${device.total_count}`,
                       description: relatedCount > 0 ? `当前子场景下有 ${relatedCount} 个镜像候选` : '当前子场景下暂无镜像候选',
-                      selected: taskDraft.deviceType === device.device_type,
-                      faded: Boolean(taskDraft.deviceType) && taskDraft.deviceType !== device.device_type,
+                      selected: taskDraft.chips === device.device_type,
+                      faded: Boolean(taskDraft.chips) && taskDraft.chips !== device.device_type,
                       disabled: device.available_count === 0,
-                      onClick: () => setTaskDraft((prev) => ({ ...prev, deviceType: device.device_type, imageId: undefined })),
+                      onClick: () => setTaskDraft((prev) => ({ ...prev, chips: device.device_type, image_id: undefined })),
                     };
-                  }) : [{ key: 'empty-device', title: '暂无设备候选', subtitle: taskDraft.taskType ? '当前子场景未匹配到在线设备' : '请先选择子场景', disabled: true }]}
+                  }) : [{ key: 'empty-device', title: '暂无设备候选', subtitle: taskDraft.scenario ? '当前子场景未匹配到在线设备' : '请先选择子场景', disabled: true }]}
                 />
 
                 <VisualStage
                   title="第二层：中间层"
-                  hint={taskDraft.deviceType ? '根据设备与子场景收敛框架/中间层。' : '先完成第一层设备选择后，这里才会激活。'}
+                  hint={taskDraft.chips ? '根据设备与子场景收敛框架/中间层。' : '先完成第一层设备选择后，这里才会激活。'}
                   items={visualFrameworkCandidates.length ? visualFrameworkCandidates.map((item) => ({
                     key: item.key,
                     title: item.label,
@@ -912,12 +912,12 @@ export default function DLAgentCreate() {
                     description: selectedDevice ? `基于 ${chipLabelFromDevice(selectedDevice)} 过滤` : '请先选择设备',
                     selected: selectedFrameworkKey === item.key,
                     faded: Boolean(selectedFrameworkKey) && selectedFrameworkKey !== item.key,
-                    disabled: !taskDraft.deviceType,
+                    disabled: !taskDraft.chips,
                     onClick: () => {
                       const firstImage = filteredImages.find((img) => frameworkKeyFromImage(img) === item.key);
-                      setTaskDraft((prev) => ({ ...prev, imageId: firstImage?.id }));
+                      setTaskDraft((prev) => ({ ...prev, image_id: firstImage?.id }));
                     },
-                  })) : [{ key: 'empty-framework', title: '暂无中间层候选', subtitle: taskDraft.deviceType ? '当前设备下没有匹配框架' : '请先选择设备', disabled: true }]}
+                  })) : [{ key: 'empty-framework', title: '暂无中间层候选', subtitle: taskDraft.chips ? '当前设备下没有匹配框架' : '请先选择设备', disabled: true }]}
                 />
 
                 <VisualStage
@@ -929,10 +929,10 @@ export default function DLAgentCreate() {
                     subtitle: `${img.framework_name || '未知框架'} · ${img.chip_name || chipLabelFromDevice(selectedDevice) || '未知芯片'}`,
                     description: img.description || img.name,
                     meta: scenarioTagsFromImage(img, scenarioTagSet).join(' / ') || undefined,
-                    selected: taskDraft.imageId === img.id,
-                    faded: Boolean(taskDraft.imageId) && taskDraft.imageId !== img.id,
-                    disabled: !taskDraft.deviceType,
-                    onClick: () => setTaskDraft((prev) => ({ ...prev, imageId: img.id })),
+                    selected: taskDraft.image_id === img.id,
+                    faded: Boolean(taskDraft.image_id) && taskDraft.image_id !== img.id,
+                    disabled: !taskDraft.chips,
+                    onClick: () => setTaskDraft((prev) => ({ ...prev, image_id: img.id })),
                   })) : [{ key: 'empty-image', title: '暂无镜像候选', subtitle: selectedFrameworkKey ? '当前条件下没有匹配镜像' : '请先选择中间层', disabled: true }]}
                 />
               </Space>

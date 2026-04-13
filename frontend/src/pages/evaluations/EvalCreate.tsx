@@ -190,8 +190,8 @@ export default function EvalCreate() {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
-  const [taskCategory, setTaskCategory] = useState<string>('');
-  const [taskType, setTaskType] = useState<string>('');
+  const [taskKind, setTaskKind] = useState<string>('');
+  const [scenario, setScenario] = useState<string>('');
   const [typeSearch, setTypeSearch] = useState('');
 
   const [operatorToolsets, setOperatorToolsets] = useState<{ id: number; name: string; asset_code?: string }[]>([]);
@@ -230,7 +230,7 @@ export default function EvalCreate() {
 
   const fetchToolsets = (scenarioType?: string) => {
     setToolsetsLoading(true);
-    if (scenarioType && taskCategory === 'model_deployment_test') {
+    if (scenarioType && taskKind === 'model_deployment_test') {
       getAvailableToolsets(scenarioType)
         .then((res: any) => {
           const list = res?.data || res || [];
@@ -239,7 +239,7 @@ export default function EvalCreate() {
         .catch(() => {})
         .finally(() => setToolsetsLoading(false));
     } else {
-      getAssets({ asset_type: 'toolset', page_size: 100 })
+      getAssets({ asset_type: 'tool', page_size: 100 })
         .then((res: any) => {
           const list = res?.data?.items || res?.items || res?.data || [];
           if (Array.isArray(list)) {
@@ -275,9 +275,9 @@ export default function EvalCreate() {
       .finally(() => setOperatorLibsLoading(false));
   };
 
-  const fetchModelImages = (scenarioType?: string, deviceType?: string) => {
+  const fetchModelImages = (scenarioType?: string, chips?: string) => {
     setModelImagesLoading(true);
-    getAvailableImages(scenarioType, deviceType)
+    getAvailableImages(scenarioType, chips)
       .then((res: any) => {
         const list = res?.data || res || [];
         if (Array.isArray(list)) {
@@ -346,12 +346,12 @@ export default function EvalCreate() {
   }, [fetchOperatorCategories, fetchDevices, fetchAllModelImages]);
 
   useEffect(() => {
-    if (taskCategory === 'model_deployment_test' && taskType) {
-      fetchToolsets(taskType);
-    } else if (taskCategory === 'operator_test') {
+    if (taskKind === 'model_deployment_test' && scenario) {
+      fetchToolsets(scenario);
+    } else if (taskKind === 'operator_test') {
       fetchToolsets();
     }
-  }, [taskCategory, taskType]);
+  }, [taskKind, scenario]);
 
   const steps = [
     { title: '选择评测大类' },
@@ -361,10 +361,10 @@ export default function EvalCreate() {
   ];
 
   const subTypes = useMemo(() => {
-    if (taskCategory === 'operator_test') return OPERATOR_TEST_TYPES;
-    if (taskCategory === 'model_deployment_test') return MODEL_TEST_TYPES;
+    if (taskKind === 'operator_test') return OPERATOR_TEST_TYPES;
+    if (taskKind === 'model_deployment_test') return MODEL_TEST_TYPES;
     return [];
-  }, [taskCategory]);
+  }, [taskKind]);
 
   const filteredSubTypes = useMemo(() => {
     if (!typeSearch) return subTypes;
@@ -377,10 +377,10 @@ export default function EvalCreate() {
     );
   }, [subTypes, typeSearch]);
 
-  const isOperatorTest = taskCategory === 'operator_test';
+  const isOperatorTest = taskKind === 'operator_test';
 
   const generateDefaultName = (deviceVal?: string) => {
-    const subType = subTypes.find((t) => t.value === taskType);
+    const subType = subTypes.find((t) => t.value === scenario);
     const today = dayjs().format('YYYYMMDD');
     const device = deviceList.find((d) => d.device_type === deviceVal);
     const shortDevice = device ? device.name.split(' ')[0] : '设备';
@@ -389,13 +389,13 @@ export default function EvalCreate() {
 
   const handleNext = async () => {
     if (current === 0) {
-      if (!taskCategory) return message.warning('请选择评测大类');
+      if (!taskKind) return message.warning('请选择评测大类');
       setCurrent(1);
       return;
     }
     if (current === 1) {
-      if (!taskType) return message.warning('请选择子类型');
-      const subType = subTypes.find((t) => t.value === taskType);
+      if (!scenario) return message.warning('请选择子类型');
+      const subType = subTypes.find((t) => t.value === scenario);
       const today = dayjs().format('YYYYMMDD');
       const defaults: any = { name: `${subType?.label || '评测'}-${today}`, priority: 'medium' };
       if (isOperatorTest) {
@@ -418,7 +418,7 @@ export default function EvalCreate() {
 
   const handlePrev = () => {
     if (current === 1) {
-      setTaskType('');
+      setScenario('');
       setTypeSearch('');
     }
     setCurrent(current - 1);
@@ -428,10 +428,10 @@ export default function EvalCreate() {
     await fetchDevices();
     const formValues = form.getFieldsValue();
     const values = { ...cachedFormValues, ...formValues };
-    const deviceCount = values.device_count ?? 1;
+    const chipNum = values.device_count ?? 1;
     const device = deviceList.find((d) => d.device_type === values.device_type);
-    if (device && deviceCount > device.available_count) {
-      message.error(`设备数量不足：需要 ${deviceCount} 台 ${device.name}，当前空闲仅 ${device.available_count} 台`);
+    if (device && chipNum > device.available_count) {
+      message.error(`设备数量不足：需要 ${chipNum} 台 ${device.name}，当前空闲仅 ${device.available_count} 台`);
       return;
     }
 
@@ -444,17 +444,17 @@ export default function EvalCreate() {
       const params: any = {
         name: values.name,
         description: values.description || undefined,
-        task: taskCategory === 'operator_test' ? 'operator' : 'model_deployment',
-        scenario: taskType === 'operator_perf_accuracy' ? 'operator_accuracy_performance' : taskType,
+        task: taskKind === 'operator_test' ? 'operator' : 'model_deployment',
+        scenario: scenario === 'operator_perf_accuracy' ? 'operator_accuracy_performance' : scenario,
         chips: values.device_type,
-        chip_num: deviceCount,
+        chip_num: chipNum,
         visibility: values.visibility || 'private',
         priority: values.priority,
         tool_id: values.toolset_id,
-        image_id: taskCategory === 'model_deployment_test' ? values.image_id : undefined,
+        image_id: taskKind === 'model_deployment_test' ? values.image_id : undefined,
       };
 
-      if (taskCategory === 'operator_test') {
+      if (taskKind === 'operator_test') {
         if (values.operator_count) params.operator_count = values.operator_count;
         if (values.operator_categories?.length) params.operator_categories = values.operator_categories;
         if (values.operator_lib_id) params.operator_lib_id = values.operator_lib_id;
@@ -479,23 +479,23 @@ export default function EvalCreate() {
   const selectedImageId = Form.useWatch('image_id', form);
 
   const visualCandidateImages = useMemo(() => {
-    if (!taskType) return [];
-    return allModelImages.filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(taskType));
-  }, [allModelImages, scenarioTagSet, taskType]);
+    if (!scenario) return [];
+    return allModelImages.filter((img) => scenarioTagsFromImage(img, scenarioTagSet).includes(scenario));
+  }, [allModelImages, scenarioTagSet, scenario]);
 
   const deviceCandidates = useMemo(() => {
-    if (taskCategory !== 'model_deployment_test') return [] as DeviceInfo[];
-    if (!taskType) return onlineDevices;
+    if (taskKind !== 'model_deployment_test') return [] as DeviceInfo[];
+    if (!scenario) return onlineDevices;
     const chips = new Set(visualCandidateImages.map((img) => chipKeyFromImage(img)));
     const matched = onlineDevices.filter((device) => chips.has(normalizeText(chipTagFromDevice(device))));
     return matched.length ? matched : onlineDevices;
-  }, [onlineDevices, taskCategory, taskType, visualCandidateImages]);
+  }, [onlineDevices, taskKind, scenario, visualCandidateImages]);
 
   const selectedDevice = useMemo(() => deviceList.find((d) => d.device_type === selectedDeviceType), [deviceList, selectedDeviceType]);
   const selectedDeviceChipKey = useMemo(() => normalizeText(chipTagFromDevice(selectedDevice)), [selectedDevice]);
 
   const frameworkCandidates = useMemo(() => {
-    if (taskCategory !== 'model_deployment_test' || !taskType || !selectedDeviceChipKey) return [] as { key: string; label: string; count: number; descriptions: string[] }[];
+    if (taskKind !== 'model_deployment_test' || !scenario || !selectedDeviceChipKey) return [] as { key: string; label: string; count: number; descriptions: string[] }[];
     const bucket = new Map<string, { key: string; label: string; count: number; descriptions: string[] }>();
     visualCandidateImages
       .filter((img) => chipKeyFromImage(img) === selectedDeviceChipKey)
@@ -508,10 +508,10 @@ export default function EvalCreate() {
         bucket.set(key, prev);
       });
     return Array.from(bucket.values()).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
-  }, [selectedDeviceChipKey, taskCategory, taskType, visualCandidateImages]);
+  }, [selectedDeviceChipKey, taskKind, scenario, visualCandidateImages]);
 
   useEffect(() => {
-    if (taskCategory !== 'model_deployment_test') return;
+    if (taskKind !== 'model_deployment_test') return;
     if (!selectedDeviceType) {
       setVisualFramework('');
       form.setFieldsValue({ image_id: undefined });
@@ -522,29 +522,29 @@ export default function EvalCreate() {
       setVisualFramework(first);
       form.setFieldsValue({ image_id: undefined });
     }
-  }, [frameworkCandidates, form, selectedDeviceType, taskCategory, visualFramework]);
+  }, [frameworkCandidates, form, selectedDeviceType, taskKind, visualFramework]);
 
   const imageCandidatesByVisual = useMemo(() => {
-    if (taskCategory !== 'model_deployment_test' || !taskType || !selectedDeviceChipKey || !visualFramework) return [] as ModelImageInfo[];
+    if (taskKind !== 'model_deployment_test' || !scenario || !selectedDeviceChipKey || !visualFramework) return [] as ModelImageInfo[];
     return visualCandidateImages.filter((img) => chipKeyFromImage(img) === selectedDeviceChipKey && middlewareKeyFromImage(img) === visualFramework);
-  }, [selectedDeviceChipKey, taskCategory, taskType, visualCandidateImages, visualFramework]);
+  }, [selectedDeviceChipKey, taskKind, scenario, visualCandidateImages, visualFramework]);
 
   useEffect(() => {
-    if (taskCategory === 'model_deployment_test' && taskType && selectedDeviceType) {
-      fetchModelImages(taskType, selectedDeviceType);
+    if (taskKind === 'model_deployment_test' && scenario && selectedDeviceType) {
+      fetchModelImages(scenario, selectedDeviceType);
     }
-  }, [selectedDeviceType, taskCategory, taskType]);
+  }, [selectedDeviceType, taskKind, scenario]);
 
   useEffect(() => {
-    if (taskCategory !== 'model_deployment_test') return;
+    if (taskKind !== 'model_deployment_test') return;
     const currentImageId = form.getFieldValue('image_id');
     if (currentImageId && !imageCandidatesByVisual.some((img) => img.id === currentImageId)) {
       form.setFieldsValue({ image_id: undefined });
     }
-  }, [form, imageCandidatesByVisual, taskCategory]);
+  }, [form, imageCandidatesByVisual, taskKind]);
 
   const modelVisualSummary = useMemo(() => ({
-    deviceCount: deviceCandidates.length,
+    chipNum: deviceCandidates.length,
     frameworkCount: frameworkCandidates.length,
     imageCount: imageCandidatesByVisual.length,
   }), [deviceCandidates.length, frameworkCandidates.length, imageCandidatesByVisual.length]);
@@ -554,10 +554,10 @@ export default function EvalCreate() {
       <div style={{ textAlign: 'center', marginBottom: 24, color: '#666' }}>选择评测类型</div>
       <Row gutter={24} justify="center">
         {EVAL_CATEGORIES.map((cat) => {
-          const isActive = taskCategory === cat.value;
+          const isActive = taskKind === cat.value;
           return (
             <Col key={cat.value} xs={24} sm={12} md={10}>
-              <Card hoverable onClick={() => setTaskCategory(cat.value)} style={{ textAlign: 'center', borderRadius: 18, border: isActive ? '3px solid #1B3A6B' : '2px solid #cfd8ea', background: isActive ? 'linear-gradient(180deg, #e8f0ff 0%, #f7faff 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)', boxShadow: isActive ? '0 18px 38px rgba(27, 58, 107, 0.22)' : '0 10px 24px rgba(27, 58, 107, 0.08)', cursor: 'pointer', marginBottom: 16, transform: isActive ? 'translateY(-4px) scale(1.01)' : 'translateY(0)', transition: 'all 0.2s ease', overflow: 'hidden', position: 'relative' }} styles={{ body: { padding: '40px 24px' } }}>
+              <Card hoverable onClick={() => setTaskKind(cat.value)} style={{ textAlign: 'center', borderRadius: 18, border: isActive ? '3px solid #1B3A6B' : '2px solid #cfd8ea', background: isActive ? 'linear-gradient(180deg, #e8f0ff 0%, #f7faff 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)', boxShadow: isActive ? '0 18px 38px rgba(27, 58, 107, 0.22)' : '0 10px 24px rgba(27, 58, 107, 0.08)', cursor: 'pointer', marginBottom: 16, transform: isActive ? 'translateY(-4px) scale(1.01)' : 'translateY(0)', transition: 'all 0.2s ease', overflow: 'hidden', position: 'relative' }} styles={{ body: { padding: '40px 24px' } }}>
                 {isActive ? <div style={{ position: 'absolute', top: 14, right: 14 }}><Tag color="blue" style={{ borderRadius: 999, paddingInline: 10, fontWeight: 700 }}>已选中</Tag></div> : null}
                 <div style={{ fontSize: 56, marginBottom: 16, filter: isActive ? 'drop-shadow(0 6px 12px rgba(27,58,107,0.18))' : 'none' }}>{cat.icon}</div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: '#102a4f', marginBottom: 10 }}>{cat.label}</div>
@@ -572,14 +572,14 @@ export default function EvalCreate() {
 
   const renderStep1 = () => (
     <div>
-      <div style={{ textAlign: 'center', marginBottom: 16, color: '#666' }}>当前大类：<Tag color="blue">{getCategoryLabel(taskCategory)}</Tag></div>
-      {taskCategory === 'model_deployment_test' && <div style={{ maxWidth: 400, margin: '0 auto 20px' }}><Input prefix={<SearchOutlined />} placeholder="搜索子场景..." allowClear value={typeSearch} onChange={(e) => setTypeSearch(e.target.value)} /></div>}
+      <div style={{ textAlign: 'center', marginBottom: 16, color: '#666' }}>当前大类：<Tag color="blue">{getCategoryLabel(taskKind)}</Tag></div>
+      {taskKind === 'model_deployment_test' && <div style={{ maxWidth: 400, margin: '0 auto 20px' }}><Input prefix={<SearchOutlined />} placeholder="搜索子场景..." allowClear value={typeSearch} onChange={(e) => setTypeSearch(e.target.value)} /></div>}
       <Row gutter={[16, 16]} justify={isOperatorTest ? 'center' : 'start'}>
         {filteredSubTypes.map((st) => {
-          const isActive = taskType === st.value;
+          const isActive = scenario === st.value;
           return (
             <Col key={st.value} xs={24} sm={12} md={isOperatorTest ? 10 : 6}>
-              <Card hoverable size="small" onClick={() => setTaskType(st.value)} style={{ borderRadius: 16, border: isActive ? '3px solid #1B3A6B' : '1px solid #d7deeb', background: isActive ? 'linear-gradient(180deg, #eaf2ff 0%, #f8fbff 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)', cursor: 'pointer', height: '100%', boxShadow: isActive ? '0 16px 34px rgba(27, 58, 107, 0.18)' : '0 8px 18px rgba(15, 34, 64, 0.06)', transform: isActive ? 'translateY(-3px)' : 'translateY(0)', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden' }} styles={{ body: { padding: '18px 16px' } }}>
+              <Card hoverable size="small" onClick={() => setScenario(st.value)} style={{ borderRadius: 16, border: isActive ? '3px solid #1B3A6B' : '1px solid #d7deeb', background: isActive ? 'linear-gradient(180deg, #eaf2ff 0%, #f8fbff 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%)', cursor: 'pointer', height: '100%', boxShadow: isActive ? '0 16px 34px rgba(27, 58, 107, 0.18)' : '0 8px 18px rgba(15, 34, 64, 0.06)', transform: isActive ? 'translateY(-3px)' : 'translateY(0)', transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden' }} styles={{ body: { padding: '18px 16px' } }}>
                 {isActive ? <div style={{ position: 'absolute', top: 12, right: 12 }}><Tag color="blue" style={{ borderRadius: 999, paddingInline: 8, fontWeight: 700 }}>已选中</Tag></div> : null}
                 <div style={{ fontWeight: 700, fontSize: 15, color: '#102a4f', marginBottom: 8, paddingRight: 70 }}>{st.label}</div>
                 <div style={{ color: '#60738f', fontSize: 12, lineHeight: 1.7 }}>{st.description}</div>
@@ -595,7 +595,7 @@ export default function EvalCreate() {
   const selectFieldStyle = { borderRadius: 12, border: '1px solid #cfd8ea', boxShadow: '0 6px 18px rgba(16, 42, 79, 0.06)' } as const;
 
   const renderVisualModelSelector = () => {
-    if (taskCategory !== 'model_deployment_test') return null;
+    if (taskKind !== 'model_deployment_test') return null;
 
     const deviceItems: VisualStageInfo[] = deviceCandidates.map((device) => {
       const selected = device.device_type === selectedDeviceType;
@@ -659,7 +659,7 @@ export default function EvalCreate() {
               </div>
             </div>
             <Space wrap>
-              <Tag color="blue">设备 {modelVisualSummary.deviceCount}</Tag>
+              <Tag color="blue">设备 {modelVisualSummary.chipNum}</Tag>
               <Tag color="purple">中间层 {modelVisualSummary.frameworkCount}</Tag>
               <Tag color="cyan">镜像 {modelVisualSummary.imageCount}</Tag>
             </Space>
@@ -674,7 +674,7 @@ export default function EvalCreate() {
     );
   };
 
-  const currentRoutePrefix = taskType ? TASK_TYPE_PREFIX_MAP[taskType] : undefined;
+  const currentRoutePrefix = scenario ? TASK_TYPE_PREFIX_MAP[scenario] : undefined;
 
   const renderStep2 = () => (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
@@ -689,17 +689,17 @@ export default function EvalCreate() {
       >
         <Row gutter={[16, 16]}>
           <Col xs={24} md={8}>
-            <Statistic title="当前大类" value={getCategoryLabel(taskCategory) || '-'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} />
+            <Statistic title="当前大类" value={getCategoryLabel(taskKind) || '-'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} />
           </Col>
           <Col xs={24} md={8}>
-            <Statistic title="当前子场景" value={getSubTypeLabel(taskType) || '-'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} />
+            <Statistic title="当前子场景" value={getSubTypeLabel(scenario) || '-'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} />
           </Col>
           <Col xs={24} md={8}>
             <Statistic title="编号前缀" value={currentRoutePrefix || '--'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} suffix={currentRoutePrefix ? '系列' : ''} />
           </Col>
         </Row>
         <div style={{ marginTop: 12, fontSize: 13, color: '#60738f', lineHeight: 1.8 }}>
-          提交页和 DL 智能体页现在遵循同一套路由语义：<b>taskType</b> 决定编号前缀，<b>deviceType</b> 只表示芯片环境，镜像与工具应对齐到同一前缀段。
+          提交页和 DL 智能体页现在遵循同一套路由语义：<b>scenario</b> 决定编号前缀，<b>chips</b> 只表示芯片环境，镜像与工具应对齐到同一前缀段。
         </div>
       </Card>
       <Form form={form} layout="vertical" preserve={true}>
@@ -711,8 +711,8 @@ export default function EvalCreate() {
           <Select
             placeholder="选择智算设备"
             style={selectFieldStyle}
-            onChange={(deviceType) => {
-              form.setFieldsValue({ device_count: 1, name: generateDefaultName(deviceType), image_id: undefined });
+            onChange={(chips) => {
+              form.setFieldsValue({ device_count: 1, name: generateDefaultName(chips), image_id: undefined });
             }}
             options={deviceList.filter((d) => d.status === 'online').map((d) => ({ label: `${d.name} (空闲 ${d.available_count} / 共 ${d.total_count} 台)`, value: d.device_type, disabled: d.available_count === 0 }))}
           />
@@ -744,7 +744,7 @@ export default function EvalCreate() {
           <Form.Item
             name="image_id"
             label="选择部署镜像（芯片 + 框架 + 模型）"
-            extra={<div style={{ fontSize: 12, color: taskType && form.getFieldValue('device_type') ? '#0f7a55' : '#8a5a00', background: taskType && form.getFieldValue('device_type') ? '#edf9f3' : '#fff7e8', border: `1px solid ${taskType && form.getFieldValue('device_type') ? '#b7ebc6' : '#ffd591'}`, borderRadius: 10, padding: '8px 10px' }}>{taskType && form.getFieldValue('device_type') ? <span>✅ 已根据设备类型与图形化层级选择匹配可用镜像</span> : <span>⚠️ 请先选择设备类型和子场景，系统将自动匹配可用镜像</span>}</div>}
+            extra={<div style={{ fontSize: 12, color: scenario && form.getFieldValue('device_type') ? '#0f7a55' : '#8a5a00', background: scenario && form.getFieldValue('device_type') ? '#edf9f3' : '#fff7e8', border: `1px solid ${scenario && form.getFieldValue('device_type') ? '#b7ebc6' : '#ffd591'}`, borderRadius: 10, padding: '8px 10px' }}>{scenario && form.getFieldValue('device_type') ? <span>✅ 已根据设备类型与图形化层级选择匹配可用镜像</span> : <span>⚠️ 请先选择设备类型和子场景，系统将自动匹配可用镜像</span>}</div>}
             rules={[{ required: true, message: '模型部署测试必须选择镜像' }]}
           >
             <Select
@@ -773,7 +773,7 @@ export default function EvalCreate() {
                   <div style={{ padding: '4px 0' }}>
                     <div style={{ fontWeight: 600, color: '#102a4f', marginBottom: 4 }}>{String(data.label)}</div>
                     <div style={{ fontSize: 12, color: '#60738f', marginBottom: data.scenarioTags?.length ? 6 : 0 }}>{data.chip_name || '芯片'} · {data.middleware_name || data.framework_name || '中间层'} · {data.model_name || '模型'}</div>
-                    {data.scenarioTags?.length ? <Space size={[4, 4]} wrap>{data.scenarioTags.map((tag) => <Tag key={tag} color={tag === taskType ? 'blue' : 'default'} style={{ marginInlineEnd: 0 }}>{getSubTypeLabel(tag)}</Tag>)}</Space> : null}
+                    {data.scenarioTags?.length ? <Space size={[4, 4]} wrap>{data.scenarioTags.map((tag) => <Tag key={tag} color={tag === scenario ? 'blue' : 'default'} style={{ marginInlineEnd: 0 }}>{getSubTypeLabel(tag)}</Tag>)}</Space> : null}
                   </div>
                 );
               }}
@@ -821,28 +821,28 @@ export default function EvalCreate() {
     const allToolsets = [...operatorToolsets, ...modelToolsets];
     const toolset = allToolsets.find((t) => t.id === values.toolset_id);
     const priorityInfo = PRIORITY_MAP[values.priority];
-    const deviceCount = values.device_count ?? 1;
-    const exceedsAvailable = device ? deviceCount > device.available_count : false;
+    const chipNum = values.device_count ?? 1;
+    const exceedsAvailable = device ? chipNum > device.available_count : false;
 
     return (
       <div style={{ maxWidth: 600, margin: '0 auto' }}>
         <Card style={{ borderRadius: 8 }}>
           <Descriptions column={1} bordered size="small" labelStyle={{ width: 120, fontWeight: 500 }}>
-            <Descriptions.Item label="评测大类"><Tag color="blue">{getCategoryLabel(taskCategory)}</Tag></Descriptions.Item>
-            <Descriptions.Item label="子场景"><Tag color="geekblue">{getSubTypeLabel(taskType)}</Tag></Descriptions.Item>
+            <Descriptions.Item label="评测大类"><Tag color="blue">{getCategoryLabel(taskKind)}</Tag></Descriptions.Item>
+            <Descriptions.Item label="子场景"><Tag color="geekblue">{getSubTypeLabel(scenario)}</Tag></Descriptions.Item>
             <Descriptions.Item label="任务名称">{values.name}</Descriptions.Item>
             <Descriptions.Item label="设备类型"><span style={{ fontWeight: 500 }}>{device?.name || values.device_type || '-'}</span></Descriptions.Item>
-            <Descriptions.Item label="设备数量">{deviceCount} 台{device && <span style={{ color: '#999', marginLeft: 8, fontSize: 12 }}>(空闲 {device.available_count} / 共 {device.total_count} 台)</span>}</Descriptions.Item>
+            <Descriptions.Item label="设备数量">{chipNum} 台{device && <span style={{ color: '#999', marginLeft: 8, fontSize: 12 }}>(空闲 {device.available_count} / 共 {device.total_count} 台)</span>}</Descriptions.Item>
             <Descriptions.Item label={isOperatorTest ? '算子评测工具' : '模型部署测试工具'}>{toolset?.name || '未选择'}</Descriptions.Item>
-            {taskCategory === 'operator_test' && <Descriptions.Item label="算子库">{(() => {
+            {taskKind === 'operator_test' && <Descriptions.Item label="算子库">{(() => {
               const lib = operatorLibs.find((l) => l.id === values.operator_lib_id);
               return lib ? <Tag color="purple">{lib.name}</Tag> : <span style={{ color: '#999' }}>未选择</span>;
             })()}</Descriptions.Item>}
-            {taskCategory === 'model_deployment_test' && <Descriptions.Item label="部署镜像">{(() => {
+            {taskKind === 'model_deployment_test' && <Descriptions.Item label="部署镜像">{(() => {
               const img = allModelImages.find((m) => m.id === values.image_id) || modelImages.find((m) => m.id === values.image_id);
               return img ? <div><Tag color="cyan">{img.name}</Tag><div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{img.description}</div>{img.tags?.slice(0, 3).map((tag) => <Tag key={tag} style={{ marginTop: 4 }}>{tag}</Tag>)}</div> : <span style={{ color: '#999' }}>未选择</span>;
             })()}</Descriptions.Item>}
-            {taskCategory === 'operator_test' && <>
+            {taskKind === 'operator_test' && <>
               <Descriptions.Item label="算子分类">{values.operator_categories?.length ? values.operator_categories.map((c: string) => <Tag key={c} color="cyan" style={{ marginBottom: 4 }}>{c}</Tag>) : <span style={{ color: '#999' }}>全部分类</span>}</Descriptions.Item>
               <Descriptions.Item label="测试算子数量">{values.operator_count ? `${values.operator_count} 个` : <span style={{ color: '#999' }}>全部匹配算子</span>}</Descriptions.Item>
             </>}
@@ -850,7 +850,7 @@ export default function EvalCreate() {
             <Descriptions.Item label="优先级"><Tag color={priorityInfo?.color}>{priorityInfo?.label || values.priority}</Tag></Descriptions.Item>
             <Descriptions.Item label="任务可见性"><Tag color={values.visibility === 'platform' ? 'blue' : 'default'}>{values.visibility === 'platform' ? '全平台' : '私有'}</Tag></Descriptions.Item>
           </Descriptions>
-          {exceedsAvailable && <Alert type="error" showIcon style={{ marginTop: 16 }} message="设备数量不足" description={`需要 ${deviceCount} 台 ${device?.name}，当前空闲仅 ${device?.available_count} 台。请减少设备数量或等待设备释放。`} />}
+          {exceedsAvailable && <Alert type="error" showIcon style={{ marginTop: 16 }} message="设备数量不足" description={`需要 ${chipNum} 台 ${device?.name}，当前空闲仅 ${device?.available_count} 台。请减少设备数量或等待设备释放。`} />}
         </Card>
       </div>
     );
