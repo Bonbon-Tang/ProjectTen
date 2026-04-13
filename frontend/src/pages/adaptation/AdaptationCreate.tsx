@@ -164,10 +164,10 @@ export default function AdaptationCreate() {
     form.setFieldsValue({ device_type: undefined, image_id: undefined });
   };
 
-  const handleDeviceChange = (deviceType: string) => {
+  const handleDeviceChange = (chips: string) => {
     const currentImageId = form.getFieldValue('image_id');
     const imageStillValid = images.some(
-      (item) => item.id === currentImageId && item.device_type === deviceType && (item.tags || []).includes(form.getFieldValue('scenario_type')),
+      (item) => item.id === currentImageId && item.device_type === chips && (item.tags || []).includes(form.getFieldValue('scenario_type')),
     );
     if (!imageStillValid) {
       form.setFieldValue('image_id', undefined);

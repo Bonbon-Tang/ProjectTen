@@ -101,16 +101,16 @@ const ALL_SCENARIOS = [
   'reinforcement_learning',
 ];
 
-function getScenarioLabel(taskType: string): string {
-  return SCENARIO_LABELS[taskType] || taskType;
+function getScenarioLabel(scenario: string): string {
+  return SCENARIO_LABELS[scenario] || scenario;
 }
 
-function getDeviceLabel(deviceType: string) {
-  return DEVICE_TYPES.find((d) => d.value === deviceType);
+function getDeviceLabel(chips: string) {
+  return DEVICE_TYPES.find((d) => d.value === chips);
 }
 
-function createPlaceholderScenario(taskType: string): ScenarioInfo {
-  return { task_type: taskType, count: 0 };
+function createPlaceholderScenario(scenario: string): ScenarioInfo {
+  return { task_type: scenario, count: 0 };
 }
 
 export default function ModelBenchmarkList() {
@@ -131,7 +131,7 @@ export default function ModelBenchmarkList() {
       if (Array.isArray(list)) {
         list.forEach((item: ScenarioInfo) => existingMap.set(item.task_type, item));
       }
-      const merged = ALL_SCENARIOS.map((taskType) => existingMap.get(taskType) || createPlaceholderScenario(taskType));
+      const merged = ALL_SCENARIOS.map((scenario) => existingMap.get(scenario) || createPlaceholderScenario(scenario));
       setScenarios(merged);
       if (!selectedScenario && merged.length > 0) {
         setSelectedScenario(merged[0].task_type);

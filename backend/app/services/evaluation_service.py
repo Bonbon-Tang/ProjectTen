@@ -104,11 +104,11 @@ class EvaluationService:
         if not expected_prefix:
             return
         if image_code and not image_code.startswith(expected_prefix):
-            raise ValueError(f"镜像业务编号前缀不匹配：taskType={task_type} 要求 imageId 以 {expected_prefix} 开头，当前为 {image_code}")
+            raise ValueError(f"镜像业务编号前缀不匹配：scenario={task_type} 要求 image_code 以 {expected_prefix} 开头，当前为 {image_code}")
         if toolset_code and not toolset_code.startswith(expected_prefix):
-            raise ValueError(f"工具业务编号前缀不匹配：taskType={task_type} 要求 toolsetId 以 {expected_prefix} 开头，当前为 {toolset_code}")
+            raise ValueError(f"工具业务编号前缀不匹配：scenario={task_type} 要求 tool_code 以 {expected_prefix} 开头，当前为 {toolset_code}")
         if image_code and toolset_code and image_code[:2] != toolset_code[:2]:
-            raise ValueError(f"镜像与工具业务编号前缀不一致：imageId={image_code}, toolsetId={toolset_code}")
+            raise ValueError(f"镜像与工具业务编号前缀不一致：image_code={image_code}, tool_code={toolset_code}")
 
     @staticmethod
     def _cpu_test_report_paths(task_id: int) -> tuple[Path, Path]:
