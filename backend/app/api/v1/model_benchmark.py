@@ -278,6 +278,7 @@ def get_available_toolsets(
     db: Session = Depends(get_db),
 ):
     """Get available toolsets for model deployment test, optionally filtered by unified v2 scenario."""
+    resolved_scenario = scenario or task_type
     q = db.query(DigitalAsset).filter(
         DigitalAsset.asset_type == "toolset",
         DigitalAsset.status == "active",
