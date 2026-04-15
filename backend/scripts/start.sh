@@ -5,8 +5,8 @@ cd "$(dirname "$0")/.."
 
 VENV_DIR=${VENV_DIR:-venv}
 HOST=${HOST:-0.0.0.0}
-PORT=${PORT:-8000}
-RELOAD=${RELOAD:-1}
+PORT=${PORT:-5000}
+RELOAD=${RELOAD:-0}
 
 # shellcheck disable=SC1091
 source "$VENV_DIR/bin/activate"
