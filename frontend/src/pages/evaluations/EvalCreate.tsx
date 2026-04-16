@@ -26,7 +26,6 @@ import {
   OPERATOR_TEST_TYPES,
   MODEL_TEST_TYPES,
   PRIORITY_MAP,
-  TASK_TYPE_PREFIX_MAP,
 } from '@/utils/constants';
 import { createEvaluation } from '@/api/evaluations';
 import { extractErrorMessage } from '@/utils/error';
@@ -103,7 +102,7 @@ function chipTagFromDevice(device?: DeviceInfo) {
 
 function chipKeyFromImage(image: ModelImageInfo) {
   const tags = image.tags || [];
-  return normalizeText(image.chip_name || tags[0] || image.name.split('-')[0]);
+  return normalizeText(tags[0] || image.chip_name || '');
 }
 
 function middlewareLabelFromImage(image: ModelImageInfo) {
@@ -676,8 +675,6 @@ export default function EvalCreate() {
     );
   };
 
-  const currentRoutePrefix = scenario ? TASK_TYPE_PREFIX_MAP[scenario] : undefined;
-
   const renderStep2 = () => (
     <div style={{ maxWidth: 960, margin: '0 auto' }}>
       <Card
@@ -697,7 +694,7 @@ export default function EvalCreate() {
             <Statistic title="当前子场景" value={getSubTypeLabel(scenario) || '-'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} />
           </Col>
           <Col xs={24} md={8}>
-            <Statistic title="编号前缀" value={currentRoutePrefix || '--'} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} suffix={currentRoutePrefix ? '系列' : ''} />
+            <Statistic title="候选设备数" value={deviceCandidates.length} valueStyle={{ color: '#102a4f', fontWeight: 800, fontSize: 22 }} suffix="种" />
           </Col>
         </Row>
         <div style={{ marginTop: 12, fontSize: 13, color: '#60738f', lineHeight: 1.8 }}>
@@ -842,7 +839,7 @@ export default function EvalCreate() {
             })()}</Descriptions.Item>}
             {taskKind === 'model_deployment_test' && <Descriptions.Item label="部署镜像">{(() => {
               const img = allModelImages.find((m) => m.id === values.image_id) || modelImages.find((m) => m.id === values.image_id);
-              return img ? <div><Tag color="cyan">{img.name}</Tag><div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{img.description}</div>{img.tags?.slice(0, 3).map((tag) => <Tag key={tag} style={{ marginTop: 4 }}>{tag}</Tag>)}</div> : <span style={{ color: '#999' }}>未选择</span>;
+              return img ? <div><Tag color="cyan">{img.name}</Tag><div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>{img.description}</div>{img.tags?.slice(0, 4).map((tag) => <Tag key={tag} style={{ marginTop: 4 }}>{tag}</Tag>)}</div> : <span style={{ color: '#999' }}>未选择</span>;
             })()}</Descriptions.Item>}
             {taskKind === 'operator_test' && <>
               <Descriptions.Item label="算子分类">{values.operator_categories?.length ? values.operator_categories.map((c: string) => <Tag key={c} color="cyan" style={{ marginBottom: 4 }}>{c}</Tag>) : <span style={{ color: '#999' }}>全部分类</span>}</Descriptions.Item>
@@ -874,7 +871,7 @@ export default function EvalCreate() {
         title="创建评测任务"
         subtitle="以统一路由语义创建正式评测：先选大类与子场景，再配置设备、工具与镜像，最后完成确认提交。"
         breadcrumbs={[{ title: '评测系统', path: '/evaluations/list' }, { title: '创建任务' }]}
-        extra={<Space wrap><Tag color="blue">统一执行字段</Tag><Tag color="purple">图形化筛选</Tag><Tag color="cyan">编号前缀对齐</Tag></Space>}
+        extra={<Space wrap><Tag color="blue">统一执行字段</Tag><Tag color="purple">图形化筛选</Tag><Tag color="cyan">Tag 对齐</Tag></Space>}
       />
       <Card style={{ borderRadius: 18, boxShadow: '0 12px 28px rgba(27, 58, 107, 0.08)' }}>
         <Steps current={current} items={steps} style={{ marginBottom: 32, maxWidth: 760, margin: '0 auto 32px' }} />
