@@ -380,12 +380,15 @@ export default function ModelBenchmarkList() {
         })}
       </div>
 
+      <div style={{ margin: '10px 0 12px', fontSize: 18, fontWeight: 800, color: '#0b1c34' }}>
+        当前榜单 Top 3
+      </div>
       <Row gutter={[16, 16]} style={{ marginBottom: 18 }}>
-        {[1, 0, 2].map((index, displayIndex) => {
+        {[0, 1, 2].map((index, displayIndex) => {
           const item = topThree[index];
-          const pedestalHeights = [220, 260, 200];
-          const rankLabels = ['TOP 2', 'TOP 1', 'TOP 3'];
-          const accentColors = ['#9bb4d1', '#f0b429', '#cd7f32'];
+          const pedestalHeights = [260, 220, 200];
+          const rankLabels = ['第1名', '第2名', '第3名'];
+          const accentColors = ['#f0b429', '#9bb4d1', '#cd7f32'];
           return (
             <Col xs={24} md={8} key={rankLabels[displayIndex]}>
               <Card
@@ -403,7 +406,7 @@ export default function ModelBenchmarkList() {
                 bodyStyle={{ width: '100%', padding: 18 }}
               >
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ color: accentColors[displayIndex], fontWeight: 800, marginBottom: 10 }}>
+                  <div style={{ color: accentColors[displayIndex], fontWeight: 800, marginBottom: 10, fontSize: 15 }}>
                     {rankLabels[displayIndex]}
                   </div>
                   <div
@@ -424,7 +427,7 @@ export default function ModelBenchmarkList() {
                   >
                     {item ? (
                       <div>
-                        {displayIndex === 1 && (
+                        {displayIndex === 0 && (
                           <div style={{ marginBottom: 10 }}>
                             <Tag color="gold">冠军</Tag>
                           </div>
@@ -434,8 +437,8 @@ export default function ModelBenchmarkList() {
                         </div>
                         <div style={{ color: '#425a78', marginBottom: 10 }}>{item.chip_name} + {item.framework_name}</div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-                          <Tag color="blue">准确率 {item.accuracy?.toFixed(2) ?? '-'}%</Tag>
-                          <Tag color="green">评分 {item.performance_score?.toFixed(1) ?? '-'}</Tag>
+                          <Tag color="blue">综合分 {item.ranking_score?.toFixed(1) ?? '-'}</Tag>
+                          <Tag color="green">性能分 {item.performance_score?.toFixed(1) ?? '-'}</Tag>
                         </div>
                       </div>
                     ) : (
