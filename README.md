@@ -33,14 +33,14 @@ sudo apt-get install -y python3 python3-venv python3-pip nodejs npm
 # 2) install backend + frontend dependencies
 bash scripts/install_all.sh
 
-# 3) start backend + frontend
+# 3) start backend + frontend（统一启动命令）
 bash scripts/start_all.sh
 ```
 
 Then open:
 
 - Frontend: http://localhost:3000
-- Backend: http://localhost:8000
+- Backend: http://localhost:5000
 
 Logs are written to `./logs/`.
 
@@ -52,6 +52,12 @@ If the code is already cloned on the internal machine:
 cd ProjectTen
 git pull origin master
 bash scripts/install_all.sh
+bash scripts/start_all.sh
+```
+
+统一启动命令就是：
+
+```bash
 bash scripts/start_all.sh
 ```
 
@@ -79,7 +85,7 @@ docker compose -f deploy/docker/docker-compose.yml up --build -d
 
 Open:
 - Frontend: http://localhost:3000
-- Backend: http://localhost:8000
+- Backend: http://localhost:5000
 
 Stop:
 ```bash
@@ -123,5 +129,5 @@ bash frontend/scripts/start.sh
   - `PROJECT_NOTES.md`（按性质分类的统一入口，建议只维护这一份）
   - `docs/legacy/`（原始历史文档存档，可按需删除）
 - 端口可通过环境变量覆盖：
-  - backend: `HOST`, `PORT`, `RELOAD`
+  - backend: `HOST`, `PORT`（默认 5000）, `RELOAD`
   - frontend: `HOST`, `PORT`
