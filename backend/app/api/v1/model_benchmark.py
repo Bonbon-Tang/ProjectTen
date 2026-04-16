@@ -75,6 +75,7 @@ def _extract_tag_parts(tags: list[str]):
     chip = None
     middleware = None
     scenarios = []
+    model = None
     for tag in tags:
         normalized_chip = _normalize_chip_tag(tag)
         if not chip and normalized_chip in CHIP_TAGS:
@@ -85,13 +86,16 @@ def _extract_tag_parts(tags: list[str]):
             continue
         if tag in SCENARIO_TAGS:
             scenarios.append(tag)
-    return chip, middleware, scenarios
+            continue
+        if not model:
+            model = tag
+    return chip, middleware, scenarios, model
 
 
 def _infer_chip_framework_model(img: DigitalAsset, tags: list[str]):
     description = (img.description or "").strip()
     name = (img.name or "").strip()
-    chip_name, framework_name, _ = _extract_tag_parts(tags)
+    chip_name, framework_name, _, model_tag = _extract_tag_parts(tags)
     model_name = None
 
     if name:
@@ -113,7 +117,7 @@ def _infer_chip_framework_model(img: DigitalAsset, tags: list[str]):
             framework_name = framework_name or desc_parts[1]
             model_name = model_name or desc_parts[2]
 
-    return chip_name, framework_name, model_name or name
+    return chip_name, framework_name, model_tag or model_name or name
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func as sa_func
@@ -257,7 +261,7 @@ def get_available_images(
             continue
 
         chip_name, framework_name, model_name = _infer_chip_framework_model(img, tags)
-        tag_chip, tag_middleware, scenario_tags = _extract_tag_parts(tags)
+        tag_chip, tag_middleware, scenario_tags, model_tag = _extract_tag_parts(tags)
         if not tag_chip or not tag_middleware or not scenario_tags:
             continue
         if target_chip_tags:
@@ -270,7 +274,7 @@ def get_available_images(
             "asset_code": img.asset_code,
             "name": img.name,
             "description": img.description,
-            "tags": [tag_chip, tag_middleware, *scenario_tags],
+            "tags": [tag_chip, tag_middleware, scenario_tags[0], model_tag or model_name],
             "version": img.version,
             "chip_name": chip_name or tag_chip,
             "framework_name": framework_name or tag_middleware,

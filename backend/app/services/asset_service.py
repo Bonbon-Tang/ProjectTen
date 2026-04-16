@@ -34,6 +34,7 @@ def _normalize_image_asset(asset: DigitalAsset) -> DigitalAsset:
     chip = None
     middleware = None
     scenarios = []
+    model = None
     for tag in tags:
         normalized = _normalize_chip(tag)
         if not chip and normalized in {"nvidia_h200", "huawei_910c", "huawei_910b", "cambrian_590", "kunlun_p800", "hygon_bw1000"}:
@@ -44,8 +45,12 @@ def _normalize_image_asset(asset: DigitalAsset) -> DigitalAsset:
             continue
         if tag in SCENARIO_TAGS and tag not in scenarios:
             scenarios.append(tag)
+            continue
+        if not model:
+            model = tag
     if chip and middleware and scenarios:
-        asset.tags = [chip, middleware, *scenarios]
+        asset.tags = [chip, middleware, scenarios[0], model or scenarios[0]]
+     return asset
     return asset
 
 from sqlalchemy import func, or_
