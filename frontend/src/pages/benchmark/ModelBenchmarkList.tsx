@@ -134,15 +134,9 @@ export default function ModelBenchmarkList() {
       }
       const merged = ALL_SCENARIOS.map((scenario) => existingMap.get(scenario) || createPlaceholderScenario(scenario));
       setScenarios(merged);
-      if (!selectedScenario && merged.length > 0) {
-        setSelectedScenario(merged[0].scenario);
-      }
     } catch {
       const merged = ALL_SCENARIOS.map(createPlaceholderScenario);
       setScenarios(merged);
-      if (!selectedScenario && merged.length > 0) {
-        setSelectedScenario(merged[0].scenario);
-      }
     }
   }, [selectedScenario]);
 
@@ -192,7 +186,7 @@ export default function ModelBenchmarkList() {
     fetchRanking();
   }, [fetchRanking]);
 
-  const topThree = useMemo(() => ranking.slice(0, 3), [ranking]);
+  const topThree = useMemo(() => (selectedScenario ? ranking.slice(0, 3) : []), [ranking, selectedScenario]);
   const selectedScenarioInfo = useMemo(
     () => scenarios.find((item) => item.scenario === selectedScenario),
     [scenarios, selectedScenario],
