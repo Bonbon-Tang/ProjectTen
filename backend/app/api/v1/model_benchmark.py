@@ -156,7 +156,7 @@ def get_ranking(
     scenario: Optional[str] = Query(None, description="Unified v2 scenario"),
     task_type: Optional[str] = Query(None, description="Legacy sub-scenario type"),
     eval_method: str = Query("standard", description="Evaluation method"),
-    sort_by: str = Query("accuracy", description="Sort field"),
+    sort_by: str = Query("ranking_score", description="Sort field"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
@@ -170,12 +170,55 @@ def get_ranking(
     )
     total = q.count()
 
-    sort_col = getattr(ModelBenchmark, sort_by, ModelBenchmark.accuracy)
-    items = q.order_by(sort_col.desc().nulls_last()).offset((page - 1) * page_size).limit(page_size).all()
+    if sort_by == "ranking_score":
+        all_items = q.all()
+
+        def _ranking_score(item: ModelBenchmark) -> float:
+            throughput = item.throughput or 0.0
+            accuracy = item.accuracy or 0.0
+            latency = item.avg_latency_ms or 9999.0
+            energy = item.energy_efficiency or 0.0
+            perf = item.performance_score or 0.0
+            software = item.software_completeness_score or 0.0
+            latency_score = max(0.0, 120.0 - latency * 2.1)
+            return round(
+                perf * 0.28 + accuracy * 0.24 + min(throughput / 12.0, 120.0) * 0.18 +
+                min(energy / 4.5, 120.0) * 0.12 + software * 0.10 + latency_score * 0.08,
+                2,
+            )
+
+        scored = sorted(all_items, key=_ranking_score, reverse=True)
+        total = len(scored)
+        items = scored[(page - 1) * page_size: page * page_size]
+    else:
+        sort_col = getattr(ModelBenchmark, sort_by, ModelBenchmark.accuracy)
+        items = q.order_by(sort_col.desc().nulls_last()).offset((page - 1) * page_size).limit(page_size).all()
 
     result = []
     for b in items:
+        ranking_score = None
+        if sort_by == "ranking_score":
+            throughput = b.throughput or 0.0
+            accuracy = b.accuracy or 0.0
+            latency = b.avg_latency_ms or 9999.0
+            energy = b.energy_efficiency or 0.0
+            perf = b.performance_score or 0.0
+            software = b.software_completeness_score or 0.0
+            latency_score = max(0.0, 120.0 - latency * 2.1)
+            ranking_score = round(
+                perf * 0.28 + accuracy * 0.24 + min(throughput / 12.0, 120.0) * 0.18 +
+                min(energy / 4.5, 120.0) * 0.12 + software * 0.10 + latency_score * 0.08,
+                2,
+            )
         result.append({
+             "id": b.id,
+             "rank": None,  # filled below
+@@
+             "memory_usage_gb": b.memory_usage_gb,
+             "task_id": b.task_id,
+             "tested_at": str(b.tested_at) if b.tested_at else None,
++            "ranking_score": ranking_score,
+         })
             "id": b.id,
             "rank": None,  # filled below
             "image_id": b.image_id,

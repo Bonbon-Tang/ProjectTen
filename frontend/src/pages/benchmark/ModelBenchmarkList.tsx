@@ -46,6 +46,7 @@ interface RankingItem {
   energy_efficiency: number | null;
   energy_efficiency_unit: string | null;
   performance_score: number | null;
+  ranking_score: number | null;
   software_completeness_score: number | null;
   memory_usage_gb: number | null;
   tested_at: string | null;
@@ -120,7 +121,7 @@ export default function ModelBenchmarkList() {
   const [rankingLoading, setRankingLoading] = useState(false);
   const [summary, setSummary] = useState<Summary>({ total_entries: 0, total_scenarios: 0, total_images_tested: 0 });
   const [summaryLoading, setSummaryLoading] = useState(true);
-  const [sortBy, setSortBy] = useState('accuracy');
+  const [sortBy, setSortBy] = useState('ranking_score');
   const [expandedRowKeys, setExpandedRowKeys] = useState<number[]>([]);
 
   const fetchScenarios = useCallback(async () => {
@@ -276,9 +277,9 @@ export default function ModelBenchmarkList() {
       render: (val: number | null, r: RankingItem) => (val != null ? `${val.toFixed(1)} ${r.energy_efficiency_unit || ''}` : '-'),
     },
     {
-      title: '性能评分',
-      dataIndex: 'performance_score',
-      key: 'performance_score',
+      title: '综合评分',
+      dataIndex: 'ranking_score',
+      key: 'ranking_score',
       width: 110,
       render: (val: number | null) =>
         val != null ? (
@@ -470,6 +471,7 @@ export default function ModelBenchmarkList() {
                 }}
                 style={{ width: 140 }}
                 options={[
+                  { label: '综合排行 ↓', value: 'ranking_score' },
                   { label: '准确率 ↓', value: 'accuracy' },
                   { label: '吞吐量 ↓', value: 'throughput' },
                   { label: '性能评分 ↓', value: 'performance_score' },
