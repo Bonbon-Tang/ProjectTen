@@ -211,14 +211,6 @@ def get_ranking(
                 2,
             )
         result.append({
-             "id": b.id,
-             "rank": None,  # filled below
-@@
-             "memory_usage_gb": b.memory_usage_gb,
-             "task_id": b.task_id,
-             "tested_at": str(b.tested_at) if b.tested_at else None,
-+            "ranking_score": ranking_score,
-         })
             "id": b.id,
             "rank": None,  # filled below
             "image_id": b.image_id,
@@ -244,6 +236,7 @@ def get_ranking(
             "memory_usage_gb": b.memory_usage_gb,
             "task_id": b.task_id,
             "tested_at": str(b.tested_at) if b.tested_at else None,
+            "ranking_score": ranking_score,
         })
 
     # Fill ranks
