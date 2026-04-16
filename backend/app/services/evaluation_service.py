@@ -824,6 +824,7 @@ class EvaluationService:
         size_factor = min(math.log(size_b + 1.0, 2) / 6.5, 1.0)
 
         chip_perf_factor = {
+            "nvidia_h200": 1.15,
             "Ascend910C": 1.0,
             "Ascend910B": 0.94,
             "MLU590": 0.91,
@@ -836,6 +837,17 @@ class EvaluationService:
             "PaddlePaddle": 0.95,
             "ROCm": 0.94,
             "DeepLink": 0.96,
+            "vllm": 1.08,
+            "sglang": 1.04,
+            "onnxruntime": 0.99,
+            "triton": 1.02,
+            "tensorrt-llm": 1.06,
+            "comfyui": 0.92,
+            "deepspeed": 1.03,
+            "ray": 0.9,
+            "dgl": 0.89,
+            "monai": 0.9,
+            "ros2": 0.87,
         }.get(framework, 0.95)
 
         metric_key = f"{task_type_val}|{image_name}|{device_type or chip}"
