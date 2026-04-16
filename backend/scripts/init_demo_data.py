@@ -106,6 +106,10 @@ def ensure_users(db):
             if user.status != spec["status"]:
                 user.status = spec["status"]
                 changed = True
+            desired_hash = hash_password(spec["password"])
+            if user.password_hash != desired_hash:
+                user.password_hash = desired_hash
+                changed = True
             if changed:
                 updated += 1
         users[spec["username"]] = user
