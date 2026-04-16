@@ -19,13 +19,33 @@ echo $! >"$LOG_DIR/backend.pid"
 if [[ -f "$LOG_DIR/frontend.pid" ]]; then
   old_pid=$(cat "$LOG_DIR/frontend.pid" 2>/dev/null || true)
   if [[ -n "${old_pid:-}" ]] && kill -0 "$old_pid" 2>/dev/null; then
-    echo "[all] frontend already running with pid=$old_pid"
+    echo "[all] stopping stale frontend pid=$old_pid before restart"
+    kill "$old_pid" 2>/dev/null || true
+    sleep 1
+  fi
+fi
+
+if command -v lsof >/dev/null 2>&1; then
+  port_3000_pid=$(lsof -ti tcp:3000 -sTCP:LISTEN 2>/dev/null | head -n 1 || true)
+  if [[ -n "${port_3000_pid:-}" ]]; then
+    echo "[all] killing process already listening on :3000 (pid=$port_3000_pid)"
+    kill "$port_3000_pid" 2>/dev/null || true
+    sleep 1
   fi
 fi
 
 echo "[all] starting frontend on :3000"
-nohup bash "$ROOT_DIR/frontend/scripts/start.sh" >"$LOG_DIR/frontend.log" 2>&1 &
+nohup env PORT=3000 bash "$ROOT_DIR/frontend/scripts/start.sh" >"$LOG_DIR/frontend.log" 2>&1 &
 echo $! >"$LOG_DIR/frontend.pid"
+
+sleep 2
+if command -v lsof >/dev/null 2>&1; then
+  actual_frontend_pid=$(lsof -ti tcp:3000 -sTCP:LISTEN 2>/dev/null | head -n 1 || true)
+  if [[ -z "${actual_frontend_pid:-}" ]]; then
+    echo "[all] ERROR: frontend failed to bind :3000, see $LOG_DIR/frontend.log"
+    exit 1
+  fi
+fi
 
 echo "[all] started"
 echo "  frontend: http://localhost:3000"
