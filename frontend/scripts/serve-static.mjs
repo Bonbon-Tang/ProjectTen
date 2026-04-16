@@ -1,4 +1,5 @@
 import http from 'node:http';
+import https from 'node:https';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +9,8 @@ const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, '..', 'dist');
 const host = process.env.HOST || '0.0.0.0';
 const port = Number(process.env.PORT || 3000);
+const apiTarget = process.env.API_TARGET || 'http://127.0.0.1:5000';
+const apiUrl = new URL(apiTarget);
 
 const mime = {
   '.html': 'text/html; charset=utf-8',
@@ -38,6 +41,31 @@ function safePath(urlPath) {
 }
 
 const server = http.createServer((req, res) => {
+  if ((req.url || '').startsWith('/api/')) {
+    const transport = apiUrl.protocol === 'https:' ? https : http;
+    const proxyReq = transport.request({
+      protocol: apiUrl.protocol,
+      hostname: apiUrl.hostname,
+      port: apiUrl.port,
+      method: req.method,
+      path: req.url,
+      headers: {
+        ...req.headers,
+        host: apiUrl.host,
+      },
+    }, (proxyRes) => {
+      res.writeHead(proxyRes.statusCode || 502, proxyRes.headers);
+      proxyRes.pipe(res);
+    });
+    proxyReq.on('error', (err) => {
+      send(res, 502, JSON.stringify({ code: 502, message: `API proxy error: ${err.message}`, data: null }), {
+        'Content-Type': 'application/json; charset=utf-8',
+      });
+    });
+    req.pipe(proxyReq);
+    return;
+  }
+
   let filePath = safePath(req.url || '/');
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, 'index.html');

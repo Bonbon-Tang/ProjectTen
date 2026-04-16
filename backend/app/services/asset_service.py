@@ -50,7 +50,6 @@ def _normalize_image_asset(asset: DigitalAsset) -> DigitalAsset:
             model = tag
     if chip and middleware and scenarios:
         asset.tags = [chip, middleware, scenarios[0], model or scenarios[0]]
-     return asset
     return asset
 
 from sqlalchemy import func, or_
