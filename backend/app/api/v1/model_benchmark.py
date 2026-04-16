@@ -254,7 +254,7 @@ def get_available_images(
     )
     images = q.all()
 
-    result = []
+    grouped = {}
     for img in images:
         tags = _ensure_list_tags(img.tags)
         if resolved_scenario and resolved_scenario not in tags:
@@ -269,20 +269,26 @@ def get_available_images(
             if tag_chip not in normalized_target:
                 continue
 
-        result.append({
+        final_model = model_tag or model_name or f"{scenario_tags[0]}_base"
+        item = {
             "id": img.id,
             "asset_code": img.asset_code,
             "name": img.name,
             "description": img.description,
-            "tags": [tag_chip, tag_middleware, scenario_tags[0], model_tag or model_name],
+            "tags": [tag_chip, tag_middleware, scenario_tags[0], final_model],
             "version": img.version,
             "chip_name": chip_name or tag_chip,
             "framework_name": framework_name or tag_middleware,
             "middleware_name": tag_middleware,
-            "model_name": model_name,
+            "model_name": final_model,
             "scenario_tags": scenario_tags,
-        })
+        }
+        group_key = (tag_chip, tag_middleware, scenario_tags[0], final_model)
+        existing = grouped.get(group_key)
+        if not existing or img.id > existing["id"]:
+            grouped[group_key] = item
 
+    result = sorted(grouped.values(), key=lambda x: x["id"])
     return _ok(result)
 
 
