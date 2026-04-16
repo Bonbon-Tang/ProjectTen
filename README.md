@@ -1,9 +1,10 @@
 # ProjectTen
 
-ProjectTen 是一个轻量的评测平台（FastAPI 后端 + Vite/React 前端），用于创建评测任务、管理评测记录与查看结果。
+ProjectTen 是一个轻量的评测平台（FastAPI 后端 + React 前端），用于创建评测任务、管理评测记录与查看结果。
 
-- 后端：提供评测/资产/报告等 API
-- 前端：提供创建评测、列表/详情、报告浏览等页面
+- 后端：提供评测 / 资产 / 报告等 API，默认监听 `5000`
+- 前端：默认以**构建后的静态站点**运行，监听 `3000`
+- 前端到后端：通过 `3000 -> /api/v1 -> 5000` 代理访问
 - 评测路由：项目内已逐步统一为单一 JSON 协议（详见本文档与 `PROJECT_NOTES.md`）
 
 ## Requirements
@@ -40,7 +41,11 @@ bash scripts/start_all.sh
 Then open:
 
 - Frontend: http://localhost:3000
-- Backend: http://localhost:5000
+- Backend API: http://localhost:5000
+
+默认链路：
+- 浏览器访问 `http://localhost:3000`
+- 前端页面里的 `/api/v1/*` 请求会由 3000 代理到 5000
 
 Logs are written to `./logs/`.
 
@@ -61,13 +66,25 @@ bash scripts/start_all.sh
 bash scripts/start_all.sh
 ```
 
+统一停止命令：
+
+```bash
+bash scripts/stop_all.sh
+```
+
 ### Useful process management commands
 
 Stop background services started by `scripts/start_all.sh`:
 
 ```bash
-pkill -f 'uvicorn app.main:app' || true
-pkill -f 'vite --host' || true
+bash scripts/stop_all.sh
+```
+
+如果怀疑有旧进程占住端口，也可以手动检查：
+
+```bash
+lsof -iTCP:3000 -sTCP:LISTEN
+lsof -iTCP:5000 -sTCP:LISTEN
 ```
 
 View logs:
@@ -122,6 +139,15 @@ bash frontend/scripts/install.sh
 bash frontend/scripts/start.sh
 ```
 
+说明：
+- `frontend/scripts/start.sh` 默认不是 Vite dev server，而是：先 build，再启动静态服务。
+- 如果确实要用开发模式，可临时执行：
+
+```bash
+cd frontend
+FRONTEND_MODE=dev bash scripts/start.sh
+```
+
 ## Notes
 
 - 本仓库不提交本地运行产物（venv、__pycache__、node_modules、dist、本地 sqlite db 等）。
@@ -130,4 +156,9 @@ bash frontend/scripts/start.sh
   - `docs/legacy/`（原始历史文档存档，可按需删除）
 - 端口可通过环境变量覆盖：
   - backend: `HOST`, `PORT`（默认 5000）, `RELOAD`
-  - frontend: `HOST`, `PORT`
+  - frontend: `HOST`, `PORT`, `FRONTEND_MODE`（默认 `static`，可切 `dev`）
+- 生产构建前端 API 基线：`frontend/.env.production` 中 `VITE_API_BASE_URL=/api/v1`
+- 如果页面报“网络异常”，优先检查：
+  1. `logs/backend.log` 是否有 Python 启动异常
+  2. `logs/frontend.log` 是否 build 成功并监听 `3000`
+  3. `3000` 与 `5000` 是否都被正确进程监听
