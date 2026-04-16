@@ -32,13 +32,14 @@ interface ReportItem {
   is_public: boolean;
   created_at?: string;
   updated_at?: string;
-  // 从 task 关联的数据
   eval_name?: string;
   task_category?: string;
   task_type?: string;
+  task?: string;
+  scenario?: string;
   device_type?: string;
+  chips?: string;
   progress?: number;
-  // Image and model info
   image_name?: string;
   model_name?: string;
   chip_name?: string;
@@ -104,7 +105,13 @@ export default function ReportList() {
       const resData = res?.data || res;
       const items = resData?.items || resData?.list || resData?.data || [];
       if (Array.isArray(items)) {
-        setData(items);
+        const normalized = items.map((item: any) => ({
+          ...item,
+          task_category: item.task_category || item.task || '-',
+          task_type: item.task_type || item.scenario || '-',
+          device_type: item.device_type || item.chips || item.chip_name || '-',
+        }));
+        setData(normalized);
         setPagination((prev) => ({
           ...prev,
           total: resData?.total ?? items.length,
