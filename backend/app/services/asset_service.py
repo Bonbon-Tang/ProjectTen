@@ -11,13 +11,14 @@ SCENARIO_TAGS = {
     "robot_control", "code_generation", "knowledge_graph",
 }
 CHIP_ALIAS = {
-    "华为昇腾910C": "910C", "华为昇腾 910C": "910C", "Ascend910C": "910C", "910C": "910C",
-    "华为昇腾910B": "910B", "华为昇腾 910B": "910B", "Ascend910B": "910B", "910B": "910B",
-    "寒武纪MLU590": "MLU590", "寒武纪 MLU590": "MLU590", "MLU590": "MLU590",
-    "昆仑芯P800": "P800", "昆仑芯 P800": "P800", "P800": "P800",
-    "海光DCU BW1000": "BW1000", "海光 DCU BW1000": "BW1000", "HygonBW1000": "BW1000", "BW1000": "BW1000",
+    "华为昇腾910C": "huawei_910c", "华为昇腾 910C": "huawei_910c", "Ascend910C": "huawei_910c", "910C": "huawei_910c", "huawei_910c": "huawei_910c",
+    "华为昇腾910B": "huawei_910b", "华为昇腾 910B": "huawei_910b", "Ascend910B": "huawei_910b", "910B": "huawei_910b", "huawei_910b": "huawei_910b",
+    "寒武纪MLU590": "cambrian_590", "寒武纪 MLU590": "cambrian_590", "MLU590": "cambrian_590", "cambrian_590": "cambrian_590",
+    "昆仑芯P800": "kunlun_p800", "昆仑芯 P800": "kunlun_p800", "P800": "kunlun_p800", "kunlun_p800": "kunlun_p800",
+    "海光DCU BW1000": "hygon_bw1000", "海光 DCU BW1000": "hygon_bw1000", "HygonBW1000": "hygon_bw1000", "BW1000": "hygon_bw1000", "hygon_bw1000": "hygon_bw1000",
+    "英伟达H200": "nvidia_h200", "英伟达 H200": "nvidia_h200", "H200": "nvidia_h200", "nvidia_h200": "nvidia_h200",
 }
-MIDDLEWARE_TAGS = {"MindSpore", "PyTorch", "PaddlePaddle", "ROCm", "ROCm/PyTorch", "DeepLink"}
+MIDDLEWARE_TAGS = {"MindSpore", "PyTorch", "PaddlePaddle", "ROCm", "ROCm/PyTorch", "DeepLink", "vllm", "sglang", "onnxruntime", "triton", "tensorrt-llm", "comfyui", "deepspeed", "ray", "dgl", "monai", "ros2"}
 
 
 def _normalize_chip(tag: Optional[str]) -> Optional[str]:
@@ -35,7 +36,7 @@ def _normalize_image_asset(asset: DigitalAsset) -> DigitalAsset:
     scenarios = []
     for tag in tags:
         normalized = _normalize_chip(tag)
-        if not chip and normalized in {"910C", "910B", "MLU590", "P800", "BW1000"}:
+        if not chip and normalized in {"nvidia_h200", "huawei_910c", "huawei_910b", "cambrian_590", "kunlun_p800", "hygon_bw1000"}:
             chip = normalized
             continue
         if not middleware and tag in MIDDLEWARE_TAGS:

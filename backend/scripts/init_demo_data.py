@@ -64,11 +64,11 @@ GLOBAL_DEVICES = [
 
 CHIP_MATRIX = [
     {"label": "英伟达 H200", "tag": "nvidia_h200", "device_type": DeviceType.nvidia_h200.value, "manufacturer": "NVIDIA"},
-    {"label": "华为昇腾 910C", "tag": "910C", "device_type": DeviceType.huawei_910c.value, "manufacturer": "华为"},
-    {"label": "华为昇腾 910B", "tag": "910B", "device_type": DeviceType.huawei_910b.value, "manufacturer": "华为"},
-    {"label": "寒武纪 MLU590", "tag": "MLU590", "device_type": DeviceType.cambrian_590.value, "manufacturer": "寒武纪"},
-    {"label": "昆仑芯 P800", "tag": "P800", "device_type": DeviceType.kunlun_p800.value, "manufacturer": "昆仑芯"},
-    {"label": "海光 DCU BW1000", "tag": "BW1000", "device_type": DeviceType.hygon_bw1000.value, "manufacturer": "海光"},
+    {"label": "华为昇腾 910C", "tag": DeviceType.huawei_910c.value, "device_type": DeviceType.huawei_910c.value, "manufacturer": "华为"},
+    {"label": "华为昇腾 910B", "tag": DeviceType.huawei_910b.value, "device_type": DeviceType.huawei_910b.value, "manufacturer": "华为"},
+    {"label": "寒武纪 MLU590", "tag": DeviceType.cambrian_590.value, "device_type": DeviceType.cambrian_590.value, "manufacturer": "寒武纪"},
+    {"label": "昆仑芯 P800", "tag": DeviceType.kunlun_p800.value, "device_type": DeviceType.kunlun_p800.value, "manufacturer": "昆仑芯"},
+    {"label": "海光 DCU BW1000", "tag": DeviceType.hygon_bw1000.value, "device_type": DeviceType.hygon_bw1000.value, "manufacturer": "海光"},
 ]
 
 MIDDLEWARE_BY_SCENARIO = {

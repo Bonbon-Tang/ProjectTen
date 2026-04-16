@@ -97,11 +97,11 @@ export default function AssetList() {
   const CHIP_OPTIONS = [
     { label: '全部芯片', value: 'all' },
     { label: '英伟达 H200', value: 'nvidia_h200' },
-    { label: '华为昇腾 910C', value: '910C' },
-    { label: '华为昇腾 910B', value: '910B' },
-    { label: '寒武纪 MLU590', value: 'MLU590' },
-    { label: '昆仑芯 P800', value: 'P800' },
-    { label: '海光 DCU BW1000', value: 'BW1000' },
+    { label: '华为昇腾 910C', value: 'huawei_910c' },
+    { label: '华为昇腾 910B', value: 'huawei_910b' },
+    { label: '寒武纪 MLU590', value: 'cambrian_590' },
+    { label: '昆仑芯 P800', value: 'kunlun_p800' },
+    { label: '海光 DCU BW1000', value: 'hygon_bw1000' },
   ];
   
   // 框架选项
