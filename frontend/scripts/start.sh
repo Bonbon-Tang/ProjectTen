@@ -5,5 +5,11 @@ cd "$(dirname "$0")/.."
 
 HOST=${HOST:-0.0.0.0}
 PORT=${PORT:-3000}
+FRONTEND_MODE=${FRONTEND_MODE:-static}
 
-exec npm run dev -- --host "$HOST" --port "$PORT"
+if [[ "$FRONTEND_MODE" == "dev" ]]; then
+  exec npm run dev -- --host "$HOST" --port "$PORT"
+fi
+
+npm run build
+exec node scripts/serve-static.mjs

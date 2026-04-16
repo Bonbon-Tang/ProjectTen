@@ -38,9 +38,15 @@ echo "[all] starting frontend on :3000"
 nohup env PORT=3000 bash "$ROOT_DIR/frontend/scripts/start.sh" >"$LOG_DIR/frontend.log" 2>&1 &
 echo $! >"$LOG_DIR/frontend.pid"
 
-sleep 2
 if command -v lsof >/dev/null 2>&1; then
-  actual_frontend_pid=$(lsof -ti tcp:3000 -sTCP:LISTEN 2>/dev/null | head -n 1 || true)
+  actual_frontend_pid=""
+  for _ in {1..30}; do
+    actual_frontend_pid=$(lsof -ti tcp:3000 -sTCP:LISTEN 2>/dev/null | head -n 1 || true)
+    if [[ -n "${actual_frontend_pid:-}" ]]; then
+      break
+    fi
+    sleep 1
+  done
   if [[ -z "${actual_frontend_pid:-}" ]]; then
     echo "[all] ERROR: frontend failed to bind :3000, see $LOG_DIR/frontend.log"
     exit 1
