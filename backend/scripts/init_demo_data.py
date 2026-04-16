@@ -297,8 +297,37 @@ def scenario_slug(scenario: str) -> str:
     return scenario
 
 
+MODEL_NAME_MAP = {
+    "llm": "qwen",
+    "multimodal": "deepseek",
+    "speech_recognition": "whisper",
+    "image_classification": "resnet",
+    "object_detection": "yolo",
+    "semantic_segmentation": "segformer",
+    "text_generation": "qwen",
+    "machine_translation": "deepseek",
+    "sentiment_analysis": "bert",
+    "question_answering": "qwen",
+    "text_summarization": "qwen",
+    "speech_synthesis": "xtts",
+    "image_generation": "stable-diffusion",
+    "video_understanding": "deepseek",
+    "ocr": "pp-ocr",
+    "recommendation": "deepfm",
+    "anomaly_detection": "isoforest",
+    "time_series": "informer",
+    "reinforcement_learning": "ppo",
+    "graph_neural_network": "gcn",
+    "medical_imaging": "monai",
+    "autonomous_driving": "transfuser",
+    "robot_control": "ros2",
+    "code_generation": "deepseek",
+    "knowledge_graph": "qwen",
+}
+
+
 def model_slug(scenario: str) -> str:
-    return f"{scenario}_base"
+    return MODEL_NAME_MAP.get(scenario, f"{scenario}_base")
 
 
 def ensure_image_assets(db, users):
