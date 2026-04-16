@@ -31,11 +31,12 @@ SCENARIO_TAGS = {
 }
 
 DEVICE_TAG_MAP = {
-    "huawei_910c": ["910C", "Ascend910C"],
-    "huawei_910b": ["910B", "Ascend910B"],
-    "cambrian_590": ["MLU590", "Cambrian590"],
-    "kunlun_p800": ["P800", "KunlunP800"],
-    "hygon_bw1000": ["BW1000", "HygonBW1000"],
+    "nvidia_h200": ["nvidia_h200", "H200"],
+    "huawei_910c": ["huawei_910c", "910C", "Ascend910C"],
+    "huawei_910b": ["huawei_910b", "910B", "Ascend910B"],
+    "cambrian_590": ["cambrian_590", "MLU590", "Cambrian590"],
+    "kunlun_p800": ["kunlun_p800", "P800", "KunlunP800"],
+    "hygon_bw1000": ["hygon_bw1000", "BW1000", "HygonBW1000"],
 }
 
 
@@ -47,14 +48,20 @@ def _ensure_list_tags(tags):
     return []
 
 
-MIDDLEWARE_TAGS = {"MindSpore", "PyTorch", "PaddlePaddle", "ROCm", "ROCm/PyTorch", "DeepLink"}
-CHIP_TAGS = {"910C", "910B", "MLU590", "P800", "BW1000", "Ascend910C", "Ascend910B", "HygonBW1000", "KunlunP800", "Cambrian590"}
+MIDDLEWARE_TAGS = {"MindSpore", "PyTorch", "PaddlePaddle", "ROCm", "ROCm/PyTorch", "DeepLink", "vllm", "sglang", "onnxruntime", "triton", "tensorrt-llm", "comfyui", "deepspeed", "ray", "dgl", "monai", "ros2"}
+CHIP_TAGS = {"nvidia_h200", "huawei_910c", "huawei_910b", "cambrian_590", "kunlun_p800", "hygon_bw1000", "910C", "910B", "MLU590", "P800", "BW1000", "Ascend910C", "Ascend910B", "HygonBW1000", "KunlunP800", "Cambrian590", "H200"}
 CHIP_NORMALIZE_MAP = {
-    "Ascend910C": "910C",
-    "Ascend910B": "910B",
-    "HygonBW1000": "BW1000",
-    "KunlunP800": "P800",
-    "Cambrian590": "MLU590",
+    "H200": "nvidia_h200",
+    "Ascend910C": "huawei_910c",
+    "910C": "huawei_910c",
+    "Ascend910B": "huawei_910b",
+    "910B": "huawei_910b",
+    "HygonBW1000": "hygon_bw1000",
+    "BW1000": "hygon_bw1000",
+    "KunlunP800": "kunlun_p800",
+    "P800": "kunlun_p800",
+    "Cambrian590": "cambrian_590",
+    "MLU590": "cambrian_590",
 }
 
 
@@ -70,7 +77,7 @@ def _extract_tag_parts(tags: list[str]):
     scenarios = []
     for tag in tags:
         normalized_chip = _normalize_chip_tag(tag)
-        if not chip and normalized_chip in CHIP_TAGS | {"910C", "910B", "MLU590", "P800", "BW1000"}:
+        if not chip and normalized_chip in CHIP_TAGS:
             chip = normalized_chip
             continue
         if not middleware and tag in MIDDLEWARE_TAGS:
@@ -88,14 +95,19 @@ def _infer_chip_framework_model(img: DigitalAsset, tags: list[str]):
     model_name = None
 
     if name:
-        name_parts = [part.strip() for part in name.split("-") if part.strip()]
-        if len(name_parts) >= 3:
-            model_name = "-".join(name_parts[2:]).strip()
-        elif len(name_parts) >= 1:
-            model_name = name_parts[-1].strip()
+        underscore_parts = [part.strip() for part in name.split("_") if part.strip()]
+        dash_parts = [part.strip() for part in name.split("-") if part.strip()]
+        if len(underscore_parts) >= 3:
+            model_name = "_".join(underscore_parts[2:]).strip()
+        elif len(dash_parts) >= 3:
+            model_name = "-".join(dash_parts[2:]).strip()
+        elif len(underscore_parts) >= 1:
+            model_name = underscore_parts[-1].strip()
+        elif len(dash_parts) >= 1:
+            model_name = dash_parts[-1].strip()
 
     if description:
-        desc_parts = [part.strip() for part in description.split("+") if part.strip()]
+        desc_parts = [part.strip() for part in description.replace("_", "+").split("+") if part.strip()]
         if len(desc_parts) >= 3:
             chip_name = chip_name or _normalize_chip_tag(desc_parts[0])
             framework_name = framework_name or desc_parts[1]
