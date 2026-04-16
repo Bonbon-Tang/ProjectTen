@@ -24,11 +24,14 @@ import dayjs from 'dayjs';
 interface RecentTask {
   id: string;
   name: string;
-  task_category: string;
-  task_type: string;
+  task_category?: string;
+  task_type?: string;
+  task?: string;
+  scenario?: string;
   status: string;
   created_at: string;
-  creator: string;
+  creator?: string;
+  creator_id?: number;
   progress?: number;
 }
 
@@ -119,7 +122,12 @@ export default function Dashboard() {
       const data = res?.data || res;
       const items = data?.items || data?.list || [];
       if (Array.isArray(items)) {
-        setRecentTasks(items);
+        setRecentTasks(items.map((item: any) => ({
+          ...item,
+          task_category: item.task_category || item.task || '-',
+          task_type: item.task_type || item.scenario || '-',
+          creator: item.creator || (item.creator_id != null ? `用户${item.creator_id}` : '-'),
+        })));
       }
     } catch {
       // 使用默认值
@@ -182,9 +190,10 @@ export default function Dashboard() {
       dataIndex: 'task_category',
       key: 'task_category',
       width: 110,
-      render: (val: string) => {
-        const cat = EVAL_CATEGORIES.find((c) => c.value === val);
-        return cat ? <Tag>{cat.icon} {cat.label}</Tag> : <Tag>{val}</Tag>;
+      render: (val: string, record) => {
+        const rawValue = val || record.task || '-';
+        const cat = EVAL_CATEGORIES.find((c) => c.value === rawValue);
+        return cat ? <Tag>{cat.icon} {cat.label}</Tag> : <Tag>{rawValue}</Tag>;
       },
     },
     {
@@ -205,7 +214,7 @@ export default function Dashboard() {
       dataIndex: 'created_at',
       key: 'created_at',
       width: 120,
-      render: (text: string) => dayjs(text).format('MM-DD HH:mm'),
+      render: (text: string) => text ? dayjs(text).format('MM-DD HH:mm') : '-',
     },
     {
       title: '操作',
