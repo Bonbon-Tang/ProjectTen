@@ -38,7 +38,7 @@ class ComputeDevice(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(256), nullable=False)
-    device_type = Column(Enum(DeviceType), nullable=False)
+    device_type = Column(String(64), nullable=False)
     manufacturer = Column(String(128), nullable=False)
     total_count = Column(Integer, nullable=False, default=0)
     available_count = Column(Integer, nullable=False, default=0)

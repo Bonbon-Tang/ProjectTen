@@ -53,7 +53,7 @@ DEMO_USERS = [
 ROLE_NAMES = ["admin", "user", "tenant"]
 
 GLOBAL_DEVICES = [
-    ("英伟达 H200", DeviceType.nvidia_h200, "NVIDIA", 16),
+    ("英伟达 H200", DeviceType.nvidia_h200.value, "NVIDIA", 16),
     ("华为昇腾910C", DeviceType.huawei_910c, "华为", 24),
     ("华为昇腾910B", DeviceType.huawei_910b, "华为", 24),
     ("寒武纪MLU590", DeviceType.cambrian_590, "寒武纪", 24),
@@ -293,6 +293,10 @@ def assign_roles(db, users):
     return changes
 
 
+def scenario_slug(scenario: str) -> str:
+    return scenario
+
+
 def ensure_image_assets(db, users):
     created = 0
     updated = 0
@@ -315,10 +319,10 @@ def ensure_image_assets(db, users):
         for scenario in DEMO_SCENARIOS:
             middleware = MIDDLEWARE_BY_SCENARIO[scenario]
             scenario_label = SCENARIO_LABELS[scenario]
-            name = f"{chip['label']} + {middleware} + {scenario_label} 基线镜像"
+            name = f"{chip['tag']}_{middleware}_{scenario_slug(scenario)}"
             asset = db.query(DigitalAsset).filter(DigitalAsset.name == name, DigitalAsset.asset_type == AssetType.image).first()
             tags = [chip['tag'], middleware, scenario]
-            description = f"{chip['label']} 上用于 {scenario_label} 的标准部署镜像，标签固定为 芯片/中间层/子场景。"
+            description = f"Baseline deployment image for {scenario_label} on {chip['tag']} with fixed tags: chip / middleware / scenario."
             file_path = f"registry.example.com/projectten/{chip['device_type']}/{middleware}:{scenario}"
             category = "model_deployment"
             if not asset:

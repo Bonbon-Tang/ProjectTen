@@ -9,8 +9,26 @@ from app.models.resource import ComputeDevice, DeviceType, DeviceStatus
 # Preset device configurations
 PRESET_DEVICES = [
     {
+        "name": "英伟达H200",
+        "device_type": DeviceType.nvidia_h200.value,
+        "manufacturer": "NVIDIA",
+        "total_count": 16,
+        "available_count": 16,
+        "specs": {
+            "memory": "141GB HBM3e",
+            "fp16_tflops": 989,
+            "fp32_tflops": 67,
+            "int8_tops": 3958,
+            "memory_bandwidth": "4.8TB/s",
+            "tdp": "700W",
+            "interconnect": "NVLink",
+            "architecture": "Hopper",
+        },
+        "status": DeviceStatus.online,
+    },
+    {
         "name": "华为昇腾910C",
-        "device_type": DeviceType.huawei_910c,
+        "device_type": DeviceType.huawei_910c.value,
         "manufacturer": "华为",
         "total_count": 24,
         "available_count": 24,
@@ -28,7 +46,7 @@ PRESET_DEVICES = [
     },
     {
         "name": "华为昇腾910B",
-        "device_type": DeviceType.huawei_910b,
+        "device_type": DeviceType.huawei_910b.value,
         "manufacturer": "华为",
         "total_count": 24,
         "available_count": 24,
@@ -46,7 +64,7 @@ PRESET_DEVICES = [
     },
     {
         "name": "寒武纪MLU590",
-        "device_type": DeviceType.cambrian_590,
+        "device_type": DeviceType.cambrian_590.value,
         "manufacturer": "寒武纪",
         "total_count": 24,
         "available_count": 24,
@@ -64,7 +82,7 @@ PRESET_DEVICES = [
     },
     {
         "name": "昆仑芯P800",
-        "device_type": DeviceType.kunlun_p800,
+        "device_type": DeviceType.kunlun_p800.value,
         "manufacturer": "昆仑芯",
         "total_count": 12,
         "available_count": 12,
@@ -82,7 +100,7 @@ PRESET_DEVICES = [
     },
     {
         "name": "海光DCU BW1000",
-        "device_type": DeviceType.hygon_bw1000,
+        "device_type": DeviceType.hygon_bw1000.value,
         "manufacturer": "海光",
         "total_count": 8,
         "available_count": 8,
@@ -100,7 +118,7 @@ PRESET_DEVICES = [
     },
     {
         "name": "本机 CPU 测试节点",
-        "device_type": DeviceType.cpu_test,
+        "device_type": DeviceType.cpu_test.value,
         "manufacturer": "本机容器节点",
         "total_count": 1,
         "available_count": 1,
