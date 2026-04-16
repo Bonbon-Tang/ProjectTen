@@ -134,9 +134,14 @@ export default function ModelBenchmarkList() {
       }
       const merged = ALL_SCENARIOS.map((scenario) => existingMap.get(scenario) || createPlaceholderScenario(scenario));
       setScenarios(merged);
+      if (!selectedScenario) {
+        const firstActive = merged.find((item) => item.count > 0)?.scenario || merged[0]?.scenario || '';
+        if (firstActive) setSelectedScenario(firstActive);
+      }
     } catch {
       const merged = ALL_SCENARIOS.map(createPlaceholderScenario);
       setScenarios(merged);
+      if (!selectedScenario && merged.length > 0) setSelectedScenario(merged[0].scenario);
     }
   }, [selectedScenario]);
 
