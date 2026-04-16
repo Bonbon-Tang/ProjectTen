@@ -40,7 +40,7 @@ echo $! >"$LOG_DIR/frontend.pid"
 
 if command -v lsof >/dev/null 2>&1; then
   actual_frontend_pid=""
-  for _ in {1..30}; do
+  for _ in {1..90}; do
     actual_frontend_pid=$(lsof -ti tcp:3000 -sTCP:LISTEN 2>/dev/null | head -n 1 || true)
     if [[ -n "${actual_frontend_pid:-}" ]]; then
       break
