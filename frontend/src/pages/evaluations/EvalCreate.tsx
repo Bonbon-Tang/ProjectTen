@@ -82,11 +82,13 @@ function normalizeText(value?: string) {
 }
 
 const DEVICE_CHIP_TAG_MAP: Record<string, string> = {
-  huawei_910c: '910C',
-  huawei_910b: '910B',
-  cambrian_590: 'MLU590',
-  kunlun_p800: 'P800',
-  hygon_bw1000: 'BW1000',
+  nvidia_h200: 'nvidia_h200',
+  huawei_910c: 'huawei_910c',
+  huawei_910b: 'huawei_910b',
+  cambrian_590: 'cambrian_590',
+  kunlun_p800: 'kunlun_p800',
+  hygon_bw1000: 'hygon_bw1000',
+  cpu_test: 'cpu_test',
 };
 
 function chipLabelFromDevice(device?: DeviceInfo) {
@@ -699,7 +701,7 @@ export default function EvalCreate() {
           </Col>
         </Row>
         <div style={{ marginTop: 12, fontSize: 13, color: '#60738f', lineHeight: 1.8 }}>
-          提交页和 DL 智能体页现在遵循同一套路由语义：<b>scenario</b> 决定编号前缀，<b>chips</b> 只表示芯片环境，镜像与工具应对齐到同一前缀段。
+          提交页和 DL 智能体页现在遵循同一套 v2 路由语义：<b>task</b> 决定评测大类，<b>scenario</b> 决定子场景，<b>chips</b> 使用标准芯片 tag，<b>image_id / tool_id</b> 使用资产数据库主键。
         </div>
       </Card>
       <Form form={form} layout="vertical" preserve={true}>

@@ -96,12 +96,13 @@ const PRECISION_OPTIONS = [
 const normalize = (value: string) => value.trim().toLowerCase();
 
 const chipTagMap: Record<string, string> = {
-  huawei_910c: '910C',
-  huawei_910b: '910B',
-  cambrian_590: 'MLU590',
-  kunlun_p800: 'P800',
-  hygon_bw1000: 'BW1000',
-  cpu_test: 'CPU',
+  nvidia_h200: 'nvidia_h200',
+  huawei_910c: 'huawei_910c',
+  huawei_910b: 'huawei_910b',
+  cambrian_590: 'cambrian_590',
+  kunlun_p800: 'kunlun_p800',
+  hygon_bw1000: 'hygon_bw1000',
+  cpu_test: 'cpu_test',
 };
 
 function chipLabelFromDevice(device?: DeviceOption) {
@@ -763,7 +764,7 @@ export default function DLAgentCreate() {
           <div style={{ padding: 14, borderRadius: 16, background: 'rgba(255,255,255,0.72)' }}>
             <div style={{ fontSize: 12, color: '#60738f', marginBottom: 6 }}>编号路由预期</div>
             <div style={{ fontSize: 18, fontWeight: 800, color: '#102a4f' }}>{routePrefix ? `${routePrefix}xx / ${routePrefix}xxxx` : '等待 scenario 确认'}</div>
-            <div style={{ marginTop: 8, fontSize: 12, color: '#60738f' }}>image_id 与 tool_id 前缀需与 scenario 对齐</div>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#60738f' }}>最终提交严格遵循 TASK_ROUTING_SPEC_V2：task / scenario / chips / chip_num / image_id / tool_id</div>
           </div>
         </div>
       </Card>
@@ -837,13 +838,13 @@ export default function DLAgentCreate() {
               {taskDraft.taskKind ? <Tag color="purple">taskKind={taskDraft.taskKind}</Tag> : null}
               {taskDraft.scenario ? <Tag color="gold">scenario={taskDraft.scenario}</Tag> : null}
               {taskDraft.chips ? <Tag color="green">chips={taskDraft.chips}</Tag> : null}
-              {taskDraft.image_id ? <Tag color="cyan">imageDbId={taskDraft.image_id}</Tag> : null}
-              {taskDraft.tool_id ? <Tag color="geekblue">toolsetDbId={taskDraft.tool_id}</Tag> : null}
+              {taskDraft.image_id ? <Tag color="cyan">image_id={taskDraft.image_id}</Tag> : null}
+              {taskDraft.tool_id ? <Tag color="geekblue">tool_id={taskDraft.tool_id}</Tag> : null}
             </Space>
             <div style={{ display: 'grid', gap: 10 }}>
               <div style={{ padding: 12, borderRadius: 14, background: '#f7faff', border: '1px solid #e3edff' }}>
                 <div style={{ fontSize: 12, color: '#60738f', marginBottom: 4 }}>路由规则</div>
-                <Text style={{ color: '#102a4f' }}>scenario 决定编号前缀，chips 只表示芯片环境，不参与场景编号推导。</Text>
+                <Text style={{ color: '#102a4f' }}>scenario 表示子场景语义，chips 使用标准芯片 tag，最终执行依赖 image_id / tool_id 对应的数据库资产。</Text>
               </div>
               <div style={{ padding: 12, borderRadius: 14, background: '#f7faff', border: '1px solid #e3edff' }}>
                 <div style={{ fontSize: 12, color: '#60738f', marginBottom: 4 }}>当前芯片标签</div>
