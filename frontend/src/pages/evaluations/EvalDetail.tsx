@@ -98,7 +98,14 @@ export default function EvalDetail() {
       const res: any = await getEvaluationById(id!);
       const data = res?.data || res;
       if (data && data.id) {
-        setDetail(data);
+        setDetail({
+          ...data,
+          task_category: data.task_category || data.task || 'model_deployment',
+          task_type: data.task_type || data.scenario || '-',
+          device_type: data.device_type || data.chips || data.chip_name || '-',
+          device_count: data.device_count || data.chip_num || 1,
+          creator: data.creator || (data.creator_id != null ? `用户${data.creator_id}` : '未知'),
+        });
       }
     } catch {
       // 使用 mock 数据作为 fallback
@@ -149,7 +156,14 @@ export default function EvalDetail() {
         const res: any = await getEvaluationById(id!);
         const data = res?.data || res;
         if (data && data.id) {
-          setDetail(data);
+          setDetail({
+            ...data,
+            task_category: data.task_category || data.task || 'model_deployment',
+            task_type: data.task_type || data.scenario || '-',
+            device_type: data.device_type || data.chips || data.chip_name || '-',
+            device_count: data.device_count || data.chip_num || 1,
+            creator: data.creator || (data.creator_id != null ? `用户${data.creator_id}` : '未知'),
+          });
           // 当进度到100且status=completed时停止轮询
           if (data.progress >= 100 && data.status === 'completed') {
             if (pollTimerRef.current) {
