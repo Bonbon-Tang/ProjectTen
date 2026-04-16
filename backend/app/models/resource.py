@@ -17,6 +17,7 @@ from app.database import Base
 
 
 class DeviceType(str, enum.Enum):
+    nvidia_h200 = "nvidia_h200"
     huawei_910c = "huawei_910c"
     huawei_910b = "huawei_910b"
     cambrian_590 = "cambrian_590"

@@ -71,6 +71,7 @@ export const MODEL_TEST_TYPES = [
 
 // 智算设备
 export const DEVICE_TYPES = [
+  { label: '英伟达H200', value: 'nvidia_h200', manufacturer: 'NVIDIA', total: 16, color: '#76b900' },
   { label: '华为昇腾910C', value: 'huawei_910c', manufacturer: '华为', total: 24, color: '#e6002d' },
   { label: '华为昇腾910B', value: 'huawei_910b', manufacturer: '华为', total: 24, color: '#e6002d' },
   { label: '寒武纪MLU590', value: 'cambrian_590', manufacturer: '寒武纪', total: 24, color: '#0066cc' },

@@ -96,6 +96,7 @@ export default function AssetList() {
   // 芯片选项
   const CHIP_OPTIONS = [
     { label: '全部芯片', value: 'all' },
+    { label: '英伟达 H200', value: 'nvidia_h200' },
     { label: '华为昇腾 910C', value: '910C' },
     { label: '华为昇腾 910B', value: '910B' },
     { label: '寒武纪 MLU590', value: 'MLU590' },
@@ -106,11 +107,17 @@ export default function AssetList() {
   // 框架选项
   const FRAMEWORK_OPTIONS = [
     { label: '全部框架', value: 'all' },
-    { label: 'MindSpore', value: 'MindSpore' },
-    { label: 'PyTorch', value: 'PyTorch' },
-    { label: 'PaddlePaddle', value: 'PaddlePaddle' },
-    { label: 'ROCm', value: 'ROCm' },
-    { label: 'DeepLink', value: 'DeepLink' },
+    { label: 'vLLM', value: 'vllm' },
+    { label: 'SGLang', value: 'sglang' },
+    { label: 'ONNX Runtime', value: 'onnxruntime' },
+    { label: 'Triton', value: 'triton' },
+    { label: 'TensorRT-LLM', value: 'tensorrt-llm' },
+    { label: 'ComfyUI', value: 'comfyui' },
+    { label: 'DeepSpeed', value: 'deepspeed' },
+    { label: 'Ray', value: 'ray' },
+    { label: 'DGL', value: 'dgl' },
+    { label: 'MONAI', value: 'monai' },
+    { label: 'ROS2', value: 'ros2' },
   ];
   
   // 25 个子场景选项
@@ -394,7 +401,10 @@ export default function AssetList() {
       width: 280,
       render: (_: any, record: AssetItem) => {
         if (record.asset_type !== 'image' || !record.tags?.length) return <Text type="secondary">-</Text>;
-        const matched = deviceUsage.find((item) => record.tags.includes(item.device_type) || record.name.includes(item.device_name));
+        const matched = deviceUsage.find((item) => {
+          const aliases = [item.device_type, item.device_name, item.device_name?.replace(/\s+/g, ''), item.device_name?.toLowerCase()];
+          return aliases.some((alias) => !!alias && (record.tags.includes(alias) || record.name.toLowerCase().includes(String(alias).toLowerCase())));
+        });
         if (!matched) return <Text type="secondary">-</Text>;
         const leasedText = matched.leased.length
           ? matched.leased.map((x) => `租售给 ${x.username || '未知用户'} ${x.count}台`).join('；')
