@@ -43,26 +43,45 @@ function safePath(urlPath) {
 const server = http.createServer((req, res) => {
   if ((req.url || '').startsWith('/api/')) {
     const transport = apiUrl.protocol === 'https:' ? https : http;
-    const proxyReq = transport.request({
-      protocol: apiUrl.protocol,
-      hostname: apiUrl.hostname,
-      port: apiUrl.port,
-      method: req.method,
-      path: req.url,
-      headers: {
+    const bodyChunks = [];
+    req.on('data', (chunk) => bodyChunks.push(chunk));
+    req.on('end', () => {
+      const body = bodyChunks.length ? Buffer.concat(bodyChunks) : null;
+      const headers = {
         ...req.headers,
         host: apiUrl.host,
-      },
-    }, (proxyRes) => {
-      res.writeHead(proxyRes.statusCode || 502, proxyRes.headers);
-      proxyRes.pipe(res);
+      };
+      delete headers['content-length'];
+      const attempts = 4;
+      const delayMs = 250;
+
+      const sendProxy = (attempt = 1) => {
+        const proxyReq = transport.request({
+          protocol: apiUrl.protocol,
+          hostname: apiUrl.hostname,
+          port: apiUrl.port,
+          method: req.method,
+          path: req.url,
+          headers,
+        }, (proxyRes) => {
+          res.writeHead(proxyRes.statusCode || 502, proxyRes.headers);
+          proxyRes.pipe(res);
+        });
+        proxyReq.on('error', (err) => {
+          if (attempt < attempts && err.code === 'ECONNREFUSED') {
+            setTimeout(() => sendProxy(attempt + 1), delayMs * attempt);
+            return;
+          }
+          send(res, 502, JSON.stringify({ code: 502, message: `API proxy error: ${err.message}`, data: null }), {
+            'Content-Type': 'application/json; charset=utf-8',
+          });
+        });
+        if (body) proxyReq.write(body);
+        proxyReq.end();
+      };
+
+      sendProxy();
     });
-    proxyReq.on('error', (err) => {
-      send(res, 502, JSON.stringify({ code: 502, message: `API proxy error: ${err.message}`, data: null }), {
-        'Content-Type': 'application/json; charset=utf-8',
-      });
-    });
-    req.pipe(proxyReq);
     return;
   }
 
