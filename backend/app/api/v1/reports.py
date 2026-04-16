@@ -112,12 +112,12 @@ def list_reports(
         if task and task.image_id:
             image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
             if image:
+                tags = image.tags if isinstance(image.tags, list) else []
                 item["image_name"] = image.name
-                # Parse model name from image name (format: "Chip + Framework + Model")
-                parts = image.name.split(" + ")
-                item["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
-                item["chip_name"] = parts[0].strip() if parts else image.name
-                item["framework_name"] = parts[1].strip() if len(parts) > 1 else None
+                item["chip_name"] = tags[0] if len(tags) > 0 else None
+                item["framework_name"] = tags[1] if len(tags) > 1 else None
+                item["scenario_name"] = tags[2] if len(tags) > 2 else None
+                item["model_name"] = tags[3] if len(tags) > 3 else image.name
         items.append(item)
     
     return _ok(paginate(items, total, page, page_size))
@@ -170,12 +170,12 @@ def list_archives(
         if task and task.image_id:
             image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
             if image:
+                tags = image.tags if isinstance(image.tags, list) else []
                 item["image_name"] = image.name
-                # Parse model name from image name (format: "Chip + Framework + Model")
-                parts = image.name.split(" + ")
-                item["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
-                item["chip_name"] = parts[0].strip() if parts else image.name
-                item["framework_name"] = parts[1].strip() if len(parts) > 1 else None
+                item["chip_name"] = tags[0] if len(tags) > 0 else None
+                item["framework_name"] = tags[1] if len(tags) > 1 else None
+                item["scenario_name"] = tags[2] if len(tags) > 2 else None
+                item["model_name"] = tags[3] if len(tags) > 3 else image.name
         
         items.append(item)
     

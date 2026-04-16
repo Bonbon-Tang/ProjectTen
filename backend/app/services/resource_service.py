@@ -220,7 +220,7 @@ class ResourceService:
         # Build result
         result = []
         for device in global_devices:
-            device_type = device.device_type.value
+            device_type = device.device_type.value if hasattr(device.device_type, 'value') else str(device.device_type)
             if device_type in allocation:
                 allocated_count = allocation[device_type]
                 in_use_count = devices_in_use.get(device_type, 0)
@@ -279,12 +279,12 @@ class ResourceService:
         by_type = []
         for d in devices:
             by_type.append({
-                "device_type": d.device_type.value,
+                "device_type": d.device_type.value if hasattr(d.device_type, 'value') else str(d.device_type),
                 "name": d.name,
                 "manufacturer": d.manufacturer,
                 "total_count": d.total_count,
                 "available_count": d.available_count,
-                "status": d.status.value,
+                "status": d.status.value if hasattr(d.status, 'value') else str(d.status),
             })
         return {
             "total_device_types": len(devices),

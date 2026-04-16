@@ -24,6 +24,19 @@ from app.utils.pagination import PaginationParams, paginate
 router = APIRouter()
 
 
+def _parse_image_meta(image):
+    tags = image.tags if isinstance(image.tags, list) else []
+    chip_name = tags[0] if len(tags) > 0 else None
+    framework_name = tags[1] if len(tags) > 1 else None
+    scenario_name = tags[2] if len(tags) > 2 else None
+    model_name = tags[3] if len(tags) > 3 else None
+    if not model_name and image.name:
+        parts = [part.strip() for part in str(image.name).split('_') if part.strip()]
+        if len(parts) >= 3:
+            model_name = '_'.join(parts[2:])
+    return chip_name, framework_name, scenario_name, model_name or image.name
+
+
 def _ok(data=None, message: str = "success"):
     return {"code": 0, "message": message, "data": data}
 
@@ -232,10 +245,11 @@ def list_evaluations(
             image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
             if image:
                 item["image_name"] = image.name
-                parts = image.name.split(" + ")
-                item["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
-                item["chip_name"] = parts[0].strip() if parts else image.name
-                item["framework_name"] = parts[1].strip() if len(parts) > 1 else None
+                chip_name, framework_name, scenario_name, model_name = _parse_image_meta(image)
+                item["model_name"] = model_name
+                item["chip_name"] = chip_name
+                item["framework_name"] = framework_name
+                item["scenario_name"] = scenario_name
 
         items.append(item)
 
@@ -308,21 +322,23 @@ def get_evaluation(task_id: int, current_user: User = Depends(get_current_user),
         image = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
         if image:
             data["image_name"] = image.name
-            # Parse model name from image name (format: "Chip + Framework + Model")
-            parts = image.name.split(" + ")
-            data["model_name"] = parts[2].strip() if len(parts) > 2 else (parts[1].strip() if len(parts) > 1 else image.name)
-            data["chip_name"] = parts[0].strip() if parts else image.name
-            data["framework_name"] = parts[1].strip() if len(parts) > 1 else None
+            chip_name, framework_name, scenario_name, model_name = _parse_image_meta(image)
+            data["model_name"] = model_name
+            data["chip_name"] = chip_name
+            data["framework_name"] = framework_name
+            data["scenario_name"] = scenario_name
         else:
             data["image_name"] = None
             data["model_name"] = None
             data["chip_name"] = None
             data["framework_name"] = None
+            data["scenario_name"] = None
     else:
         data["image_name"] = None
         data["model_name"] = None
         data["chip_name"] = None
         data["framework_name"] = None
+        data["scenario_name"] = None
     return _ok(data)
 
 

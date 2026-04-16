@@ -297,6 +297,10 @@ def scenario_slug(scenario: str) -> str:
     return scenario
 
 
+def model_slug(scenario: str) -> str:
+    return f"{scenario}_base"
+
+
 def ensure_image_assets(db, users):
     created = 0
     updated = 0
@@ -319,11 +323,11 @@ def ensure_image_assets(db, users):
         for scenario in DEMO_SCENARIOS:
             middleware = MIDDLEWARE_BY_SCENARIO[scenario]
             scenario_label = SCENARIO_LABELS[scenario]
-            name = f"{chip['tag']}_{middleware}_{scenario_slug(scenario)}"
+            name = f"{chip['tag']}_{middleware}_{model_slug(scenario)}"
             asset = db.query(DigitalAsset).filter(DigitalAsset.name == name, DigitalAsset.asset_type == AssetType.image).first()
-            tags = [chip['tag'], middleware, scenario]
-            description = f"Baseline deployment image for {scenario_label} on {chip['tag']} with fixed tags: chip / middleware / scenario."
-            file_path = f"registry.example.com/projectten/{chip['device_type']}/{middleware}:{scenario}"
+            tags = [chip['tag'], middleware, scenario, model_slug(scenario)]
+            description = f"Baseline deployment image for {scenario_label} on {chip['tag']} with fixed tags: chip / middleware / subtask / model."
+            file_path = f"registry.example.com/projectten/{chip['device_type']}/{middleware}:{model_slug(scenario)}"
             category = "model_deployment"
             if not asset:
                 prefix = {

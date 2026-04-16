@@ -1000,13 +1000,10 @@ class EvaluationService:
         if not image:
             return
 
-        # Parse image description to extract chip/framework/model
-        desc = image.description or ""
-        parts = desc.split(" + ")
-        chip_name = parts[0] if len(parts) > 0 else image.name
-
-        framework_name = parts[1] if len(parts) > 1 else ""
-        model_name = parts[2] if len(parts) > 2 else image.name
+        tags = image.tags if isinstance(image.tags, list) else []
+        chip_name = tags[0] if len(tags) > 0 else image.name
+        framework_name = tags[1] if len(tags) > 1 else ""
+        model_name = tags[3] if len(tags) > 3 else image.name
 
         device_type = task.device_type or "unknown"
         task_type_val = task.task_type.value if hasattr(task.task_type, 'value') else str(task.task_type)
