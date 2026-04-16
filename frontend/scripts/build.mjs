@@ -1,18 +1,26 @@
 import nodeCrypto from 'node:crypto';
 
-const cryptoObj = nodeCrypto.webcrypto || nodeCrypto;
-if (typeof cryptoObj.getRandomValues !== 'function' && typeof nodeCrypto.getRandomValues === 'function') {
-  cryptoObj.getRandomValues = nodeCrypto.getRandomValues.bind(nodeCrypto);
-}
+const webcrypto = nodeCrypto.webcrypto;
+const cryptoObj = webcrypto || nodeCrypto;
+const getRandomValues = nodeCrypto.getRandomValues?.bind(nodeCrypto) || webcrypto?.getRandomValues?.bind(webcrypto);
 
-if (!globalThis.crypto || typeof globalThis.crypto.getRandomValues !== 'function') {
-  Object.defineProperty(globalThis, 'crypto', {
-    value: cryptoObj,
+if (typeof getRandomValues === 'function') {
+  Object.defineProperty(cryptoObj, 'getRandomValues', {
+    value: getRandomValues,
     configurable: true,
     enumerable: true,
     writable: true,
   });
 }
+
+Object.defineProperty(globalThis, 'crypto', {
+  value: cryptoObj,
+  configurable: true,
+  enumerable: true,
+  writable: true,
+});
+
+globalThis.getRandomValues = getRandomValues;
 
 const { build } = await import('vite');
 await build();
