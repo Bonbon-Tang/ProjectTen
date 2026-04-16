@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && node scripts/vite-build.mjs",
+    "build": "tsc && node --experimental-global-webcrypto ./node_modules/vite/bin/vite.js build",
     "preview": "vite preview"
   },
   "dependencies": {
