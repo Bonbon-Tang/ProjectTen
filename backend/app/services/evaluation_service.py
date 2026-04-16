@@ -822,6 +822,34 @@ class EvaluationService:
 
         size_b = EvaluationService._extract_model_size_billions(model_name)
         size_factor = min(math.log(size_b + 1.0, 2) / 6.5, 1.0)
+        model_quality_factor = {
+            "qwen": 1.08,
+            "deepseek": 1.1,
+            "llama": 1.06,
+            "glm": 1.03,
+            "internlm": 1.04,
+            "baichuan": 0.99,
+            "yi": 1.01,
+            "chatglm": 1.0,
+            "whisper": 1.04,
+            "bert": 0.97,
+            "resnet": 0.96,
+            "yolo": 0.98,
+            "segformer": 1.0,
+            "stable-diffusion": 1.02,
+            "sdxl": 1.04,
+            "clip": 1.01,
+            "vit": 0.99,
+            "llava": 1.05,
+            "qwen2": 1.1,
+            "deepseek-v2": 1.12,
+        }
+        model_quality = 1.0
+        lower_model_name = model_name.lower()
+        for key, value in model_quality_factor.items():
+            if key in lower_model_name:
+                model_quality = value
+                break
 
         chip_perf_factor = {
             "nvidia_h200": 1.15,
@@ -851,12 +879,12 @@ class EvaluationService:
         }.get(framework, 0.95)
 
         metric_key = f"{task_type_val}|{image_name}|{device_type or chip}"
-        score_base = min(72.0 + size_factor * 24.0, 98.0)
-        accuracy_base = min(90.0 + size_factor * 8.0, 99.2)
-        throughput_base = (900.0 - size_factor * 520.0) * chip_perf_factor * framework_factor
-        latency_base = (26.0 + size_factor * 54.0) / max(chip_perf_factor * framework_factor, 0.75)
-        energy_base = (260.0 - size_factor * 80.0) * chip_perf_factor
-        power_base = 180.0 + size_factor * 130.0 + (1.0 - chip_perf_factor) * 60.0
+        score_base = min(68.0 + size_factor * 18.0, 94.0)
+        accuracy_base = min(89.0 + size_factor * 7.0, 99.0) * model_quality
+        throughput_base = (880.0 - size_factor * 500.0) * chip_perf_factor * framework_factor
+        latency_base = (24.0 + size_factor * 52.0) / max(chip_perf_factor * framework_factor, 0.75)
+        energy_base = (250.0 - size_factor * 72.0) * chip_perf_factor
+        power_base = 175.0 + size_factor * 120.0 + (1.0 - chip_perf_factor) * 55.0
         memory_base = min(8.0 + size_b * 0.52, 78.0)
 
         throughput_unit = "tokens/s" if task_type_val in ("llm", "text_generation", "code_generation", "machine_translation", "text_summarization") else "samples/s"
@@ -872,8 +900,8 @@ class EvaluationService:
         energy_efficiency = round(max(energy_base * EvaluationService._stable_variation(metric_key + '|energy'), 10.0), 1)
         power_consumption_w = round(max(power_base * EvaluationService._stable_variation(metric_key + '|power'), 80.0), 0)
         gpu_utilization_pct = round(min(max(76.0 + size_factor * 15.0, 60.0), 98.0) * EvaluationService._stable_variation(metric_key + '|util', 0.03), 1)
-        software_score = round(min(max((78.0 + size_factor * 16.0 + chip_perf_factor * 4.0) * EvaluationService._stable_variation(metric_key + '|software'), 65.0), 99.0), 1)
-        performance_score = round(min(max(score_base * EvaluationService._stable_variation(metric_key + '|perf'), 60.0), 99.0), 1)
+        software_score = round(min(max((76.0 + size_factor * 14.0 + chip_perf_factor * 6.0 + framework_factor * 3.0) * EvaluationService._stable_variation(metric_key + '|software'), 65.0), 99.0), 1)
+        performance_score = round(min(max((chip_perf_factor * framework_factor * 54.0 + score_base * 0.55) * EvaluationService._stable_variation(metric_key + '|perf'), 60.0), 99.0), 1)
         memory_usage_gb = round(max(memory_base * EvaluationService._stable_variation(metric_key + '|memory', 0.04), 2.0), 1)
         memory_utilization_pct = round(min(max((58.0 + size_factor * 24.0) * EvaluationService._stable_variation(metric_key + '|mem_util', 0.03), 35.0), 96.0), 1)
 
