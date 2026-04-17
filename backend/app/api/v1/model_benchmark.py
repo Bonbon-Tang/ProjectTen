@@ -126,10 +126,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_current_user
+from app.dependencies import get_db
 from app.models.model_benchmark import ModelBenchmark
 from app.models.asset import DigitalAsset
-from app.models.user import User
 
 router = APIRouter()
 
@@ -140,7 +139,6 @@ def _ok(data=None, message: str = "success"):
 
 @router.get("/scenarios")
 def get_scenarios(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get all sub-scenarios that have benchmark data."""
@@ -162,7 +160,6 @@ def get_ranking(
     sort_by: str = Query("ranking_score", description="Sort field"),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get model benchmark ranking for a sub-scenario, sorted by accuracy desc."""
@@ -258,7 +255,6 @@ def get_ranking(
 
 @router.get("/summary")
 def get_model_benchmark_summary(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Summary: total images tested, scenarios count, etc."""
@@ -279,7 +275,6 @@ def get_available_images(
     chips: Optional[str] = None,
     task_type: Optional[str] = None,
     device_type: Optional[str] = None,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get available images for model deployment test, optionally filtered by unified v2 scenario/chips."""
@@ -335,7 +330,6 @@ def get_available_images(
 def get_available_toolsets(
     scenario: Optional[str] = None,
     task_type: Optional[str] = None,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get available toolsets for model deployment test, optionally filtered by unified v2 scenario."""
