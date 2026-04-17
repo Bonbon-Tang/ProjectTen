@@ -4,6 +4,7 @@ from __future__ import annotations
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -498,13 +499,23 @@ def ensure_demo_tasks(db, users):
     return created, updated
 
 
+def ensure_model_benchmarks(db):
+    benchmark_count = db.execute(text("SELECT COUNT(*) FROM model_benchmarks")).scalar() or 0
+    if benchmark_count > 0:
+        return 0
+    script = ROOT / "scripts" / "seed_full_model_benchmarks.py"
+    result = subprocess.run([sys.executable, str(script)], cwd=str(ROOT), check=True)
+    return result.returncode
+
+
 def print_summary(db):
     user_count = db.execute(text("SELECT COUNT(*) FROM users")).scalar()
     task_count = db.execute(text("SELECT COUNT(*) FROM evaluation_tasks")).scalar()
     tenant_count = db.execute(text("SELECT COUNT(*) FROM tenants")).scalar()
     device_count = db.execute(text("SELECT COUNT(*) FROM compute_devices")).scalar()
     asset_count = db.execute(text("SELECT COUNT(*) FROM digital_assets")).scalar()
-    print(f"users={user_count}, tenants={tenant_count}, devices={device_count}, assets={asset_count}, evaluation_tasks={task_count}")
+    benchmark_count = db.execute(text("SELECT COUNT(*) FROM model_benchmarks")).scalar()
+    print(f"users={user_count}, tenants={tenant_count}, devices={device_count}, assets={asset_count}, evaluation_tasks={task_count}, model_benchmarks={benchmark_count}")
     print("demo accounts:")
     print("  admin / admin123")
     print("  usr1 / 123")
@@ -522,6 +533,7 @@ def main() -> int:
         asset_created, asset_updated = ensure_image_assets(db, users)
         task_created, task_updated = ensure_demo_tasks(db, users)
         role_assigned = assign_roles(db, users)
+        benchmark_seeded = ensure_model_benchmarks(db)
 
         print("[init_demo_data] done")
         print(f"  roles_created={role_created}")
@@ -531,6 +543,7 @@ def main() -> int:
         print(f"  assets_created={asset_created}, assets_updated={asset_updated}")
         print(f"  tasks_created={task_created}, tasks_updated={task_updated}")
         print(f"  roles_assigned={role_assigned}")
+        print(f"  benchmark_seeded={benchmark_seeded}")
         print_summary(db)
         return 0
     finally:
