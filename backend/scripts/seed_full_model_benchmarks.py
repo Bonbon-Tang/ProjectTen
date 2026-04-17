@@ -14,6 +14,9 @@ from app.models.user import User
 from app.services.evaluation_service import EvaluationService
 
 DEVICE_TYPE_MAP = {
+    "B200": "nvidia_b200",
+    "BlackwellB200": "nvidia_b200",
+    "H200": "nvidia_h200",
     "Ascend910C": "huawei_910c",
     "Ascend910B": "huawei_910b",
     "MLU590": "cambrian_590",

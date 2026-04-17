@@ -31,6 +31,7 @@ SCENARIO_TAGS = {
 }
 
 DEVICE_TAG_MAP = {
+    "nvidia_b200": ["nvidia_b200", "B200", "BlackwellB200"],
     "nvidia_h200": ["nvidia_h200", "H200"],
     "huawei_910c": ["huawei_910c", "910C", "Ascend910C"],
     "huawei_910b": ["huawei_910b", "910B", "Ascend910B"],
@@ -49,8 +50,10 @@ def _ensure_list_tags(tags):
 
 
 MIDDLEWARE_TAGS = {"MindSpore", "PyTorch", "PaddlePaddle", "ROCm", "ROCm/PyTorch", "DeepLink", "vllm", "sglang", "onnxruntime", "triton", "tensorrt-llm", "comfyui", "deepspeed", "ray", "dgl", "monai", "ros2"}
-CHIP_TAGS = {"nvidia_h200", "huawei_910c", "huawei_910b", "cambrian_590", "kunlun_p800", "hygon_bw1000", "910C", "910B", "MLU590", "P800", "BW1000", "Ascend910C", "Ascend910B", "HygonBW1000", "KunlunP800", "Cambrian590", "H200"}
+CHIP_TAGS = {"nvidia_b200", "nvidia_h200", "huawei_910c", "huawei_910b", "cambrian_590", "kunlun_p800", "hygon_bw1000", "B200", "H200", "910C", "910B", "MLU590", "P800", "BW1000", "Ascend910C", "Ascend910B", "HygonBW1000", "KunlunP800", "Cambrian590", "BlackwellB200"}
 CHIP_NORMALIZE_MAP = {
+    "B200": "nvidia_b200",
+    "BlackwellB200": "nvidia_b200",
     "H200": "nvidia_h200",
     "Ascend910C": "huawei_910c",
     "910C": "huawei_910c",

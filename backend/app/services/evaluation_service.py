@@ -824,24 +824,24 @@ class EvaluationService:
         size_factor = min(math.log(size_b + 1.0, 2) / 6.5, 1.0)
         model_quality_factor = {
             "qwen": 1.08,
-            "deepseek": 1.1,
+            "deepseek": 1.10,
             "llama": 1.06,
             "glm": 1.03,
             "internlm": 1.04,
             "baichuan": 0.99,
             "yi": 1.01,
-            "chatglm": 1.0,
+            "chatglm": 1.00,
             "whisper": 1.04,
             "bert": 0.97,
             "resnet": 0.96,
             "yolo": 0.98,
-            "segformer": 1.0,
+            "segformer": 1.00,
             "stable-diffusion": 1.02,
             "sdxl": 1.04,
             "clip": 1.01,
             "vit": 0.99,
             "llava": 1.05,
-            "qwen2": 1.1,
+            "qwen2": 1.10,
             "deepseek-v2": 1.12,
         }
         model_quality = 1.0
@@ -852,8 +852,9 @@ class EvaluationService:
                 break
 
         chip_perf_factor = {
+            "nvidia_b200": 1.28,
             "nvidia_h200": 1.15,
-            "Ascend910C": 1.0,
+            "Ascend910C": 1.00,
             "Ascend910B": 0.94,
             "MLU590": 0.91,
             "P800": 0.86,
