@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, Table, Tag, Typography, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import PageHeader from '@/components/PageHeader';
-import { getDeviceUsage } from '@/api/resources';
+import { getDeviceUsage, getResourceSummary } from '@/api/resources';
 
 const { Text } = Typography;
 
@@ -26,8 +26,34 @@ export default function GpuUsage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res: any = await getDeviceUsage();
-        setRows(res?.data || []);
+        const [usageRes, summaryRes] = await Promise.all([
+          getDeviceUsage(),
+          getResourceSummary().catch(() => ({ data: [] })),
+        ]);
+        const usageData: UsageRow[] = usageRes?.data || [];
+        const summaryData = summaryRes?.data || summaryRes || [];
+        const summaryMap = new Map<string, { total_count: number; available_count: number }>();
+        const summaryItems = Array.isArray(summaryData)
+          ? summaryData
+          : Array.isArray(summaryData?.devices_by_type)
+            ? summaryData.devices_by_type
+            : Array.isArray(summaryData?.devices)
+              ? summaryData.devices
+              : [];
+        summaryItems.forEach((item: any) => {
+          const key = item.device_type || item.type || item.name;
+          if (!key) return;
+          summaryMap.set(String(key), {
+            total_count: item.total_count ?? 0,
+            available_count: item.available_count ?? 0,
+          });
+        });
+        setRows(usageData.map((row) => {
+          const summary = summaryMap.get(row.device_type);
+          return summary
+            ? { ...row, total_count: summary.total_count, available_count: summary.available_count }
+            : row;
+        }));
       } catch {
         message.error('获取设备去向失败');
       } finally {
