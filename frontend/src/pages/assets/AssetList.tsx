@@ -396,29 +396,15 @@ export default function AssetList() {
         ),
     },
     {
-      title: '设备去向/占用',
-      key: 'device_usage',
-      width: 280,
-      render: (_: any, record: AssetItem) => {
-        if (record.asset_type !== 'image' || !record.tags?.length) return <Text type="secondary">-</Text>;
-        const matched = deviceUsage.find((item) => {
-          const aliases = [item.device_type, item.device_name, item.device_name?.replace(/\s+/g, ''), item.device_name?.toLowerCase()];
-          return aliases.some((alias) => !!alias && (record.tags.includes(alias) || record.name.toLowerCase().includes(String(alias).toLowerCase())));
-        });
-        if (!matched) return <Text type="secondary">-</Text>;
-        const leasedText = matched.leased.length
-          ? matched.leased.map((x) => `租售给 ${x.username || '未知用户'} ${x.count}台`).join('；')
-          : '未租售';
-        const runningText = matched.running.length
-          ? matched.running.map((x) => `任务 ${x.task_name} 使用 ${x.count}台`).join('；')
-          : '无运行任务';
-        return (
-          <div style={{ fontSize: 12, lineHeight: 1.6 }}>
-            <div>{leasedText}</div>
-            <div style={{ color: '#666' }}>{runningText}</div>
-          </div>
-        );
-      },
+      title: '共享范围',
+      key: 'share_scope',
+      width: 120,
+      render: (_: any, record: AssetItem) =>
+        record.is_shared ? (
+          <Tag color="green">{record.share_scope === 'platform' ? '全平台共享' : '组织内共享'}</Tag>
+        ) : (
+          <Tag>私有</Tag>
+        ),
     },
     { title: '创建时间', dataIndex: 'created_at', key: 'created_at', width: 120, render: (v: string) => v?.slice(0, 10) },
     {
