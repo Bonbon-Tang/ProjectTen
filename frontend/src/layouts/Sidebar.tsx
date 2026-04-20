@@ -44,7 +44,7 @@ export default function Sidebar() {
             {
               key: '/dashboard',
               icon: <HomeOutlined />,
-              label: '工作台',
+              label: '控制台',
             },
             {
               key: '/dl-agent',

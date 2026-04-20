@@ -264,7 +264,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <PageHeader title="工作台" breadcrumbs={[{ title: '工作台' }]} />
+      <PageHeader title="控制台" breadcrumbs={[{ title: '控制台' }]} />
 
       {/* 统计卡片 */}
       <Spin spinning={statsLoading}>
