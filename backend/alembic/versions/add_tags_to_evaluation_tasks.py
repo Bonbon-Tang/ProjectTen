@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 revision = 'add_tags_to_eval'
-down_revision = None
+down_revision = 'initial'
 branch_labels = None
 depends_on = None
 
