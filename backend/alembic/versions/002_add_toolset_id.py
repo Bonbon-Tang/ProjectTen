@@ -17,9 +17,11 @@ depends_on = None
 
 def upgrade() -> None:
     with op.batch_alter_table('evaluation_tasks') as batch_op:
-        batch_op.add_column(sa.Column('toolset_id', sa.Integer(), sa.ForeignKey('digital_assets.id', ondelete='SET NULL'), nullable=True, comment='Associated toolset asset'))
+        batch_op.add_column(sa.Column('toolset_id', sa.Integer(), nullable=True, comment='Associated toolset asset'))
+        batch_op.create_foreign_key('fk_evaluation_tasks_toolset_id', 'digital_assets', ['toolset_id'], ['id'], ondelete='SET NULL')
 
 
 def downgrade() -> None:
     with op.batch_alter_table('evaluation_tasks') as batch_op:
+        batch_op.drop_constraint('fk_evaluation_tasks_toolset_id', type_='foreignkey')
         batch_op.drop_column('toolset_id')
