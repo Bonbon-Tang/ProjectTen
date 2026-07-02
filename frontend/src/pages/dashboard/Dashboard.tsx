@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Row, Col, Card, Statistic, Table, Button, Space, Tag, Badge, Progress, Spin, message } from 'antd';
+import { Row, Col, Card, Statistic, Table, Button, Space, Tag, Badge, message, Spin, Progress } from 'antd';
 import {
   BarChartOutlined,
   PlayCircleOutlined,
@@ -49,7 +49,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [deviceLoading, setDeviceLoading] = useState(true);
+  const [deviceLoading] = useState(false);
 
   const [stats, setStats] = useState({
     total: 0,
@@ -59,6 +59,8 @@ export default function Dashboard() {
   });
 
   const [deviceResources, setDeviceResources] = useState<DeviceResource[]>([]);
+  const totalDevices = 109;
+  const onlineDevices = 109;
 
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
 
@@ -83,36 +85,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // 获取设备资源
-  const fetchResources = useCallback(async () => {
-    setDeviceLoading(true);
-    try {
-      const res: any = await getResourceSummary();
-      const data = res?.data || res;
-      if (Array.isArray(data)) {
-        setDeviceResources(data);
-      } else if (data?.devices_by_type && Array.isArray(data.devices_by_type)) {
-        setDeviceResources(data.devices_by_type.map((d: any) => ({
-          device_type: d.device_type,
-          device_label: d.name,
-          manufacturer: d.manufacturer,
-          total_count: d.total_count,
-          available_count: d.available_count,
-          online: d.status === 'online',
-          color: d.device_type.includes('huawei') ? '#C10015' :
-                 d.device_type.includes('cambrian') ? '#0066CC' :
-                 d.device_type.includes('kunlun') ? '#FF6600' :
-                 d.device_type.includes('hygon') ? '#006633' : '#1B3A6B',
-        })));
-      } else if (data?.devices && Array.isArray(data.devices)) {
-        setDeviceResources(data.devices);
-      }
-    } catch {
-      // 使用默认值
-    } finally {
-      setDeviceLoading(false);
-    }
-  }, []);
 
   // 获取最近任务
   const fetchRecentTasks = useCallback(async () => {
@@ -138,9 +110,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchStats();
-    fetchResources();
     fetchRecentTasks();
-  }, [fetchStats, fetchResources, fetchRecentTasks]);
+  }, [fetchStats, fetchRecentTasks]);
 
   // 自动刷新 running 任务进度
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -151,13 +122,12 @@ export default function Dashboard() {
       pollRef.current = setInterval(() => {
         fetchRecentTasks();
         fetchStats();
-        fetchResources(); // 刷新设备状态，让 usr1 能看到设备"使用中"
       }, 5000);
     }
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [hasRunning, fetchRecentTasks, fetchStats, fetchResources]);
+  }, [hasRunning, fetchRecentTasks, fetchStats]);
 
   // 设备状态渲染
   const renderDeviceStatus = (device: DeviceResource) => {
@@ -242,59 +212,64 @@ export default function Dashboard() {
     { title: '快速测试', icon: <ThunderboltOutlined />, path: '/evaluations/create', color: '#fa8c16' },
   ];
 
-  const totalDevices = deviceResources.reduce((s, d) => s + d.total_count, 0);
-  const onlineDevices = deviceResources.filter((d) => d.online).reduce((s, d) => s + d.total_count, 0);
-
   return (
     <div>
-      <div className="tech-hero" style={{ marginBottom: 20, padding: '22px 24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-          <div>
-            <div className="tech-glow-text" style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
-              资源与任务总览
-            </div>
-          </div>
-          <div style={{ minWidth: 220, textAlign: 'right' }}>
-            <div style={{ color: '#8ca6c7', fontSize: 12, marginBottom: 8 }}>设备在线率</div>
-            <div style={{ fontSize: 30, fontWeight: 700, color: '#eaf4ff' }}>
-              {totalDevices ? Math.round((onlineDevices / totalDevices) * 100) : 0}%
-            </div>
-            <div style={{ color: '#7fcfff', fontSize: 12, marginTop: 6 }}>{onlineDevices}/{totalDevices} 台在线</div>
-          </div>
-        </div>
-      </div>
-
       <PageHeader title="控制台" breadcrumbs={[{ title: '控制台' }]} />
 
-      {/* 统计卡片 */}
-      <Spin spinning={statsLoading}>
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          {statCards.map((stat, index) => (
-            <Col xs={24} sm={12} lg={6} key={index}>
-              <Card hoverable className="tech-stat-card" style={{ borderRadius: 18 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Statistic title={stat.title} value={stat.value} />
-                  <div
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 12,
-                      background: `${stat.color}15`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 24,
-                      color: stat.color,
-                    }}
-                  >
-                    {stat.icon}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} lg={12}>
+          <Card className="tech-hero" style={{ height: '100%', borderRadius: 18, padding: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'stretch', height: '100%' }}>
+              <div style={{ flex: '0 0 54%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 16 }}>
+                <div>
+                  <div className="tech-glow-text" style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>
+                    资源与任务总览
+                  </div>
+                  <div style={{ color: '#3b6fb8', fontSize: 15, lineHeight: 1.8, fontWeight: 600 }}>
+                    汇总当前智算资源与评测任务状态，快速查看整体运行情况。
                   </div>
                 </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </Spin>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ color: '#2e79da', fontSize: 14, fontWeight: 700 }}>设备在线率</div>
+                  <div style={{ fontSize: 34, fontWeight: 800, color: '#13345f' }}>100%</div>
+                  <div style={{ color: '#2e79da', fontSize: 14, fontWeight: 700 }}>109/109 台在线</div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={12}>
+          <Spin spinning={statsLoading}>
+            <Row gutter={[16, 16]}>
+              {statCards.map((stat, index) => (
+                <Col xs={12} key={index}>
+                  <Card hoverable className="tech-stat-card" style={{ borderRadius: 18, height: '100%' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Statistic title={stat.title} value={stat.value} />
+                      <div
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 12,
+                          background: `${stat.color}15`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 24,
+                          color: stat.color,
+                        }}
+                      >
+                        {stat.icon}
+                      </div>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </Spin>
+        </Col>
+      </Row>
 
       {/* 设备资源概览 */}
       <Spin spinning={deviceLoading}>

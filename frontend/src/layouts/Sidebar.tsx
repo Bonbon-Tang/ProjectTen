@@ -263,7 +263,7 @@ export default function Sidebar() {
               justifyContent: 'center',
               color: '#fff',
               fontWeight: 'bold',
-              fontSize: 16,
+              fontSize: 18,
               boxShadow: '0 0 22px rgba(79, 216, 255, 0.28)',
             }}
           >
@@ -271,10 +271,10 @@ export default function Sidebar() {
           </div>
           {!collapsed && (
             <div style={{ color: '#eef8ff', lineHeight: 1.15 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.2 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: 0.2 }}>
                 上海人工智能实验室
               </div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(238,248,255,0.82)' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(238,248,255,0.82)' }}>
                 AGI4SCI适配&验证基地
               </div>
             </div>
@@ -288,7 +288,7 @@ export default function Sidebar() {
         defaultOpenKeys={openKeys}
         items={menuItems}
         onClick={({ key }) => navigate(key)}
-        style={{ borderRight: 0, background: 'transparent', paddingTop: 10 }}
+        style={{ borderRight: 0, background: 'transparent', paddingTop: 10, fontSize: 16 }}
       />
     </Sider>
   );
