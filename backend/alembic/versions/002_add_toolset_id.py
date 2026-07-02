@@ -16,8 +16,10 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('evaluation_tasks', sa.Column('toolset_id', sa.Integer(), sa.ForeignKey('digital_assets.id', ondelete='SET NULL'), nullable=True, comment='Associated toolset asset'))
+    with op.batch_alter_table('evaluation_tasks') as batch_op:
+        batch_op.add_column(sa.Column('toolset_id', sa.Integer(), sa.ForeignKey('digital_assets.id', ondelete='SET NULL'), nullable=True, comment='Associated toolset asset'))
 
 
 def downgrade() -> None:
-    op.drop_column('evaluation_tasks', 'toolset_id')
+    with op.batch_alter_table('evaluation_tasks') as batch_op:
+        batch_op.drop_column('toolset_id')
