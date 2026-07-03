@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, '..', 'dist');
 const host = process.env.HOST || '0.0.0.0';
 const port = Number(process.env.PORT || 3000);
-const apiTarget = process.env.API_TARGET || 'http://127.0.0.1:5000';
+const apiTarget = process.env.API_TARGET || 'http://127.0.0.1:8001';
 const apiUrl = new URL(apiTarget);
 
 const mime = {
