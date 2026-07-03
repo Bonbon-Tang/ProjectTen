@@ -286,6 +286,7 @@ def get_evaluation(task_id: int, current_user: User = Depends(get_current_user),
         "id": task.id,
         "name": task.name,
         "description": task.description,
+        "task_category": task_category,
         "task": unified_task,
         "scenario": unified_scenario,
         "chips": task.device_type,
@@ -303,6 +304,8 @@ def get_evaluation(task_id: int, current_user: User = Depends(get_current_user),
         "tenant_id": task.tenant_id,
         "created_at": task.created_at,
         "updated_at": task.updated_at,
+        "result": task.result,
+        "metrics": task.metrics,
     }
     # Attach report_id if a report exists for this task
     from app.models.report import EvaluationReport
