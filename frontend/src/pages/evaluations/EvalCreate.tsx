@@ -466,12 +466,14 @@ export default function EvalCreate() {
         if (values.operator_lib_id) params.operator_lib_id = values.operator_lib_id;
         if (normalizedToolName === 'deeplink_op_test') {
           params.deeplink_payload = {
-            tool: 'deeplink_op_test',
+            tool_name: 'deeplink_op_test',
             device: values.device_type,
-            category: '元素操作类',
+            operator_category: '元素操作类',
+            operator_library: 'local_default',
             operators: ['matmul', 'relu', 'normal'],
             supported_device: 'hygon_bw1000',
             scenario: params.scenario,
+            operator_count: values.operator_count || 3,
             warmup: 5,
             repeat: 20,
             dtype: 'float32',

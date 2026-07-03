@@ -26,7 +26,6 @@ from app.models.resource import ComputeDevice
 from app.models.operator import Operator
 from app.models.operator_benchmark import OperatorBenchmark
 from app.models.asset import DigitalAsset
-from app.services.deeplink_op_test_runner import run as run_deeplink_op_test
 from app.utils.pagination import PaginationParams
 
 
@@ -34,6 +33,8 @@ class EvaluationService:
     CPU_TEST_RUNNER_DIR = Path('/root/.openclaw/workspace/cpu-test-runner')
     CPU_TEST_RUNNER_PYTHON = CPU_TEST_RUNNER_DIR / '.venv' / 'bin' / 'python'
     CPU_TEST_REPORT_DIR = Path('/root/.openclaw/workspace/ProjectTen/backend/data/cpu_test_reports')
+    DEEPLINK_OP_TEST_DIR = Path('/root/.openclaw/workspace/ProjectTen/deeplink_op_test')
+    DEEPLINK_OP_TEST_PYTHON = 'python3'
     CPU_TEST_SUPPORTED_OPERATORS = {"Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"}
     LEGACY_TASK_CATEGORY_MAP = {
         'model_test': 'model_deployment_test',
@@ -128,6 +129,48 @@ class EvaluationService:
         _, json_path = EvaluationService._cpu_test_report_paths(task_id)
         with json_path.open('w', encoding='utf-8') as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
+
+    @staticmethod
+    def _run_deeplink_op_test(task: EvaluationTask, operator_lib_name: Optional[str]) -> dict:
+        config = task.config or {}
+        payload = (config.get('deeplink_payload') if isinstance(config, dict) else None) or {}
+        operator_category = None
+        if isinstance(task.operator_categories, list) and task.operator_categories:
+            operator_category = task.operator_categories[0]
+
+        task_payload = {
+            'tool_name': 'deeplink_op_test',
+            'task_id': task.id,
+            'task_name': task.name,
+            'device': task.device_type,
+            'operator_category': operator_category or payload.get('operator_category') or payload.get('category') or '元素操作类',
+            'operator_library': operator_lib_name or payload.get('operator_library') or 'local_default',
+            'operators': payload.get('operators') or ['matmul', 'relu', 'normal'],
+            'scenario': getattr(task.task_type, 'value', str(task.task_type)),
+            'operator_count': task.operator_count,
+            'warmup': payload.get('warmup', 5),
+            'repeat': payload.get('repeat', 20),
+            'dtype': payload.get('dtype', 'float32'),
+        }
+
+        EvaluationService.CPU_TEST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+        task_json = EvaluationService.CPU_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test.json'
+        result_json = EvaluationService.CPU_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test_result.json'
+        task_json.write_text(json.dumps(task_payload, ensure_ascii=False, indent=2), encoding='utf-8')
+
+        cmd = [
+            EvaluationService.DEEPLINK_OP_TEST_PYTHON,
+            str(EvaluationService.DEEPLINK_OP_TEST_DIR / 'main.py'),
+            str(task_json),
+            '--output',
+            str(result_json),
+        ]
+        proc = subprocess.run(cmd, capture_output=True, text=True, cwd=str(EvaluationService.DEEPLINK_OP_TEST_DIR))
+        if proc.returncode != 0:
+            raise RuntimeError(f"deeplink_op_test failed: {proc.stderr or proc.stdout}")
+        if not result_json.exists():
+            raise RuntimeError('deeplink_op_test did not produce result.json')
+        return json.loads(result_json.read_text(encoding='utf-8'))
 
     @staticmethod
     def _run_cpu_test_operator_runner(task: EvaluationTask, selected_ops: List[Operator], operator_lib_name: Optional[str]) -> dict:
@@ -612,14 +655,7 @@ class EvaluationService:
         task_config = task.config or {}
         tool_name = task_config.get('tool_name') if isinstance(task_config, dict) else None
         if tool_name == 'deeplink_op_test':
-            requested_names = []
-            deeplink_payload = task_config.get('deeplink_payload') if isinstance(task_config, dict) else None
-            if isinstance(deeplink_payload, dict):
-                requested_names = [str(name).strip().lower() for name in deeplink_payload.get('operators', []) if str(name).strip()]
-            if not requested_names:
-                requested_names = [op.name.lower() for op in selected_ops if op.category == '元素操作类']
-            selected_names = [name for name in requested_names if name in {'matmul', 'relu', 'normal'}]
-            runner_output = run_deeplink_op_test(task, selected_names)
+            runner_output = EvaluationService._run_deeplink_op_test(task, operator_lib_name)
             return {
                 "test_type": task_type_val,
                 "tool_name": tool_name,
@@ -629,14 +665,14 @@ class EvaluationService:
                 "avg_fp16_loss_rate": 0,
                 "avg_int8_loss_rate": 0,
                 "all_pass": True,
-                "operator_lib": operator_lib_name,
+                "operator_lib": runner_output.get('operator_library', operator_lib_name),
                 "device_type": task.device_type,
                 "runner": 'deeplink_op_test',
-                "supported_category": '元素操作类',
-                "supported_operators": runner_output.get('supported_operators', []),
-                "deeplink_payload": runner_output.get('payload'),
+                "supported_category": runner_output.get('operator_category', '元素操作类'),
+                "supported_operators": [item.get('name') for item in runner_output.get('operators', [])],
+                "deeplink_payload": task_config.get('deeplink_payload') if isinstance(task_config, dict) else None,
                 "summary": runner_output.get('summary', {}),
-                "operator_results": runner_output.get('results', []),
+                "operator_results": runner_output.get('operators', []),
             }
 
         operator_results = []
