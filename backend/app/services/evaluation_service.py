@@ -33,8 +33,8 @@ class EvaluationService:
     CPU_TEST_RUNNER_DIR = Path('/root/.openclaw/workspace/cpu-test-runner')
     CPU_TEST_RUNNER_PYTHON = CPU_TEST_RUNNER_DIR / '.venv' / 'bin' / 'python'
     CPU_TEST_REPORT_DIR = Path('/root/.openclaw/workspace/ProjectTen/backend/data/cpu_test_reports')
-    DEEPLINK_OP_TEST_DIR = Path('/root/.openclaw/workspace/ProjectTen/deeplink_op_test')
-    DEEPLINK_OP_TEST_PYTHON = 'python3'
+    DEEPLINK_OP_TEST_DIR = Path('/home/ailab/tangyufeng/ProjectTen/deeplink_op_test')
+    DEEPLINK_OP_TEST_PYTHON = '/usr/bin/python3'
     DEEPLINK_OP_TEST_REPORT_DIR = Path('/home/ailab/tangyufeng/ProjectTen/backend/data/cpu_test_reports')
     CPU_TEST_SUPPORTED_OPERATORS = {"Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"}
     LEGACY_TASK_CATEGORY_MAP = {
