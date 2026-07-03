@@ -240,7 +240,7 @@ export default function EvalCreate() {
         .catch(() => {})
         .finally(() => setToolsetsLoading(false));
     } else {
-      getAssets({ asset_type: 'tool', page_size: 100 })
+      getAssets({ asset_type: 'toolset', page_size: 100 })
         .then((res: any) => {
           const list = res?.data?.items || res?.items || res?.data || [];
           if (Array.isArray(list)) {
