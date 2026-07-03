@@ -496,3 +496,8 @@ def root():
 @app.get("/health", tags=["Health"])
 def health():
     return {"code": 0, "message": "healthy", "data": None}
+
+
+@app.get("/api/v1/health", tags=["Health"])
+def health_v1():
+    return health()
