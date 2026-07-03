@@ -35,6 +35,7 @@ class EvaluationService:
     CPU_TEST_REPORT_DIR = Path('/root/.openclaw/workspace/ProjectTen/backend/data/cpu_test_reports')
     DEEPLINK_OP_TEST_DIR = Path('/root/.openclaw/workspace/ProjectTen/deeplink_op_test')
     DEEPLINK_OP_TEST_PYTHON = 'python3'
+    DEEPLINK_OP_TEST_REPORT_DIR = Path('/home/ailab/tangyufeng/ProjectTen/backend/data/cpu_test_reports')
     CPU_TEST_SUPPORTED_OPERATORS = {"Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"}
     LEGACY_TASK_CATEGORY_MAP = {
         'model_test': 'model_deployment_test',
@@ -153,9 +154,9 @@ class EvaluationService:
             'dtype': payload.get('dtype', 'float32'),
         }
 
-        EvaluationService.CPU_TEST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
-        task_json = EvaluationService.CPU_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test.json'
-        result_json = EvaluationService.CPU_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test_result.json'
+        EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+        task_json = EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test.json'
+        result_json = EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test_result.json'
         task_json.write_text(json.dumps(task_payload, ensure_ascii=False, indent=2), encoding='utf-8')
 
         cmd = [
