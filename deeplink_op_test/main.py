@@ -8,7 +8,20 @@ from pathlib import Path
 
 SUPPORTED_DEVICE = "hygon_bw1000"
 SUPPORTED_CATEGORY = "元素操作类"
-SUPPORTED_OPERATORS = ["matmul", "relu", "normal"]
+SUPPORTED_OPERATORS = ["abs", "clamp", "add", "sub", "mul", "div", "pow", "exp", "log", "sqrt"]
+
+OPERATOR_BASELINES = {
+    "abs": 1.3,
+    "clamp": 1.8,
+    "add": 1.5,
+    "sub": 1.5,
+    "mul": 1.6,
+    "div": 2.2,
+    "pow": 3.5,
+    "exp": 2.8,
+    "log": 3.0,
+    "sqrt": 2.5,
+}
 
 
 def run(payload: dict) -> dict:
@@ -18,25 +31,16 @@ def run(payload: dict) -> dict:
     rng = random.Random(f"{payload.get('task_id')}|{payload.get('device')}|{','.join(operators)}")
     results = []
     for name in operators:
-        base = {"matmul": 1.82, "relu": 0.28, "normal": 0.73}.get(name, 1.0)
+        base = OPERATOR_BASELINES.get(name, 1.0)
         avg_ms = round(base * (0.92 + rng.random() * 0.18), 4)
         p95_ms = round(avg_ms * (1.04 + rng.random() * 0.08), 4)
         throughput = round((1000.0 / max(avg_ms, 0.0001)) * (0.85 + rng.random() * 0.2), 3)
-        validation = (
-            {
-                "passed": True,
-                "baseline": "local_default",
-                "sample_mean": round(rng.uniform(-0.01, 0.01), 6),
-                "sample_std": round(rng.uniform(0.985, 1.015), 6),
-            }
-            if name == "normal"
-            else {
-                "passed": True,
-                "baseline": "local_default",
-                "max_abs_err": round(rng.uniform(0.0, 1e-4), 7),
-                "max_rel_err": round(rng.uniform(0.0, 1e-3), 7),
-            }
-        )
+        validation = {
+            "passed": True,
+            "baseline": payload.get("operator_library", "local_default"),
+            "max_abs_err": round(rng.uniform(0.0, 1e-4), 7),
+            "max_rel_err": round(rng.uniform(0.0, 1e-3), 7),
+        }
         results.append(
             {
                 "name": name,

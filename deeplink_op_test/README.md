@@ -8,7 +8,7 @@
 - 平台 `/evaluations/create` 下发 JSON 与本库接收协议对齐
 - 当前设备支持：`hygon_bw1000`
 - 当前分类支持：`元素操作类`
-- 当前算子支持：`matmul`、`relu`、`normal`
+- 当前算子支持：`Abs`、`Clamp`、`Add`、`Sub`、`Mul`、`Div`、`Pow`、`Exp`、`Log`、`Sqrt`
 
 ## 任务协议
 
@@ -21,7 +21,7 @@
     "tool": "deeplink_op_test",
     "device": "hygon_bw1000",
     "category": "元素操作类",
-    "operators": ["matmul", "relu", "normal"],
+    "operators": ["abs", "clamp", "add", "sub", "mul", "div", "pow", "exp", "log", "sqrt"],
     "scenario": "operator_accuracy" | "operator_accuracy_performance",
     "warmup": 5,
     "repeat": 20,

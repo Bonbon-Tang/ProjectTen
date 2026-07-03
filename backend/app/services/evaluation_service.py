@@ -146,7 +146,7 @@ class EvaluationService:
             'device': task.device_type,
             'operator_category': operator_category or payload.get('operator_category') or payload.get('category') or '元素操作类',
             'operator_library': operator_lib_name or payload.get('operator_library') or 'local_default',
-            'operators': payload.get('operators') or ['matmul', 'relu', 'normal'],
+            'operators': payload.get('operators') or ['abs', 'clamp', 'add', 'sub', 'mul', 'div', 'pow', 'exp', 'log', 'sqrt'],
             'scenario': getattr(task.task_type, 'value', str(task.task_type)),
             'operator_count': task.operator_count,
             'warmup': payload.get('warmup', 5),

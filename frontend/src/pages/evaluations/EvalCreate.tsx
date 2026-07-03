@@ -470,10 +470,10 @@ export default function EvalCreate() {
             device: values.device_type,
             operator_category: '元素操作类',
             operator_library: 'local_default',
-            operators: ['matmul', 'relu', 'normal'],
+            operators: ['abs', 'clamp', 'add', 'sub', 'mul', 'div', 'pow', 'exp', 'log', 'sqrt'],
             supported_device: 'hygon_bw1000',
             scenario: params.scenario,
-            operator_count: values.operator_count || 3,
+            operator_count: values.operator_count || 10,
             warmup: 5,
             repeat: 20,
             dtype: 'float32',
@@ -803,7 +803,7 @@ export default function EvalCreate() {
 
         {isOperatorTest && (
           <>
-            <Form.Item name="operator_categories" label="选择算子分类" extra={form.getFieldValue('toolset_id') && ([...operatorToolsets, ...modelToolsets].find((t) => t.id === form.getFieldValue('toolset_id'))?.name === 'deeplink_op_test' || [...operatorToolsets, ...modelToolsets].find((t) => t.id === form.getFieldValue('toolset_id'))?.name === 'Deeplink_op_test') ? 'deeplink_op_test 当前固定对齐 BW1000 的元素操作类，下发算子为 matmul / relu / normal' : '不选则测试所有分类的算子'}>
+            <Form.Item name="operator_categories" label="选择算子分类" extra={form.getFieldValue('toolset_id') && ([...operatorToolsets, ...modelToolsets].find((t) => t.id === form.getFieldValue('toolset_id'))?.name === 'deeplink_op_test' || [...operatorToolsets, ...modelToolsets].find((t) => t.id === form.getFieldValue('toolset_id'))?.name === 'Deeplink_op_test') ? 'deeplink_op_test 当前固定对齐 BW1000 的元素操作类 10 个算子：Abs / Clamp / Add / Sub / Mul / Div / Pow / Exp / Log / Sqrt' : '不选则测试所有分类的算子'}>
               <Select mode="multiple" placeholder="选择要测试的算子分类（可多选，不选=全部）" allowClear style={selectFieldStyle} options={operatorCategories.map((c) => ({ label: `${c.category} (${c.count}个)`, value: c.category }))} onChange={(vals: string[]) => {
                 if (vals?.length) {
                   const matchedCount = operatorCategories.filter((c) => vals.includes(c.category)).reduce((sum, c) => sum + c.count, 0);

@@ -325,12 +325,12 @@ export default function EvalDetail() {
       id: r.operator_id || idx,
       name: r.operator_name || r.name || '-',
       category: r.category || '-',
-      fp32_accuracy: r.accuracy?.fp32_accuracy ?? r.fp32_accuracy,
-      fp16_accuracy: r.accuracy?.fp16_accuracy ?? r.fp16_accuracy,
-      int8_accuracy: r.accuracy?.int8_accuracy ?? r.int8_accuracy,
+      fp32_accuracy: r.accuracy?.fp32_accuracy ?? r.validation?.passed ?? r.fp32_accuracy,
+      fp16_accuracy: r.accuracy?.fp16_accuracy ?? r.validation?.max_abs_err ?? r.fp16_accuracy,
+      int8_accuracy: r.accuracy?.int8_accuracy ?? r.validation?.max_rel_err ?? r.int8_accuracy,
       accuracy_loss_rate: r.accuracy?.int8_loss_rate != null
         ? r.accuracy.int8_loss_rate / 100
-        : r.accuracy_loss_rate,
+        : (r.validation?.max_rel_err ?? r.accuracy_loss_rate),
       device_latency: r.performance?.tested_fp16_latency_us ?? r.device_latency,
       h100_latency: r.performance?.h100_fp16_latency_us ?? r.h100_latency,
       device_throughput: r.performance?.tested_throughput_gops ?? r.device_throughput,
