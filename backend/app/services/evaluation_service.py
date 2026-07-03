@@ -693,6 +693,27 @@ class EvaluationService:
         tool_name = task_config.get('tool_name') if isinstance(task_config, dict) else None
         if tool_name == 'deeplink_op_test':
             runner_output = EvaluationService._run_deeplink_op_test(task, operator_lib_name)
+            # 转换库输出为 metrics 结构，对齐前端字段
+            lib_ops = runner_output.get('operators', [])
+            operator_results = []
+            for op in lib_ops:
+                avg_ms = op.get('avg_ms', 0)
+                throughput = op.get('throughput', 0)
+                operator_results.append({
+                    'name': op.get('name'),
+                    'status': op.get('status'),
+                    'category': '元素操作类',
+                    'accuracy': None,
+                    'performance': {
+                        'tested_fp16_latency_us': round(avg_ms * 1000, 2) if avg_ms else None,
+                        'h100_fp16_latency_us': None,
+                        'tested_throughput_gops': round(throughput, 2) if throughput else None,
+                        'h100_throughput_gops': None,
+                    },
+                    'validation': op.get('validation'),
+                })
+            lib_summary = runner_output.get('summary', {})
+            avg_ms_total = lib_summary.get('avg_ms', 0)
             return {
                 "test_type": task_type_val,
                 "tool_name": tool_name,
@@ -706,10 +727,16 @@ class EvaluationService:
                 "device_type": task.device_type,
                 "runner": 'deeplink_op_test',
                 "supported_category": runner_output.get('operator_category', '元素操作类'),
-                "supported_operators": [item.get('name') for item in runner_output.get('operators', [])],
+                "supported_operators": [item.get('name') for item in lib_ops],
                 "deeplink_payload": task_config.get('deeplink_payload') if isinstance(task_config, dict) else None,
-                "summary": runner_output.get('summary', {}),
-                "operator_results": runner_output.get('operators', []),
+                "summary": {
+                    "operators_tested": lib_summary.get('operators_tested', 0),
+                    "passed": lib_summary.get('passed', 0),
+                    "avg_ms": avg_ms_total,
+                    "p95_ms": lib_summary.get('p95_ms', 0),
+                    "throughput": lib_summary.get('throughput', 0),
+                },
+                "operator_results": operator_results,
             }
 
         operator_results = []

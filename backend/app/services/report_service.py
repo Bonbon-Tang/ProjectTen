@@ -18,11 +18,25 @@ class ReportService:
         if not task:
             raise ValueError("Task not found")
 
+        # Build report content from task metrics and result
+        content = {
+            "task_id": task.id,
+            "task_name": task.name,
+            "status": task.status.value if hasattr(task.status, 'value') else str(task.status),
+            "device_type": task.device_type,
+            "toolset_id": task.toolset_id,
+            "operator_categories": task.operator_categories,
+        }
+        if task.metrics:
+            content["metrics"] = task.metrics
+        if task.result:
+            content["result"] = task.result
+
         report = EvaluationReport(
             task_id=task_id,
             title=title,
             report_type=ReportType(report_type),
-            content=None,  # Will be populated by actual report generation
+            content=content,
             creator_id=creator_id,
             tenant_id=tenant_id,
         )
