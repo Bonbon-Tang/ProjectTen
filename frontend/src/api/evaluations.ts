@@ -26,6 +26,8 @@ export interface UnifiedEvalRoutingParams {
   image_id?: number;
   /** 工具资产数据库 id（算子/模型部署都可填，算子评测必填） */
   tool_id?: number;
+  /** 工具名，用于库侧协议对齐 */
+  tool_name?: string;
 
   // Meta
   name: string;
@@ -37,6 +39,7 @@ export interface UnifiedEvalRoutingParams {
   operator_count?: number;
   operator_categories?: string[];
   operator_lib_id?: number;
+  deeplink_payload?: Record<string, any>;
 }
 
 type CreateEvalParams = UnifiedEvalRoutingParams;

@@ -400,7 +400,7 @@ export default function EvalCreate() {
       const today = dayjs().format('YYYYMMDD');
       const defaults: any = { name: `${subType?.label || '评测'}-${today}`, priority: 'medium' };
       if (isOperatorTest) {
-        const defaultToolset = operatorToolsets.find((t) => t.name === 'Deeplink_op_test' || t.name.includes('Deeplink_op_test'));
+        const defaultToolset = operatorToolsets.find((t) => t.name === 'deeplink_op_test' || t.name === 'Deeplink_op_test' || t.name.includes('Deeplink_op_test'));
         if (defaultToolset) defaults.toolset_id = defaultToolset.id;
       }
       form.setFieldsValue(defaults);
@@ -441,6 +441,7 @@ export default function EvalCreate() {
       const allToolsets = [...operatorToolsets, ...modelToolsets];
       const selectedToolset = allToolsets.find((t) => t.id === values.toolset_id);
       const selectedImage = allModelImages.find((m) => m.id === values.image_id) || modelImages.find((m) => m.id === values.image_id);
+      const normalizedToolName = selectedToolset?.name === 'deeplink_op_test' || selectedToolset?.name === 'Deeplink_op_test' ? 'deeplink_op_test' : undefined;
       // Unified routing payload v2 (frontend must send only these fields)
       const params: any = {
         name: values.name,
@@ -452,13 +453,30 @@ export default function EvalCreate() {
         visibility: values.visibility || 'private',
         priority: values.priority,
         tool_id: values.toolset_id,
+        tool_name: normalizedToolName,
         image_id: taskKind === 'model_deployment_test' ? values.image_id : undefined,
       };
 
       if (taskKind === 'operator_test') {
         if (values.operator_count) params.operator_count = values.operator_count;
-        if (values.operator_categories?.length) params.operator_categories = values.operator_categories;
+        const operatorCategories = normalizedToolName === 'deeplink_op_test'
+          ? ['元素操作类']
+          : values.operator_categories;
+        if (operatorCategories?.length) params.operator_categories = operatorCategories;
         if (values.operator_lib_id) params.operator_lib_id = values.operator_lib_id;
+        if (normalizedToolName === 'deeplink_op_test') {
+          params.deeplink_payload = {
+            tool: 'deeplink_op_test',
+            device: values.device_type,
+            category: '元素操作类',
+            operators: ['matmul', 'relu', 'normal'],
+            supported_device: 'hygon_bw1000',
+            scenario: params.scenario,
+            warmup: 5,
+            repeat: 20,
+            dtype: 'float32',
+          };
+        }
       }
       const res: any = await createEvaluation(params);
       message.success('评测任务创建成功！');
@@ -783,7 +801,7 @@ export default function EvalCreate() {
 
         {isOperatorTest && (
           <>
-            <Form.Item name="operator_categories" label="选择算子分类" extra="不选则测试所有分类的算子">
+            <Form.Item name="operator_categories" label="选择算子分类" extra={form.getFieldValue('toolset_id') && ([...operatorToolsets, ...modelToolsets].find((t) => t.id === form.getFieldValue('toolset_id'))?.name === 'deeplink_op_test' || [...operatorToolsets, ...modelToolsets].find((t) => t.id === form.getFieldValue('toolset_id'))?.name === 'Deeplink_op_test') ? 'deeplink_op_test 当前固定对齐 BW1000 的元素操作类，下发算子为 matmul / relu / normal' : '不选则测试所有分类的算子'}>
               <Select mode="multiple" placeholder="选择要测试的算子分类（可多选，不选=全部）" allowClear style={selectFieldStyle} options={operatorCategories.map((c) => ({ label: `${c.category} (${c.count}个)`, value: c.category }))} onChange={(vals: string[]) => {
                 if (vals?.length) {
                   const matchedCount = operatorCategories.filter((c) => vals.includes(c.category)).reduce((sum, c) => sum + c.count, 0);

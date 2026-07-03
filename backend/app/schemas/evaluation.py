@@ -26,11 +26,15 @@ class EvaluationCreate(BaseModel):
     chip_num: int = 1
     image_id: Optional[int] = None
     tool_id: Optional[int] = None
+    tool_name: Optional[str] = None
 
     # Operator-only options
     operator_count: Optional[int] = None
     operator_categories: Optional[List[str]] = None
     operator_lib_id: Optional[int] = None
+
+    # Tool-specific payload
+    deeplink_payload: Optional[Dict[str, Any]] = None
 
 
 class EvaluationUpdate(BaseModel):
@@ -57,6 +61,7 @@ class EvaluationOut(BaseModel):
     chip_num: int
     image_id: Optional[int] = None
     tool_id: Optional[int] = None
+    tool_name: Optional[str] = None
 
     # meta/status
     status: str
@@ -68,6 +73,7 @@ class EvaluationOut(BaseModel):
     operator_count: Optional[int] = None
     operator_categories: Optional[List[str]] = None
     operator_lib_id: Optional[int] = None
+    deeplink_payload: Optional[Dict[str, Any]] = None
 
     # timestamps/owner
     creator_id: int
@@ -96,6 +102,10 @@ class EvaluationOut(BaseModel):
                 data["tool_id"] = data.get("toolset_id")
             if "image_id" not in data:
                 data["image_id"] = data.get("image_id")
+            if "tool_name" not in data:
+                data["tool_name"] = data.get("config", {}).get("tool_name") if isinstance(data.get("config"), dict) else None
+            if "deeplink_payload" not in data:
+                data["deeplink_payload"] = data.get("config", {}).get("deeplink_payload") if isinstance(data.get("config"), dict) else None
         else:
             task_type = getattr(data, "task_type", None)
             task_category = getattr(data, "task_category", None)
@@ -110,6 +120,11 @@ class EvaluationOut(BaseModel):
                 setattr(data, "chip_num", getattr(data, "device_count", 1) or 1)
             if not getattr(data, "tool_id", None):
                 setattr(data, "tool_id", getattr(data, "toolset_id", None))
+            config = getattr(data, "config", None) or {}
+            if not getattr(data, "tool_name", None) and isinstance(config, dict):
+                setattr(data, "tool_name", config.get("tool_name"))
+            if not getattr(data, "deeplink_payload", None) and isinstance(config, dict):
+                setattr(data, "deeplink_payload", config.get("deeplink_payload"))
         return data
 
 

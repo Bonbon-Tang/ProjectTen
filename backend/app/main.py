@@ -18,16 +18,16 @@ Base.metadata.create_all(bind=engine)
 
 
 def _init_default_toolset(db):
-    """Initialize the default Deeplink_op_test toolset (算子测试专用) if it doesn't exist."""
+    """Initialize the default deeplink_op_test toolset (算子测试专用) if it doesn't exist."""
     from app.models.asset import DigitalAsset
-    existing = db.query(DigitalAsset).filter(DigitalAsset.name == "Deeplink_op_test").first()
+    existing = db.query(DigitalAsset).filter(DigitalAsset.name.in_(["deeplink_op_test", "Deeplink_op_test"])).first()
     if not existing:
         asset = DigitalAsset(
-            name="Deeplink_op_test",
-            description="DeepLink算子测试工具集，支持精度验证和性能Benchmark，内置100个常用算子的H100参考基线数据",
+            name="deeplink_op_test",
+            description="DeepLink算子测试工具集，平台与库侧统一协议，当前支持 BW1000 元素操作类下发执行（matmul/relu/normal）",
             asset_type="toolset",
             category="算子测试工具",
-            tags=["算子测试", "精度验证", "性能benchmark", "H100基线"],
+            tags=["算子测试", "DeepLink", "BW1000", "元素操作类", "matmul", "relu", "normal"],
             version="v1.0.0",
             file_path="/tools/deeplink_op_test",
             file_size=0,
@@ -39,6 +39,7 @@ def _init_default_toolset(db):
         db.add(asset)
     else:
         # Ensure existing toolset has correct category
+        existing.name = "deeplink_op_test"
         if existing.category != "算子测试工具":
             existing.category = "算子测试工具"
     db.commit()

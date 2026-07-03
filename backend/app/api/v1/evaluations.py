@@ -99,6 +99,11 @@ def create_evaluation(body: EvaluationCreate, request: Request,
 
     try:
         norm = normalize_unified_payload(raw)
+        task_config = {}
+        if body.tool_name:
+            task_config["tool_name"] = body.tool_name
+        if body.deeplink_payload:
+            task_config["deeplink_payload"] = body.deeplink_payload
         task = EvaluationService.create(
             db,
             creator_id=current_user.id,
@@ -117,8 +122,7 @@ def create_evaluation(body: EvaluationCreate, request: Request,
             operator_count=norm.operator_count,
             operator_categories=norm.operator_categories,
             operator_lib_id=norm.operator_lib_id,
-            # unified schema uses no extra config at the boundary
-            config={},
+            config=task_config,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -137,6 +141,7 @@ def create_evaluation(body: EvaluationCreate, request: Request,
         "chip_num": raw.get("chip_num") or 1,
         "image_id": norm.image_id,
         "tool_id": norm.tool_id,
+        "tool_name": body.tool_name,
         "status": task.status.value if hasattr(task.status, 'value') else str(task.status),
         "priority": task.priority.value if hasattr(task.priority, 'value') else str(task.priority),
         "progress": task.progress or 0,
@@ -144,6 +149,7 @@ def create_evaluation(body: EvaluationCreate, request: Request,
         "operator_count": task.operator_count,
         "operator_categories": task.operator_categories,
         "operator_lib_id": task.operator_lib_id,
+        "deeplink_payload": body.deeplink_payload,
         "creator_id": task.creator_id,
         "tenant_id": task.tenant_id,
         "created_at": task.created_at,

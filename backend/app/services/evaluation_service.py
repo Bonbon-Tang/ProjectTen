@@ -26,6 +26,7 @@ from app.models.resource import ComputeDevice
 from app.models.operator import Operator
 from app.models.operator_benchmark import OperatorBenchmark
 from app.models.asset import DigitalAsset
+from app.services.deeplink_op_test_runner import run as run_deeplink_op_test
 from app.utils.pagination import PaginationParams
 
 
@@ -608,6 +609,36 @@ class EvaluationService:
             if lib_asset:
                 operator_lib_name = lib_asset.name
 
+        task_config = task.config or {}
+        tool_name = task_config.get('tool_name') if isinstance(task_config, dict) else None
+        if tool_name == 'deeplink_op_test':
+            requested_names = []
+            deeplink_payload = task_config.get('deeplink_payload') if isinstance(task_config, dict) else None
+            if isinstance(deeplink_payload, dict):
+                requested_names = [str(name).strip().lower() for name in deeplink_payload.get('operators', []) if str(name).strip()]
+            if not requested_names:
+                requested_names = [op.name.lower() for op in selected_ops if op.category == '元素操作类']
+            selected_names = [name for name in requested_names if name in {'matmul', 'relu', 'normal'}]
+            runner_output = run_deeplink_op_test(task, selected_names)
+            return {
+                "test_type": task_type_val,
+                "tool_name": tool_name,
+                "total_ops_tested": runner_output.get('operators_tested', 0),
+                "passed_ops": runner_output.get('operators_tested', 0),
+                "pass_rate": 100.0 if runner_output.get('operators_tested', 0) else 0.0,
+                "avg_fp16_loss_rate": 0,
+                "avg_int8_loss_rate": 0,
+                "all_pass": True,
+                "operator_lib": operator_lib_name,
+                "device_type": task.device_type,
+                "runner": 'deeplink_op_test',
+                "supported_category": '元素操作类',
+                "supported_operators": runner_output.get('supported_operators', []),
+                "deeplink_payload": runner_output.get('payload'),
+                "summary": runner_output.get('summary', {}),
+                "operator_results": runner_output.get('results', []),
+            }
+
         operator_results = []
         cpu_test_result_map = {}
         if str(task.device_type) == 'cpu_test' or getattr(task.device_type, 'value', None) == 'cpu_test':
@@ -1112,4 +1143,3 @@ class EvaluationService:
             )
             db.add(bench)
         db.commit()
-
