@@ -24,7 +24,7 @@ class ReportOut(BaseModel):
     task_id: int
     title: str
     report_type: str
-    content: Optional[str] = None
+    content: Optional[Any] = None
     version: int
     status: str
     file_path: Optional[str] = None

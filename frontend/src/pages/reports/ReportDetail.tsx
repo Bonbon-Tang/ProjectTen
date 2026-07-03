@@ -138,11 +138,11 @@ export default function ReportDetail() {
   const operatorColumns: ColumnsType<any> = [
     {
       title: '算子名称',
-      dataIndex: 'operator_name',
-      key: 'operator_name',
+      dataIndex: 'name',
+      key: 'name',
       width: 140,
       fixed: 'left',
-      render: (text: string) => <Text strong>{text}</Text>,
+      render: (text: string) => <Text strong>{text || '-'}</Text>,
     },
     {
       title: '分类',
@@ -174,12 +174,13 @@ export default function ReportDetail() {
       key: 'loss_rate',
       width: 120,
       render: (_: any, r: any) => {
-        const val = r.accuracy?.int8_loss_rate;
+        const val = r.accuracy?.int8_loss_rate ?? r.validation?.max_rel_err;
         if (val == null) return '-';
+        const pct = val > 1 ? val : val * 100;
         let color = '#fa8c16';
-        if (val < 1) color = '#52c41a';
-        if (val > 5) color = '#ff4d4f';
-        return <span style={{ color, fontWeight: 600 }}>{val.toFixed(2)}%</span>;
+        if (pct < 1) color = '#52c41a';
+        if (pct > 5) color = '#ff4d4f';
+        return <span style={{ color, fontWeight: 600 }}>{pct.toFixed(2)}%</span>;
       },
     },
     {
@@ -187,7 +188,7 @@ export default function ReportDetail() {
       key: 'pass',
       width: 70,
       render: (_: any, r: any) =>
-        r.accuracy?.pass ? (
+        (r.accuracy?.pass ?? r.validation?.passed) ? (
           <CheckCircleFilled style={{ color: '#52c41a' }} />
         ) : (
           <CloseCircleFilled style={{ color: '#ff4d4f' }} />

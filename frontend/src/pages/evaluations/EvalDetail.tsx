@@ -276,9 +276,7 @@ export default function EvalDetail() {
     }
     try {
       const res: any = await downloadReport(detail.report_id);
-      // Response is JSON (from updated backend)
-      const data = typeof res === 'string' ? res : (res?.data ? JSON.stringify(res.data, null, 2) : JSON.stringify(res, null, 2));
-      const blob = new Blob([data], { type: 'application/json' });
+      const blob = res?.data instanceof Blob ? res.data : new Blob([res?.data ?? res], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
