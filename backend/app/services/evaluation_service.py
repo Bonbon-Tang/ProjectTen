@@ -157,6 +157,7 @@ class EvaluationService:
         EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
         task_json = EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test.json'
         result_json = EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test_result.json'
+        log_file = EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test.log'
         task_json.write_text(json.dumps(task_payload, ensure_ascii=False, indent=2), encoding='utf-8')
 
         cmd = [
@@ -166,11 +167,46 @@ class EvaluationService:
             '--output',
             str(result_json),
         ]
-        proc = subprocess.run(cmd, capture_output=True, text=True, cwd=str(EvaluationService.DEEPLINK_OP_TEST_DIR))
+
+        # 写入执行日志
+        log_lines = [
+            f"[deeplink_op_test] task_id={task.id}",
+            f"[command] {' '.join(cmd)}",
+            f"[cwd] {EvaluationService.DEEPLINK_OP_TEST_DIR}",
+            f"[env] PYTHONPATH={EvaluationService.DEEPLINK_OP_TEST_DIR}",
+            f"[task_payload] {json.dumps(task_payload, ensure_ascii=False)}",
+        ]
+
+        try:
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                cwd=str(EvaluationService.DEEPLINK_OP_TEST_DIR),
+                timeout=300,
+            )
+            log_lines.append(f"[returncode] {proc.returncode}")
+            if proc.stdout:
+                log_lines.append(f"[stdout] {proc.stdout}")
+            if proc.stderr:
+                log_lines.append(f"[stderr] {proc.stderr}")
+        except subprocess.TimeoutExpired:
+            log_lines.append("[error] subprocess timed out after 300s")
+            log_file.write_text('\n'.join(log_lines), encoding='utf-8')
+            raise RuntimeError("deeplink_op_test execution timed out after 300 seconds")
+        except Exception as ex:
+            log_lines.append(f"[error] {type(ex).__name__}: {ex}")
+            log_file.write_text('\n'.join(log_lines), encoding='utf-8')
+            raise
+
+        log_file.write_text('\n'.join(log_lines), encoding='utf-8')
+
         if proc.returncode != 0:
-            raise RuntimeError(f"deeplink_op_test failed: {proc.stderr or proc.stdout}")
+            raise RuntimeError(
+                f"deeplink_op_test failed (code={proc.returncode}):\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}\nsee log: {log_file}"
+            )
         if not result_json.exists():
-            raise RuntimeError('deeplink_op_test did not produce result.json')
+            raise RuntimeError(f"deeplink_op_test did not produce result.json (returncode={proc.returncode}), see log: {log_file}")
         return json.loads(result_json.read_text(encoding='utf-8'))
 
     @staticmethod
