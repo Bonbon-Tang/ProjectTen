@@ -1,0 +1,22 @@
+{
+  "tool_name": "deeplink_op_test",
+  "task_id": 1,
+  "task_name": "bw1000-elementwise-smoke",
+  "device": "hygon_bw1000",
+  "chip": "hygon_bw1000",
+  "chip_info": {
+    "chip": "hygon_bw1000",
+    "supported_chip": "hygon_bw1000",
+    "server_role": "deployment_server"
+  },
+  "device_count": 1,
+  "operator_category": "元素操作类",
+  "operator_library": "local_default",
+  "operator_library_scope": "local",
+  "operators": ["abs", "clamp", "add", "sub", "mul", "div", "pow", "exp", "log", "sqrt"],
+  "scenario": "operator_accuracy_performance",
+  "warmup": 5,
+  "repeat": 20,
+  "dtype": "float32",
+  "shape": [1024, 1024]
+}

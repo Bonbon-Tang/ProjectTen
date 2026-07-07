@@ -1,57 +1,77 @@
 # deeplink_op_test
 
-`deeplink_op_test` 是 ProjectTen 平台对齐的算子验证库。
+`deeplink_op_test` is the standalone operator test runner used by ProjectTen for DeepLink operator evaluation.
 
-当前 V1 目标：
+It keeps the platform payload protocol stable and executes the currently supported BW1000 elementwise operator set locally with PyTorch on CPU.
 
-- 工具名固定为 `deeplink_op_test`
-- 平台 `/evaluations/create` 下发 JSON 与本库接收协议对齐
-- 当前设备支持：`hygon_bw1000`（BW1000 部署服务器）
-- 支持平台下发设备数量：`device_count`
-- 当前算子库：默认部署服务器本地算子库（`local_default`）
-- 当前分类支持：`元素操作类`
-- 当前算子支持：`Abs`、`Clamp`、`Add`、`Sub`、`Mul`、`Div`、`Pow`、`Exp`、`Log`、`Sqrt`
-- 执行结果可按统一 metrics 协议回传平台并展示在评测详情页
+## Positioning
 
-## 任务协议
+- Tool name: `deeplink_op_test`
+- Current target chip from platform payload: `hygon_bw1000` / BW1000 deployment server
+- Execution backend in this standalone project: PyTorch CPU benchmark
+- Operator library: local default operator library, reported as `local_default`
+- Operator category: `元素操作类`
+- Supported operators: `Abs`, `Clamp`, `Add`, `Sub`, `Mul`, `Div`, `Pow`, `Exp`, `Log`, `Sqrt`
+- Result protocol: JSON output compatible with ProjectTen metrics ingestion
 
-平台在创建算子评测任务时，会将以下字段写入任务配置：
+## Install
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+If the deployment server already has PyTorch installed, using that Python environment is also fine.
+
+## Run
+
+```bash
+python main.py examples/bw1000_payload.json --output result.json
+cat result.json
+```
+
+The runner accepts the ProjectTen payload shape directly. The important fields are:
 
 ```json
 {
   "tool_name": "deeplink_op_test",
-  "deeplink_payload": {
-    "tool": "deeplink_op_test",
-    "device": "hygon_bw1000",
-    "chip": "hygon_bw1000",
-    "chip_info": {
-      "chip": "hygon_bw1000",
-      "supported_chip": "hygon_bw1000",
-      "server_role": "deployment_server"
-    },
-    "device_count": 1,
-    "category": "元素操作类",
-    "operator_library": "local_default",
-    "operator_library_label": "本地算子库",
-    "operator_library_scope": "local",
-    "operators": ["abs", "clamp", "add", "sub", "mul", "div", "pow", "exp", "log", "sqrt"],
-    "scenario": "operator_accuracy" | "operator_accuracy_performance",
-    "warmup": 5,
-    "repeat": 20,
-    "dtype": "float32"
-  }
+  "device": "hygon_bw1000",
+  "chip": "hygon_bw1000",
+  "device_count": 1,
+  "operator_category": "元素操作类",
+  "operator_library": "local_default",
+  "operator_library_scope": "local",
+  "operators": ["abs", "clamp", "add", "sub", "mul", "div", "pow", "exp", "log", "sqrt"],
+  "warmup": 5,
+  "repeat": 20,
+  "dtype": "float32",
+  "shape": [1024, 1024]
 }
 ```
 
-## 返回协议
+## Output
 
-执行结果返回到平台时，至少包含：
+The result contains both summary metrics and per-operator metrics:
 
-- `operators_tested`
-- `supported_operators`
+- `status`
+- `execution_mode`: `real_pytorch_cpu`
 - `device / chip_info / device_count`
 - `operator_category / operator_library`
-- `summary.avg_ms / p95_ms / throughput`
-- `results[]`
+- `operators_tested`
+- `operators[]`
+- `results[]` alias for platform compatibility
+- `summary.avg_ms / p95_ms / throughput / pass_rate`
 
-后续接入真实 BW1000 runtime 时，可直接替换当前模拟 runner，而不改平台协议。
+Each operator result includes:
+
+- `avg_ms`
+- `p95_ms`
+- `throughput` in `elements/s`
+- `validation.max_abs_err`
+- `validation.max_rel_err`
+- `validation.passed`
+
+## Notes
+
+The current implementation intentionally benchmarks on CPU with PyTorch. When a native BW1000 runtime or DeepLink SDK entrypoint is ready, it can replace the PyTorch operator dispatch in `main.py` while keeping the same input and output JSON protocol.
