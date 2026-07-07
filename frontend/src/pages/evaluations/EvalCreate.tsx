@@ -37,6 +37,17 @@ import dayjs from 'dayjs';
 
 const { TextArea } = Input;
 
+const DEEPLINK_TOOL_NAME = 'deeplink_op_test';
+const DEEPLINK_DEVICE_TYPE = 'hygon_bw1000';
+const DEEPLINK_OPERATOR_CATEGORY = '元素操作类';
+const DEEPLINK_OPERATOR_LIBRARY = 'local_default';
+const DEEPLINK_OPERATOR_LIBRARY_LABEL = '本地算子库';
+const DEEPLINK_OPERATORS = ['abs', 'clamp', 'add', 'sub', 'mul', 'div', 'pow', 'exp', 'log', 'sqrt'];
+
+function isDeeplinkToolName(name?: string) {
+  return normalizeText(name) === DEEPLINK_TOOL_NAME;
+}
+
 type DeviceInfo = {
   device_type: string;
   name: string;
@@ -400,8 +411,12 @@ export default function EvalCreate() {
       const today = dayjs().format('YYYYMMDD');
       const defaults: any = { name: `${subType?.label || '评测'}-${today}`, priority: 'medium' };
       if (isOperatorTest) {
-        const defaultToolset = operatorToolsets.find((t) => t.name === 'deeplink_op_test' || t.name === 'Deeplink_op_test' || t.name.includes('Deeplink_op_test'));
+        const defaultToolset = operatorToolsets.find((t) => isDeeplinkToolName(t.name));
         if (defaultToolset) defaults.toolset_id = defaultToolset.id;
+        defaults.device_type = DEEPLINK_DEVICE_TYPE;
+        defaults.device_count = 1;
+        defaults.operator_categories = [DEEPLINK_OPERATOR_CATEGORY];
+        defaults.operator_count = DEEPLINK_OPERATORS.length;
       }
       form.setFieldsValue(defaults);
       setCurrent(2);
@@ -429,8 +444,12 @@ export default function EvalCreate() {
     await fetchDevices();
     const formValues = form.getFieldsValue();
     const values = { ...cachedFormValues, ...formValues };
+    const allToolsets = [...operatorToolsets, ...modelToolsets];
+    const selectedToolset = allToolsets.find((t) => t.id === values.toolset_id);
+    const normalizedToolName = isDeeplinkToolName(selectedToolset?.name) ? DEEPLINK_TOOL_NAME : undefined;
+    const effectiveDeviceType = normalizedToolName === DEEPLINK_TOOL_NAME ? DEEPLINK_DEVICE_TYPE : values.device_type;
     const chipNum = values.device_count ?? 1;
-    const device = deviceList.find((d) => d.device_type === values.device_type);
+    const device = deviceList.find((d) => d.device_type === effectiveDeviceType);
     if (device && chipNum > device.available_count) {
       message.error(`设备数量不足：需要 ${chipNum} 台 ${device.name}，当前空闲仅 ${device.available_count} 台`);
       return;
@@ -438,17 +457,14 @@ export default function EvalCreate() {
 
     setLoading(true);
     try {
-      const allToolsets = [...operatorToolsets, ...modelToolsets];
-      const selectedToolset = allToolsets.find((t) => t.id === values.toolset_id);
       const selectedImage = allModelImages.find((m) => m.id === values.image_id) || modelImages.find((m) => m.id === values.image_id);
-      const normalizedToolName = selectedToolset?.name === 'deeplink_op_test' || selectedToolset?.name === 'Deeplink_op_test' ? 'deeplink_op_test' : undefined;
       // Unified routing payload v2 (frontend must send only these fields)
       const params: any = {
         name: values.name,
         description: values.description || undefined,
         task: taskKind === 'operator_test' ? 'operator' : 'model_deployment',
         scenario: scenario === 'operator_perf_accuracy' ? 'operator_accuracy_performance' : scenario,
-        chips: values.device_type,
+        chips: effectiveDeviceType,
         chip_num: chipNum,
         visibility: values.visibility || 'private',
         priority: values.priority,
@@ -460,20 +476,29 @@ export default function EvalCreate() {
       if (taskKind === 'operator_test') {
         if (values.operator_count) params.operator_count = values.operator_count;
         const operatorCategories = normalizedToolName === 'deeplink_op_test'
-          ? ['元素操作类']
+          ? [DEEPLINK_OPERATOR_CATEGORY]
           : values.operator_categories;
         if (operatorCategories?.length) params.operator_categories = operatorCategories;
         if (values.operator_lib_id) params.operator_lib_id = values.operator_lib_id;
-        if (normalizedToolName === 'deeplink_op_test') {
+        if (normalizedToolName === DEEPLINK_TOOL_NAME) {
           params.deeplink_payload = {
-            tool_name: 'deeplink_op_test',
-            device: values.device_type,
-            operator_category: '元素操作类',
-            operator_library: 'local_default',
-            operators: ['abs', 'clamp', 'add', 'sub', 'mul', 'div', 'pow', 'exp', 'log', 'sqrt'],
-            supported_device: 'hygon_bw1000',
+            tool_name: DEEPLINK_TOOL_NAME,
+            device: effectiveDeviceType,
+            chip: effectiveDeviceType,
+            chip_info: {
+              chip: effectiveDeviceType,
+              supported_chip: DEEPLINK_DEVICE_TYPE,
+              server_role: 'deployment_server',
+            },
+            device_count: chipNum,
+            operator_category: DEEPLINK_OPERATOR_CATEGORY,
+            operator_library: DEEPLINK_OPERATOR_LIBRARY,
+            operator_library_label: DEEPLINK_OPERATOR_LIBRARY_LABEL,
+            operator_library_scope: 'local',
+            operators: DEEPLINK_OPERATORS,
+            supported_device: DEEPLINK_DEVICE_TYPE,
             scenario: params.scenario,
-            operator_count: values.operator_count || 10,
+            operator_count: values.operator_count || DEEPLINK_OPERATORS.length,
             warmup: 5,
             repeat: 20,
             dtype: 'float32',
@@ -498,6 +523,23 @@ export default function EvalCreate() {
   const onlineDevices = useMemo(() => deviceList.filter((d) => d.status === 'online'), [deviceList]);
   const selectedDeviceType = Form.useWatch('device_type', form);
   const selectedImageId = Form.useWatch('image_id', form);
+  const selectedToolsetId = Form.useWatch('toolset_id', form);
+  const selectedOperatorToolset = useMemo(
+    () => operatorToolsets.find((t) => t.id === selectedToolsetId),
+    [operatorToolsets, selectedToolsetId]
+  );
+  const isDeeplinkSelected = isOperatorTest && isDeeplinkToolName(selectedOperatorToolset?.name);
+
+  useEffect(() => {
+    if (!isDeeplinkSelected) return;
+    form.setFieldsValue({
+      device_type: DEEPLINK_DEVICE_TYPE,
+      device_count: form.getFieldValue('device_count') || 1,
+      operator_categories: [DEEPLINK_OPERATOR_CATEGORY],
+      operator_count: DEEPLINK_OPERATORS.length,
+      operator_lib_id: undefined,
+    });
+  }, [form, isDeeplinkSelected]);
 
   const visualCandidateImages = useMemo(() => {
     if (!scenario) return [];
@@ -728,12 +770,13 @@ export default function EvalCreate() {
 
         <Form.Item name="device_type" label="选择设备类型" rules={[{ required: true, message: '请选择设备类型' }]}>
           <Select
-            placeholder="选择智算设备"
+            disabled={isDeeplinkSelected}
+            placeholder={isDeeplinkSelected ? 'deeplink_op_test 当前固定使用 BW1000 部署服务器' : '选择智算设备'}
             style={selectFieldStyle}
             onChange={(chips) => {
               form.setFieldsValue({ device_count: 1, name: generateDefaultName(chips), image_id: undefined });
             }}
-            options={deviceList.filter((d) => d.status === 'online').map((d) => ({ label: `${d.name} (空闲 ${d.available_count} / 共 ${d.total_count} 台)`, value: d.device_type, disabled: d.available_count === 0 }))}
+            options={deviceList.filter((d) => d.status === 'online').map((d) => ({ label: `${d.name} (空闲 ${d.available_count} / 共 ${d.total_count} 台)`, value: d.device_type, disabled: d.available_count === 0 || (isDeeplinkSelected && d.device_type !== DEEPLINK_DEVICE_TYPE) }))}
           />
         </Form.Item>
 
@@ -754,8 +797,8 @@ export default function EvalCreate() {
         </Form.Item>
 
         {isOperatorTest && (
-          <Form.Item name="operator_lib_id" label="选择算子库" extra="选择算子的来源库，不同算子库实现可能影响测试结果" rules={[{ required: true, message: '算子测试必须选择算子库' }]}>
-            <Select placeholder="选择算子库来源" loading={operatorLibsLoading} style={selectFieldStyle} options={operatorLibs.map((lib) => ({ label: `${lib.name}${lib.description ? ` — ${lib.description.substring(0, 40)}...` : ''}`, value: lib.id }))} />
+          <Form.Item name="operator_lib_id" label="选择算子库" extra={isDeeplinkSelected ? 'deeplink_op_test 当前默认使用部署服务器本地算子库，结果会以 local_default 回传平台' : '选择算子的来源库，不同算子库实现可能影响测试结果'} rules={isDeeplinkSelected ? [] : [{ required: true, message: '算子测试必须选择算子库' }]}>
+            <Select disabled={isDeeplinkSelected} placeholder={isDeeplinkSelected ? DEEPLINK_OPERATOR_LIBRARY_LABEL : '选择算子库来源'} loading={operatorLibsLoading} style={selectFieldStyle} options={operatorLibs.map((lib) => ({ label: `${lib.name}${lib.description ? ` — ${lib.description.substring(0, 40)}...` : ''}`, value: lib.id }))} />
           </Form.Item>
         )}
 
@@ -803,8 +846,8 @@ export default function EvalCreate() {
 
         {isOperatorTest && (
           <>
-            <Form.Item name="operator_categories" label="选择算子分类" extra={form.getFieldValue('toolset_id') && ([...operatorToolsets, ...modelToolsets].find((t) => t.id === form.getFieldValue('toolset_id'))?.name === 'deeplink_op_test' || [...operatorToolsets, ...modelToolsets].find((t) => t.id === form.getFieldValue('toolset_id'))?.name === 'Deeplink_op_test') ? 'deeplink_op_test 当前固定对齐 BW1000 的元素操作类 10 个算子：Abs / Clamp / Add / Sub / Mul / Div / Pow / Exp / Log / Sqrt' : '不选则测试所有分类的算子'}>
-              <Select mode="multiple" placeholder="选择要测试的算子分类（可多选，不选=全部）" allowClear style={selectFieldStyle} options={operatorCategories.map((c) => ({ label: `${c.category} (${c.count}个)`, value: c.category }))} onChange={(vals: string[]) => {
+            <Form.Item name="operator_categories" label="选择算子分类" extra={isDeeplinkSelected ? 'deeplink_op_test 当前固定对齐 BW1000 的元素操作类 10 个算子：Abs / Clamp / Add / Sub / Mul / Div / Pow / Exp / Log / Sqrt' : '不选则测试所有分类的算子'}>
+              <Select mode="multiple" disabled={isDeeplinkSelected} placeholder="选择要测试的算子分类（可多选，不选=全部）" allowClear={!isDeeplinkSelected} style={selectFieldStyle} options={operatorCategories.map((c) => ({ label: `${c.category} (${c.count}个)`, value: c.category }))} onChange={(vals: string[]) => {
                 if (vals?.length) {
                   const matchedCount = operatorCategories.filter((c) => vals.includes(c.category)).reduce((sum, c) => sum + c.count, 0);
                   form.setFieldsValue({ _availableOpCount: matchedCount });
@@ -815,6 +858,7 @@ export default function EvalCreate() {
             </Form.Item>
 
             <Form.Item name="operator_count" label="测试算子数量" extra={(() => {
+              if (isDeeplinkSelected) return `deeplink_op_test 当前固定测试 ${DEEPLINK_OPERATORS.length} 个元素操作类算子`;
               const selectedCats = form.getFieldValue('operator_categories');
               if (selectedCats?.length) {
                 const matchedCount = operatorCategories.filter((c) => selectedCats.includes(c.category)).reduce((sum, c) => sum + c.count, 0);
@@ -822,7 +866,7 @@ export default function EvalCreate() {
               }
               return `当前共 ${totalOperatorCount} 个算子，留空时默认全部纳入测试`;
             })()}>
-              <InputNumber min={1} max={totalOperatorCount || 100} style={{ width: '100%', ...selectFieldStyle }} placeholder="留空时默认测试全部匹配算子" />
+              <InputNumber disabled={isDeeplinkSelected} min={1} max={totalOperatorCount || 100} style={{ width: '100%', ...selectFieldStyle }} placeholder="留空时默认测试全部匹配算子" />
             </Form.Item>
           </>
         )}

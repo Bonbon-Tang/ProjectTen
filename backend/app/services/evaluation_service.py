@@ -30,12 +30,17 @@ from app.utils.pagination import PaginationParams
 
 
 class EvaluationService:
+    PROJECT_ROOT = Path(__file__).resolve().parents[3]
     CPU_TEST_RUNNER_DIR = Path('/root/.openclaw/workspace/cpu-test-runner')
     CPU_TEST_RUNNER_PYTHON = CPU_TEST_RUNNER_DIR / '.venv' / 'bin' / 'python'
-    CPU_TEST_REPORT_DIR = Path('/root/.openclaw/workspace/ProjectTen/backend/data/cpu_test_reports')
-    DEEPLINK_OP_TEST_DIR = Path('/home/ailab/tangyufeng/ProjectTen/deeplink_op_test')
+    CPU_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
+    DEEPLINK_OP_TEST_DIR = PROJECT_ROOT / 'deeplink_op_test'
     DEEPLINK_OP_TEST_PYTHON = '/usr/bin/python3'
-    DEEPLINK_OP_TEST_REPORT_DIR = Path('/home/ailab/tangyufeng/ProjectTen/backend/data/cpu_test_reports')
+    DEEPLINK_OP_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
+    DEEPLINK_SUPPORTED_DEVICE = 'hygon_bw1000'
+    DEEPLINK_SUPPORTED_CATEGORY = '元素操作类'
+    DEEPLINK_DEFAULT_OPERATOR_LIBRARY = 'local_default'
+    DEEPLINK_SUPPORTED_OPERATORS = ['abs', 'clamp', 'add', 'sub', 'mul', 'div', 'pow', 'exp', 'log', 'sqrt']
     CPU_TEST_SUPPORTED_OPERATORS = {"Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"}
     LEGACY_TASK_CATEGORY_MAP = {
         'model_test': 'model_deployment_test',
@@ -138,15 +143,29 @@ class EvaluationService:
         operator_category = None
         if isinstance(task.operator_categories, list) and task.operator_categories:
             operator_category = task.operator_categories[0]
+        requested_device = payload.get('device') or payload.get('chip') or task.device_type or EvaluationService.DEEPLINK_SUPPORTED_DEVICE
+        device_count = payload.get('device_count') or payload.get('chip_num') or getattr(task, 'device_count', None) or 1
+        operator_library = (
+            payload.get('operator_library')
+            or payload.get('operator_lib')
+            or operator_lib_name
+            or EvaluationService.DEEPLINK_DEFAULT_OPERATOR_LIBRARY
+        )
 
         task_payload = {
             'tool_name': 'deeplink_op_test',
             'task_id': task.id,
             'task_name': task.name,
-            'device': task.device_type,
-            'operator_category': operator_category or payload.get('operator_category') or payload.get('category') or '元素操作类',
-            'operator_library': operator_lib_name or payload.get('operator_library') or 'local_default',
-            'operators': payload.get('operators') or ['abs', 'clamp', 'add', 'sub', 'mul', 'div', 'pow', 'exp', 'log', 'sqrt'],
+            'device': requested_device,
+            'chip_info': {
+                'chip': requested_device,
+                'supported_chip': EvaluationService.DEEPLINK_SUPPORTED_DEVICE,
+                'server_role': 'deployment_server',
+            },
+            'device_count': int(device_count),
+            'operator_category': operator_category or payload.get('operator_category') or payload.get('category') or EvaluationService.DEEPLINK_SUPPORTED_CATEGORY,
+            'operator_library': operator_library,
+            'operators': payload.get('operators') or EvaluationService.DEEPLINK_SUPPORTED_OPERATORS,
             'scenario': getattr(task.task_type, 'value', str(task.task_type)),
             'operator_count': task.operator_count,
             'warmup': payload.get('warmup', 5),
@@ -724,9 +743,11 @@ class EvaluationService:
                 "avg_int8_loss_rate": 0,
                 "all_pass": True,
                 "operator_lib": runner_output.get('operator_library', operator_lib_name),
-                "device_type": task.device_type,
+                "device_type": runner_output.get('device', task.device_type),
+                "device_count": runner_output.get('device_count', getattr(task, 'device_count', 1)),
+                "chip_info": runner_output.get('chip_info'),
                 "runner": 'deeplink_op_test',
-                "supported_category": runner_output.get('operator_category', '元素操作类'),
+                "supported_category": runner_output.get('operator_category', EvaluationService.DEEPLINK_SUPPORTED_CATEGORY),
                 "supported_operators": [item.get('name') for item in lib_ops],
                 "deeplink_payload": task_config.get('deeplink_payload') if isinstance(task_config, dict) else None,
                 "summary": {

@@ -52,6 +52,15 @@ import dayjs from 'dayjs';
 
 const { Text } = Typography;
 
+function asArray(value: any): any[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function asNumber(value: any): number | undefined {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : undefined;
+}
+
 // 获取子场景标签
 function getScenarioLabel(category: string, scenario: string): string {
   const list = category === 'operator_test' ? OPERATOR_TEST_TYPES : MODEL_TEST_TYPES;
@@ -70,10 +79,10 @@ interface OperatorResultItem {
   id: number;
   name: string;
   category: string;
-  fp32_accuracy: number;
-  fp16_accuracy: number;
-  int8_accuracy: number;
-  accuracy_loss_rate: number;
+  fp32_accuracy?: number;
+  fp16_accuracy?: number;
+  int8_accuracy?: number;
+  accuracy_loss_rate?: number;
   device_latency?: number;
   h100_latency?: number;
   device_throughput?: number;
@@ -311,6 +320,7 @@ export default function EvalDetail() {
   const isFailed = detail.status === 'failed' || detail.status === 'terminated';
   const isOperatorTest = detail.task_category === 'operator_test';
   const isAccuracyAndPerf = detail.task_type === 'operator_perf_accuracy';
+  const isDeeplinkTask = detail.toolset_name === 'deeplink_op_test' || detail.metrics?.runner === 'deeplink_op_test' || detail.deeplink_payload?.tool_name === 'deeplink_op_test';
 
   // 模型测试结果 - from metrics
   const modelResults =
@@ -320,31 +330,31 @@ export default function EvalDetail() {
 
   // 算子测试结果 - parse from metrics.operator_results
   const operatorResults: OperatorResultItem[] = (() => {
-    const raw = detail.metrics?.operator_results || detail.operator_results || detail.results?.operators || [];
+    const raw = asArray(detail.metrics?.operator_results || detail.metrics?.results || detail.operator_results || detail.results?.operators);
     return raw.map((r: any, idx: number) => ({
       id: r.operator_id || idx,
       name: r.operator_name || r.name || '-',
       category: r.category || '-',
-      fp32_accuracy: r.accuracy?.fp32_accuracy ?? r.validation?.passed ?? r.fp32_accuracy,
-      fp16_accuracy: r.accuracy?.fp16_accuracy ?? r.validation?.max_abs_err ?? r.fp16_accuracy,
-      int8_accuracy: r.accuracy?.int8_accuracy ?? r.validation?.max_rel_err ?? r.int8_accuracy,
-      accuracy_loss_rate: r.accuracy?.int8_loss_rate != null
+      fp32_accuracy: asNumber(r.accuracy?.fp32_accuracy ?? r.validation?.passed ?? r.fp32_accuracy),
+      fp16_accuracy: asNumber(r.accuracy?.fp16_accuracy ?? r.validation?.max_abs_err ?? r.fp16_accuracy),
+      int8_accuracy: asNumber(r.accuracy?.int8_accuracy ?? r.validation?.max_rel_err ?? r.int8_accuracy),
+      accuracy_loss_rate: asNumber(r.accuracy?.int8_loss_rate != null
         ? r.accuracy.int8_loss_rate / 100
-        : (r.validation?.max_rel_err ?? r.accuracy_loss_rate),
-      device_latency: r.performance?.tested_fp16_latency_us ?? r.device_latency,
-      h100_latency: r.performance?.h100_fp16_latency_us ?? r.h100_latency,
-      device_throughput: r.performance?.tested_throughput_gops ?? r.device_throughput,
-      h100_throughput: r.performance?.h100_throughput_gops ?? r.h100_throughput,
+        : (r.validation?.max_rel_err ?? r.accuracy_loss_rate)),
+      device_latency: asNumber(r.performance?.tested_fp16_latency_us ?? r.performance?.latency_ms ?? r.latency_ms ?? r.device_latency),
+      h100_latency: asNumber(r.performance?.h100_fp16_latency_us ?? r.h100_latency),
+      device_throughput: asNumber(r.performance?.tested_throughput_gops ?? r.performance?.throughput_gops ?? r.throughput_gops ?? r.device_throughput),
+      h100_throughput: asNumber(r.performance?.h100_throughput_gops ?? r.h100_throughput),
     }));
   })();
 
   // 算子测试汇总
   const operatorSummary = detail.metrics ? {
-    total: detail.metrics.total_ops_tested,
-    passed: detail.metrics.passed_ops,
-    passRate: detail.metrics.pass_rate,
-    avgFp16Loss: detail.metrics.avg_fp16_loss_rate,
-    avgInt8Loss: detail.metrics.avg_int8_loss_rate,
+    total: detail.metrics.total_ops_tested ?? detail.metrics.operators_tested ?? operatorResults.length,
+    passed: detail.metrics.passed_ops ?? detail.metrics.summary?.passed ?? operatorResults.length,
+    passRate: detail.metrics.pass_rate ?? detail.metrics.summary?.pass_rate ?? (operatorResults.length ? 100 : undefined),
+    avgFp16Loss: detail.metrics.avg_fp16_loss_rate ?? detail.metrics.summary?.avg_fp16_loss_rate ?? 0,
+    avgInt8Loss: detail.metrics.avg_int8_loss_rate ?? detail.metrics.summary?.avg_int8_loss_rate ?? 0,
     allPass: detail.metrics.all_pass,
   } : null;
 
@@ -632,6 +642,12 @@ export default function EvalDetail() {
           <Descriptions.Item label="设备数量">
             {detail.device_count} 台
           </Descriptions.Item>
+          {isDeeplinkTask && detail.metrics?.chip_info && (
+            <Descriptions.Item label="芯片信息">
+              <Tag color="blue">{detail.metrics.chip_info.chip || detail.device_type}</Tag>
+              <Tag color="geekblue">{detail.metrics.chip_info.server_role || 'deployment_server'}</Tag>
+            </Descriptions.Item>
+          )}
           <Descriptions.Item label={isOperatorTest ? '算子评测工具' : '模型部署测试工具'}>
             {detail.toolset_name || '未选择'}
           </Descriptions.Item>
@@ -640,6 +656,8 @@ export default function EvalDetail() {
               <Descriptions.Item label="算子库">
                 {detail.operator_lib_name
                   ? <Tag color="purple">{detail.operator_lib_name}</Tag>
+                  : isDeeplinkTask
+                    ? <Tag color="purple">{detail.metrics?.operator_lib || 'local_default'}（本地算子库）</Tag>
                   : <span style={{ color: '#999' }}>未选择</span>
                 }
               </Descriptions.Item>
