@@ -17,7 +17,7 @@ from app.schemas.evaluation import (
     EvaluationStatsOut,
 )
 from app.services.routing_normalizer import normalize_unified_payload
-from app.models.evaluation import TEST_TAGS
+from app.models.evaluation import TEST_TAGS, TaskStatus
 from app.services.evaluation_service import EvaluationService
 from app.utils.pagination import PaginationParams, paginate
 
