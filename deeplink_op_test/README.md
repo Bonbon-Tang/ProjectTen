@@ -31,6 +31,33 @@ python main.py examples/bw1000_payload.json --output result.json
 cat result.json
 ```
 
+## Remote execution mode
+
+The platform controller runs on `10.201.6.19`. For the supported profile only
+(`deeplink_op_test` + `hygon_bw1000` + `元素操作类`), it sends the payload to
+the runner on `10.201.6.32`. Other combinations are rejected as unsupported.
+
+On `10.201.6.32`:
+
+```bash
+cd ProjectTen/deeplink_op_test
+source .venv/bin/activate
+export DEEPLINK_EXECUTOR_IP=10.201.6.32
+export DEEPLINK_OP_TEST_TOKEN='replace-with-a-shared-token'
+uvicorn server:app --host 0.0.0.0 --port 9100
+```
+
+On `10.201.6.19`, configure the backend with the same token:
+
+```bash
+export DEEPLINK_OP_TEST_URL=http://10.201.6.32:9100
+export DEEPLINK_OP_TEST_TOKEN='replace-with-a-shared-token'
+```
+
+The current runner backend is intentionally `pytorch_cpu`; the executor metadata
+is returned with the result so that CPU simulation is not confused with native
+BW1000 execution.
+
 The runner accepts the ProjectTen payload shape directly. The important fields are:
 
 ```json

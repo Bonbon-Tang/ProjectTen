@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import random
 import re
 import subprocess
@@ -12,6 +13,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session
@@ -35,7 +38,9 @@ class EvaluationService:
     CPU_TEST_RUNNER_PYTHON = CPU_TEST_RUNNER_DIR / '.venv' / 'bin' / 'python'
     CPU_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
     DEEPLINK_OP_TEST_DIR = PROJECT_ROOT / 'deeplink_op_test'
-    DEEPLINK_OP_TEST_PYTHON = '/usr/bin/python3'
+    # The controller is 10.201.6.19; execution is always delegated to the runner host.
+    DEEPLINK_OP_TEST_URL = os.getenv('DEEPLINK_OP_TEST_URL', 'http://10.201.6.32:9100').rstrip('/')
+    DEEPLINK_OP_TEST_TOKEN = os.getenv('DEEPLINK_OP_TEST_TOKEN', '')
     DEEPLINK_OP_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
     DEEPLINK_SUPPORTED_DEVICE = 'hygon_bw1000'
     DEEPLINK_SUPPORTED_CATEGORY = '元素操作类'
@@ -119,6 +124,20 @@ class EvaluationService:
             raise ValueError(f"镜像与工具业务编号前缀不一致：image_code={image_code}, tool_code={toolset_code}")
 
     @staticmethod
+    def _validate_deeplink_support(*, tool_name: Optional[str], device_type: Optional[str], operator_categories: Optional[list]) -> None:
+        """deeplink_op_test currently supports exactly one execution profile."""
+        if tool_name != 'deeplink_op_test':
+            return
+        if device_type != EvaluationService.DEEPLINK_SUPPORTED_DEVICE:
+            raise ValueError(
+                '当前测试不支持：deeplink_op_test 仅支持 BW1000（hygon_bw1000）'
+            )
+        if operator_categories != [EvaluationService.DEEPLINK_SUPPORTED_CATEGORY]:
+            raise ValueError(
+                '当前测试不支持：deeplink_op_test 仅支持元素操作类'
+            )
+
+    @staticmethod
     def _cpu_test_report_paths(task_id: int) -> tuple[Path, Path]:
         EvaluationService.CPU_TEST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
         base = EvaluationService.CPU_TEST_REPORT_DIR / f"task_{task_id}_cpu_test_report"
@@ -171,6 +190,7 @@ class EvaluationService:
             'warmup': payload.get('warmup', 5),
             'repeat': payload.get('repeat', 20),
             'dtype': payload.get('dtype', 'float32'),
+            'shape': payload.get('shape', [1024, 1024]),
         }
 
         EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
@@ -179,54 +199,44 @@ class EvaluationService:
         log_file = EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test.log'
         task_json.write_text(json.dumps(task_payload, ensure_ascii=False, indent=2), encoding='utf-8')
 
-        cmd = [
-            EvaluationService.DEEPLINK_OP_TEST_PYTHON,
-            str(EvaluationService.DEEPLINK_OP_TEST_DIR / 'main.py'),
-            str(task_json),
-            '--output',
-            str(result_json),
-        ]
+        endpoint = f"{EvaluationService.DEEPLINK_OP_TEST_URL}/v1/evaluations/run"
+        headers = {'Content-Type': 'application/json'}
+        if EvaluationService.DEEPLINK_OP_TEST_TOKEN:
+            headers['Authorization'] = f"Bearer {EvaluationService.DEEPLINK_OP_TEST_TOKEN}"
+        request = Request(
+            endpoint,
+            data=json.dumps(task_payload, ensure_ascii=False).encode('utf-8'),
+            headers=headers,
+            method='POST',
+        )
 
-        # 写入执行日志
         log_lines = [
             f"[deeplink_op_test] task_id={task.id}",
-            f"[command] {' '.join(cmd)}",
-            f"[cwd] {EvaluationService.DEEPLINK_OP_TEST_DIR}",
-            f"[env] PYTHONPATH={EvaluationService.DEEPLINK_OP_TEST_DIR}",
+            f"[mode] remote_http",
+            f"[endpoint] {endpoint}",
             f"[task_payload] {json.dumps(task_payload, ensure_ascii=False)}",
         ]
 
         try:
-            proc = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                cwd=str(EvaluationService.DEEPLINK_OP_TEST_DIR),
-                timeout=300,
-            )
-            log_lines.append(f"[returncode] {proc.returncode}")
-            if proc.stdout:
-                log_lines.append(f"[stdout] {proc.stdout}")
-            if proc.stderr:
-                log_lines.append(f"[stderr] {proc.stderr}")
-        except subprocess.TimeoutExpired:
-            log_lines.append("[error] subprocess timed out after 300s")
+            with urlopen(request, timeout=300) as response:
+                response_body = response.read().decode('utf-8')
+                runner_output = json.loads(response_body)
+                log_lines.extend([f"[http_status] {response.status}", f"[response] {response_body}"])
+        except HTTPError as ex:
+            error_body = ex.read().decode('utf-8', errors='replace')
+            log_lines.extend([f"[http_status] {ex.code}", f"[error] {error_body}"])
             log_file.write_text('\n'.join(log_lines), encoding='utf-8')
-            raise RuntimeError("deeplink_op_test execution timed out after 300 seconds")
-        except Exception as ex:
+            raise RuntimeError(f"deeplink_op_test agent returned HTTP {ex.code}: {error_body}") from ex
+        except (URLError, TimeoutError, json.JSONDecodeError) as ex:
             log_lines.append(f"[error] {type(ex).__name__}: {ex}")
             log_file.write_text('\n'.join(log_lines), encoding='utf-8')
-            raise
+            raise RuntimeError(f"deeplink_op_test agent request failed: {ex}") from ex
 
         log_file.write_text('\n'.join(log_lines), encoding='utf-8')
-
-        if proc.returncode != 0:
-            raise RuntimeError(
-                f"deeplink_op_test failed (code={proc.returncode}):\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}\nsee log: {log_file}"
-            )
-        if not result_json.exists():
-            raise RuntimeError(f"deeplink_op_test did not produce result.json (returncode={proc.returncode}), see log: {log_file}")
-        return json.loads(result_json.read_text(encoding='utf-8'))
+        if runner_output.get('status') != 'success':
+            raise RuntimeError(f"deeplink_op_test agent returned failure: {runner_output.get('error', runner_output)}")
+        result_json.write_text(json.dumps(runner_output, ensure_ascii=False, indent=2), encoding='utf-8')
+        return runner_output
 
     @staticmethod
     def _run_cpu_test_operator_runner(task: EvaluationTask, selected_ops: List[Operator], operator_lib_name: Optional[str]) -> dict:
@@ -360,6 +370,17 @@ class EvaluationService:
         # Validate: operator_test requires toolset_id
         if task_category == "operator_test" and not kwargs.get("toolset_id"):
             raise ValueError("算子评测任务必须关联工具集(toolset_id/toolset_code)，请选择 Deeplink_op_test 或其他算子测试工具")
+
+        task_config = kwargs.get('config') or {}
+        tool_name = task_config.get('tool_name') if isinstance(task_config, dict) else None
+        operator_categories = kwargs.get('operator_categories')
+        if tool_name == 'deeplink_op_test' and task_category != 'operator_test':
+            raise ValueError('当前测试不支持：deeplink_op_test 仅可用于算子评测')
+        EvaluationService._validate_deeplink_support(
+            tool_name=tool_name,
+            device_type=kwargs.get('device_type'),
+            operator_categories=operator_categories,
+        )
 
         # Validate device availability at creation time
         device_type = kwargs.get("device_type")
@@ -604,25 +625,33 @@ class EvaluationService:
             if not task:
                 return
 
-            # Simulate 60-120 seconds of execution
-            total_duration = random.randint(60, 120)
-            elapsed = 0
-            step = 10
+            task_config = task.config or {}
+            is_deeplink_task = (
+                isinstance(task_config, dict)
+                and task_config.get('tool_name') == 'deeplink_op_test'
+            )
+            if is_deeplink_task:
+                # deeplink_op_test performs the real remote call immediately.
+                task.progress = 10
+                db.commit()
+            else:
+                # Other runners remain simulated until their real executors are connected.
+                total_duration = random.randint(60, 120)
+                elapsed = 0
+                step = 10
 
-            while elapsed < total_duration:
-                time.sleep(step)
-                elapsed += step
+                while elapsed < total_duration:
+                    time.sleep(step)
+                    elapsed += step
 
-                # Re-read task to check if it was terminated externally
-                db.refresh(task)
-                if task.status != TaskStatus.running:
-                    return
+                    db.refresh(task)
+                    if task.status != TaskStatus.running:
+                        return
 
-                # Progress can only increase, never decrease
-                new_progress = min(math.ceil(elapsed / total_duration * 100), 99)
-                if new_progress > task.progress:
-                    task.progress = new_progress
-                    db.commit()
+                    new_progress = min(math.ceil(elapsed / total_duration * 100), 99)
+                    if new_progress > task.progress:
+                        task.progress = new_progress
+                        db.commit()
 
             # Generate metrics based on task category
             task_category = task.task_category
@@ -711,6 +740,11 @@ class EvaluationService:
         task_config = task.config or {}
         tool_name = task_config.get('tool_name') if isinstance(task_config, dict) else None
         if tool_name == 'deeplink_op_test':
+            EvaluationService._validate_deeplink_support(
+                tool_name=tool_name,
+                device_type=getattr(task.device_type, 'value', task.device_type),
+                operator_categories=task.operator_categories,
+            )
             runner_output = EvaluationService._run_deeplink_op_test(task, operator_lib_name)
             # 转换库输出为 metrics 结构，对齐前端字段
             lib_ops = runner_output.get('operators', [])
