@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import math
 import os
 import random
@@ -14,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import ProxyHandler, Request, build_opener
 
 from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session
@@ -30,6 +31,8 @@ from app.models.operator import Operator
 from app.models.operator_benchmark import OperatorBenchmark
 from app.models.asset import DigitalAsset
 from app.utils.pagination import PaginationParams
+
+logger = logging.getLogger(__name__)
 
 
 class EvaluationService:
@@ -218,7 +221,9 @@ class EvaluationService:
         ]
 
         try:
-            with urlopen(request, timeout=300) as response:
+            # Internal runner traffic must not be routed through HTTP(S)_PROXY.
+            opener = build_opener(ProxyHandler({}))
+            with opener.open(request, timeout=300) as response:
                 response_body = response.read().decode('utf-8')
                 runner_output = json.loads(response_body)
                 log_lines.extend([f"[http_status] {response.status}", f"[response] {response_body}"])
@@ -683,7 +688,8 @@ class EvaluationService:
             EvaluationService._create_auto_report(db, task)
 
         except Exception as e:
-            # On error, mark task as failed and release devices
+            # On error, mark task as failed and release devices.
+            logger.exception("Evaluation task %s failed in background execution", task_id)
             try:
                 task = db.query(EvaluationTask).filter(EvaluationTask.id == task_id).first()
                 if task:
@@ -693,7 +699,7 @@ class EvaluationService:
                     EvaluationService._release_devices(db, task)
                     db.commit()
             except Exception:
-                pass
+                logger.exception("Failed to persist failure state for evaluation task %s", task_id)
         finally:
             db.close()
 

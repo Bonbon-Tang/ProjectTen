@@ -370,6 +370,32 @@ def get_task_logs(task_id: int, current_user: User = Depends(get_current_user),
                     continue
                 logs.append({"timestamp": str(task.updated_at or task.created_at), "level": "INFO", "message": line})
 
+    task_config = task.config or {}
+    if isinstance(task_config, dict) and task_config.get('tool_name') == 'deeplink_op_test':
+        log_path = (
+            EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR
+            / f'task_{task_id}_deeplink_op_test.log'
+        )
+        if log_path.exists():
+            for line in log_path.read_text(encoding='utf-8').splitlines():
+                if not line.strip():
+                    continue
+                is_error = '[error]' in line or '[http_status] 4' in line or '[http_status] 5' in line
+                logs.append({
+                    "timestamp": str(task.updated_at or task.created_at),
+                    "level": "ERROR" if is_error else "INFO",
+                    "message": line,
+                })
+
+    if task.status == TaskStatus.failed and isinstance(task.result, dict):
+        error_message = task.result.get('message') or task.result.get('error')
+        if error_message:
+            logs.append({
+                "timestamp": str(task.completed_at or task.updated_at or task.created_at),
+                "level": "ERROR",
+                "message": f"Task failed: {error_message}",
+            })
+
     return _ok({
         "task_id": task_id,
         "logs": logs,
