@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-SUPPORTED_DEVICE = "hygon_bw1000"
+SUPPORTED_DEVICE = "huawei_910b"
 SUPPORTED_CATEGORY = "元素操作类"
 SUPPORTED_OPERATORS = ["abs", "clamp", "add", "sub", "mul", "div", "pow", "exp", "log", "sqrt"]
 DEFAULT_SHAPE = [1024, 1024]

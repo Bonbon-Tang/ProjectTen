@@ -41,7 +41,7 @@ class EvaluationService:
     CPU_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
     DEEPLINK_OP_TEST_DIR = PROJECT_ROOT / 'deeplink_op_test'
     # The controller is 10.201.6.19; deeplink_op_test owns the SSH transport.
-    DEEPLINK_OP_TEST_SSH_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'bw1000-runner')
+    DEEPLINK_OP_TEST_SSH_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', '10.201.21.35')
     DEEPLINK_OP_TEST_REMOTE_DIR = os.getenv(
         'DEEPLINK_OP_TEST_REMOTE_DIR',
         '/data/tangyufeng/ProjectTen/deeplink_op_test',
@@ -50,7 +50,7 @@ class EvaluationService:
     DEEPLINK_OP_TEST_TIMEOUT = int(os.getenv('DEEPLINK_OP_TEST_TIMEOUT', '300'))
     DEEPLINK_OP_TEST_LOCAL_PYTHON = os.getenv('DEEPLINK_OP_TEST_LOCAL_PYTHON', sys.executable)
     DEEPLINK_OP_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
-    DEEPLINK_SUPPORTED_DEVICE = 'hygon_bw1000'
+    DEEPLINK_SUPPORTED_DEVICE = 'huawei_910b'
     DEEPLINK_SUPPORTED_CATEGORY = '元素操作类'
     DEEPLINK_DEFAULT_OPERATOR_LIBRARY = 'local_default'
     DEEPLINK_SUPPORTED_OPERATORS = ['abs', 'clamp', 'add', 'sub', 'mul', 'div', 'pow', 'exp', 'log', 'sqrt']
@@ -138,7 +138,7 @@ class EvaluationService:
             return
         if device_type != EvaluationService.DEEPLINK_SUPPORTED_DEVICE:
             raise ValueError(
-                '当前测试不支持：deeplink_op_test 仅支持 BW1000（hygon_bw1000）'
+                '当前测试不支持：deeplink_op_test 仅支持华为昇腾 910B（huawei_910b）'
             )
         if operator_categories != [EvaluationService.DEEPLINK_SUPPORTED_CATEGORY]:
             raise ValueError(

@@ -1,12 +1,12 @@
 {
   "tool_name": "deeplink_op_test",
   "task_id": 1,
-  "task_name": "bw1000-elementwise-smoke",
-  "device": "hygon_bw1000",
-  "chip": "hygon_bw1000",
+  "task_name": "ascend910b-elementwise-smoke",
+  "device": "huawei_910b",
+  "chip": "huawei_910b",
   "chip_info": {
-    "chip": "hygon_bw1000",
-    "supported_chip": "hygon_bw1000",
+    "chip": "huawei_910b",
+    "supported_chip": "huawei_910b",
     "server_role": "deployment_server"
   },
   "device_count": 1,

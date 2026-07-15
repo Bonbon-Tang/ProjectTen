@@ -2,12 +2,12 @@
 
 `deeplink_op_test` is the standalone operator test runner used by ProjectTen for DeepLink operator evaluation.
 
-It keeps the platform payload protocol stable and executes the currently supported BW1000 elementwise operator set with the Python standard library on CPU.
+It keeps the platform payload protocol stable and executes the currently supported Huawei Ascend 910B elementwise operator set with the Python standard library on CPU.
 
 ## Positioning
 
 - Tool name: `deeplink_op_test`
-- Current target chip from platform payload: `hygon_bw1000` / BW1000 deployment server
+- Current target chip from platform payload: `huawei_910b` / Huawei Ascend 910B execution server
 - Execution backend in this standalone project: Python standard-library CPU benchmark
 - Operator library: local default operator library, reported as `local_default`
 - Operator category: `元素操作类`
@@ -37,16 +37,16 @@ cat result.json
 ## Remote execution mode (SSH)
 
 The platform controller runs on `10.201.6.19`. For the supported profile only
-(`deeplink_op_test` + `hygon_bw1000` + `元素操作类`), it sends the payload to
-the runner on `10.201.6.32` over SSH. Other combinations are rejected as unsupported.
+(`deeplink_op_test` + `huawei_910b` + `元素操作类`), it sends the payload to
+the runner on `10.201.21.35` over SSH. Other combinations are rejected as unsupported.
 
 Configure an SSH alias on `10.201.6.19`:
 
 ```sshconfig
-Host bw1000-runner
-    HostName 10.201.6.32
-    User <BW1000-SSH-USER>
-    IdentityFile ~/.ssh/projectten_bw1000
+Host ascend910b-runner
+    HostName 10.201.21.35
+    User <910B-SSH-USER>
+    IdentityFile ~/.ssh/projectten_910b
     IdentitiesOnly yes
     BatchMode yes
     ConnectTimeout 10
@@ -58,14 +58,14 @@ Host bw1000-runner
 Verify the remote runner directly:
 
 ```bash
-printf '%s\n' '{"tool_name":"deeplink_op_test","device":"hygon_bw1000","operator_category":"元素操作类","operators":["abs"],"warmup":1,"repeat":1}' \
+printf '%s\n' '{"tool_name":"deeplink_op_test","device":"huawei_910b","operator_category":"元素操作类","operators":["abs"],"warmup":1,"repeat":1}' \
   | python ssh_runner.py
 ```
 
 ProjectTen reads these optional environment variables on `10.201.6.19`:
 
 ```bash
-export DEEPLINK_OP_TEST_SSH_TARGET=bw1000-runner
+export DEEPLINK_OP_TEST_SSH_TARGET=ascend910b-runner
 export DEEPLINK_OP_TEST_REMOTE_DIR=/data/tangyufeng/ProjectTen/deeplink_op_test
 export DEEPLINK_OP_TEST_REMOTE_PYTHON=/path/to/existing/python
 export DEEPLINK_OP_TEST_TIMEOUT=300
@@ -74,15 +74,15 @@ export DEEPLINK_OP_TEST_TIMEOUT=300
 The runner uses SSH stdin/stdout, keepalive, strict host-key checking, a
 300-second timeout, and remote `flock` so only one benchmark occupies the
 execution server at a time. The current backend is `python_stdlib_cpu`; this
-must not be confused with native BW1000 execution.
+must not be confused with native Ascend 910B execution.
 
 The runner accepts the ProjectTen payload shape directly. The important fields are:
 
 ```json
 {
   "tool_name": "deeplink_op_test",
-  "device": "hygon_bw1000",
-  "chip": "hygon_bw1000",
+  "device": "huawei_910b",
+  "chip": "huawei_910b",
   "device_count": 1,
   "operator_category": "元素操作类",
   "operator_library": "local_default",
@@ -119,4 +119,4 @@ Each operator result includes:
 
 ## Notes
 
-The current implementation intentionally benchmarks on CPU with the Python standard library. For large requested tensors it transparently benchmarks at most 65,536 elements and reports both `requested_elements` and `benchmark_elements`. When a native BW1000 runtime or DeepLink SDK entrypoint is ready, it can replace the standard-library operator dispatch in `main.py` while keeping the same input and output JSON protocol.
+The current implementation intentionally benchmarks on CPU with the Python standard library. For large requested tensors it transparently benchmarks at most 65,536 elements and reports both `requested_elements` and `benchmark_elements`. When a native Ascend 910B runtime or DeepLink SDK entrypoint is ready, it can replace the standard-library operator dispatch in `main.py` while keeping the same input and output JSON protocol.

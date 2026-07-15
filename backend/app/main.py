@@ -24,10 +24,10 @@ def _init_default_toolset(db):
     if not existing:
         asset = DigitalAsset(
             name="deeplink_op_test",
-            description="DeepLink算子测试工具集，平台调用算子测试后可选择本工具；当前支持 BW1000 部署服务器、设备数量、本地算子库与元素操作类算子回传协议。",
+            description="DeepLink算子测试工具集，平台调用算子测试后可选择本工具；当前支持华为昇腾 910B 执行服务器、设备数量、本地算子库与元素操作类算子回传协议。",
             asset_type="toolset",
             category="算子测试工具",
-            tags=["算子测试", "DeepLink", "BW1000", "hygon_bw1000", "部署服务器", "本地算子库", "元素操作类", "Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"],
+            tags=["算子测试", "DeepLink", "华为昇腾910B", "huawei_910b", "部署服务器", "本地算子库", "元素操作类", "Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"],
             version="v1.0.0",
             file_path="/tools/deeplink_op_test",
             file_size=0,
@@ -40,8 +40,8 @@ def _init_default_toolset(db):
     else:
         # Ensure existing toolset has correct category
         existing.name = "deeplink_op_test"
-        existing.description = "DeepLink算子测试工具集，平台调用算子测试后可选择本工具；当前支持 BW1000 部署服务器、设备数量、本地算子库与元素操作类算子回传协议。"
-        existing.tags = ["算子测试", "DeepLink", "BW1000", "hygon_bw1000", "部署服务器", "本地算子库", "元素操作类", "Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"]
+        existing.description = "DeepLink算子测试工具集，平台调用算子测试后可选择本工具；当前支持华为昇腾 910B 执行服务器、设备数量、本地算子库与元素操作类算子回传协议。"
+        existing.tags = ["算子测试", "DeepLink", "华为昇腾910B", "huawei_910b", "部署服务器", "本地算子库", "元素操作类", "Abs", "Clamp", "Add", "Sub", "Mul", "Div", "Pow", "Exp", "Log", "Sqrt"]
         if existing.category != "算子测试工具":
             existing.category = "算子测试工具"
     db.commit()

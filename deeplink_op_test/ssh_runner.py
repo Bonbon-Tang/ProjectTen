@@ -9,7 +9,7 @@ import sys
 from typing import Any
 
 
-DEFAULT_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'bw1000-runner')
+DEFAULT_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', '10.201.21.35')
 DEFAULT_REMOTE_DIR = os.getenv(
     'DEEPLINK_OP_TEST_REMOTE_DIR',
     '/data/tangyufeng/ProjectTen/deeplink_op_test',

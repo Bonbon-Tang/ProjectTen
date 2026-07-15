@@ -38,7 +38,7 @@ import dayjs from 'dayjs';
 const { TextArea } = Input;
 
 const DEEPLINK_TOOL_NAME = 'deeplink_op_test';
-const DEEPLINK_DEVICE_TYPE = 'hygon_bw1000';
+const DEEPLINK_DEVICE_TYPE = 'huawei_910b';
 const DEEPLINK_OPERATOR_CATEGORY = '元素操作类';
 const DEEPLINK_OPERATOR_LIBRARY = 'local_default';
 const DEEPLINK_OPERATOR_LIBRARY_LABEL = '本地算子库';
@@ -780,7 +780,7 @@ export default function EvalCreate() {
         <Form.Item name="device_type" label="选择设备类型" rules={[{ required: true, message: '请选择设备类型' }]}>
           <Select
             disabled={isDeeplinkSelected}
-            placeholder={isDeeplinkSelected ? 'deeplink_op_test 当前固定使用 BW1000 部署服务器' : '选择智算设备'}
+          placeholder={isDeeplinkSelected ? 'deeplink_op_test 当前固定使用华为昇腾 910B 执行服务器' : '选择智算设备'}
             style={selectFieldStyle}
             onChange={(chips) => {
               form.setFieldsValue({ device_count: 1, name: generateDefaultName(chips), image_id: undefined });
@@ -855,7 +855,7 @@ export default function EvalCreate() {
 
         {isOperatorTest && (
           <>
-            <Form.Item name="operator_categories" label="选择算子分类" extra={isDeeplinkSelected ? 'deeplink_op_test 当前固定对齐 BW1000 的元素操作类 10 个算子：Abs / Clamp / Add / Sub / Mul / Div / Pow / Exp / Log / Sqrt' : '不选则测试所有分类的算子'}>
+              <Form.Item name="operator_categories" label="选择算子分类" extra={isDeeplinkSelected ? 'deeplink_op_test 当前固定对齐华为昇腾 910B 的元素操作类 10 个算子：Abs / Clamp / Add / Sub / Mul / Div / Pow / Exp / Log / Sqrt' : '不选则测试所有分类的算子'}>
               <Select mode="multiple" disabled={isDeeplinkSelected} placeholder="选择要测试的算子分类（可多选，不选=全部）" allowClear={!isDeeplinkSelected} style={selectFieldStyle} options={operatorCategories.map((c) => ({ label: `${c.category} (${c.count}个)`, value: c.category }))} onChange={(vals: string[]) => {
                 if (vals?.length) {
                   const matchedCount = operatorCategories.filter((c) => vals.includes(c.category)).reduce((sum, c) => sum + c.count, 0);
