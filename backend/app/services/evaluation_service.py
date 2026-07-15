@@ -651,10 +651,86 @@ class EvaluationService:
                 isinstance(task_config, dict)
                 and task_config.get('tool_name') == 'deeplink_op_test'
             )
+            is_aibench_agent_task = (
+                isinstance(task_config, dict)
+                and task_config.get('tool_name') == 'aibench_agent'
+            )
             if is_deeplink_task:
                 # deeplink_op_test performs the real remote call immediately.
                 task.progress = 10
                 db.commit()
+            elif is_aibench_agent_task:
+                # AIBenchAgent: submit to 910B execution node, poll until done.
+                task.progress = 5
+                db.commit()
+                from app.services.aibench_client import (
+                    AIBenchClient,
+                    JobPollTimeoutError,
+                    TERMINAL_STATUSES as _AGENT_TERMINAL,
+                    AGENT_TO_PROGRESS,
+                )
+                client = AIBenchClient()
+                job_info = client.submit_job(task)
+                job_id = job_info.get('job_id')
+                if not job_id:
+                    raise RuntimeError(
+                        f"AIBenchAgent 任务提交失败: {job_info.get('error', 'unknown')}"
+                    )
+                deadline = time.time() + client.poll_timeout
+                last_progress = 5
+                while True:
+                    time.sleep(client.poll_interval)
+                    try:
+                        state = client._get(f"/api/v1/jobs/{job_id}").json()
+                    except Exception as exc:
+                        logger.warning("[AIBenchAgent] 轮询 job %s 时出错: %s", job_id, exc)
+                        time.sleep(client.poll_interval)
+                        continue
+                    status = state.get('status', '')
+                    prog = AGENT_TO_PROGRESS.get(status, last_progress)
+                    if prog > task.progress:
+                        task.progress = prog
+                        db.commit()
+                        last_progress = prog
+                    if status in _AGENT_TERMINAL:
+                        break
+                    if time.time() >= deadline:
+                        client.cancel_job(job_id)
+                        raise RuntimeError(
+                            f"AIBenchAgent job {job_id} 轮询超时（{client.poll_timeout}s）"
+                        )
+                if status != 'completed':
+                    error_info = state.get('error') or {}
+                    raise RuntimeError(
+                        f"AIBenchAgent job {job_id} 执行失败 [status={status}]: "
+                        f"{error_info.get('stage','')} {error_info.get('message','')}"
+                    )
+                # Collect real results
+                try:
+                    agent_result = client._get(f"/api/v1/jobs/{job_id}/result").json()
+                except Exception as exc:
+                    raise RuntimeError(f"AIBenchAgent job {job_id} 结果获取失败: {exc}") from exc
+                real_metrics = (
+                    agent_result.get('metrics')
+                    or {}
+                )
+                task.metrics = real_metrics
+                task.result = {
+                    'status': 'success',
+                    'runner': 'aibench_agent',
+                    'agent_job_id': job_id,
+                    'agent_url': client.base_url,
+                    'raw_result': agent_result,
+                }
+                task.progress = 100
+                task.status = TaskStatus.completed
+                task.completed_at = datetime.utcnow()
+                EvaluationService._release_devices(db, task)
+                db.commit()
+                if task.task_category == TaskCategory.model_deployment_test and task.image_id:
+                    EvaluationService._write_model_benchmark(db, task, real_metrics)
+                EvaluationService._create_auto_report(db, task)
+                return  # 真实路径结束，不走后续模拟
             else:
                 # Other runners remain simulated until their real executors are connected.
                 total_duration = random.randint(60, 120)

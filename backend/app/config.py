@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: str = '["http://localhost:3000","http://localhost:5173"]'
 
+    # AIBenchAgent 910B 执行节点（部署在 910B 宿主机）
+    # 示例：http://10.201.21.35:8080
+    AIBENCH_AGENT_URL: str = ""
+    # 预留鉴权 token，生产环境建议配置
+    AIBENCH_AGENT_TOKEN: str = ""
+    # 管理节点轮询间隔（秒）
+    AIBENCH_POLL_INTERVAL_SECONDS: int = 10
+    # 管理节点总等待超时（秒），默认 30 分钟
+    AIBENCH_POLL_TIMEOUT_SECONDS: int = 1800
+
     @property
     def cors_origins_list(self) -> List[str]:
         try:
