@@ -27,7 +27,7 @@ import {
   MODEL_TEST_TYPES,
   PRIORITY_MAP,
 } from '@/utils/constants';
-import { createEvaluation } from '@/api/evaluations';
+import { createEvaluation, startEvaluation } from '@/api/evaluations';
 import { extractErrorMessage } from '@/utils/error';
 import { getAssets } from '@/api/assets';
 import { getResourceSummary } from '@/api/resources';
@@ -506,8 +506,17 @@ export default function EvalCreate() {
         }
       }
       const res: any = await createEvaluation(params);
-      message.success('评测任务创建成功！');
       const newId = res?.data?.id || res?.id;
+      if (normalizedToolName === DEEPLINK_TOOL_NAME && newId) {
+        try {
+          await startEvaluation(String(newId));
+          message.success('DeepLink 评测任务已创建并启动');
+        } catch (startError) {
+          message.warning(extractErrorMessage(startError, '任务已创建，但启动失败，请在详情页重试'));
+        }
+      } else {
+        message.success('评测任务创建成功！');
+      }
       navigate(newId ? `/evaluations/${newId}` : '/evaluations/list');
     } catch (error) {
       message.error(extractErrorMessage(error, '创建任务失败，请重试'));
