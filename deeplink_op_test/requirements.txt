@@ -1,1 +1,3 @@
-torch>=2.2
+# Intentionally empty.
+# deeplink_op_test must reuse the PyTorch already installed on the BW1000
+# execution server. Do not install or upgrade torch from this file.

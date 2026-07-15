@@ -16,13 +16,16 @@ It keeps the platform payload protocol stable and executes the currently support
 
 ## Install
 
+Do **not** install or upgrade PyTorch from this project. Reuse the Python
+environment already validated on the BW1000 server:
+
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+python3 -c 'import sys, torch; print(sys.executable); print(torch.__version__)'
 ```
 
-If the deployment server already has PyTorch installed, using that Python environment is also fine.
+Set `DEEPLINK_OP_TEST_REMOTE_PYTHON` to the printed Python path when it is not
+the default `python3`. `requirements.txt` is intentionally empty so it cannot
+replace the server's existing Torch build.
 
 ## Run
 
@@ -64,7 +67,7 @@ ProjectTen reads these optional environment variables on `10.201.6.19`:
 ```bash
 export DEEPLINK_OP_TEST_SSH_TARGET=bw1000-runner
 export DEEPLINK_OP_TEST_REMOTE_DIR=/data/tangyufeng/ProjectTen/deeplink_op_test
-export DEEPLINK_OP_TEST_REMOTE_PYTHON=.venv/bin/python
+export DEEPLINK_OP_TEST_REMOTE_PYTHON=/path/to/existing/python
 export DEEPLINK_OP_TEST_TIMEOUT=300
 ```
 

@@ -46,7 +46,7 @@ class EvaluationService:
         'DEEPLINK_OP_TEST_REMOTE_DIR',
         '/data/tangyufeng/ProjectTen/deeplink_op_test',
     )
-    DEEPLINK_OP_TEST_REMOTE_PYTHON = os.getenv('DEEPLINK_OP_TEST_REMOTE_PYTHON', '.venv/bin/python')
+    DEEPLINK_OP_TEST_REMOTE_PYTHON = os.getenv('DEEPLINK_OP_TEST_REMOTE_PYTHON', 'python3')
     DEEPLINK_OP_TEST_TIMEOUT = int(os.getenv('DEEPLINK_OP_TEST_TIMEOUT', '300'))
     DEEPLINK_OP_TEST_LOCAL_PYTHON = os.getenv('DEEPLINK_OP_TEST_LOCAL_PYTHON', sys.executable)
     DEEPLINK_OP_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'

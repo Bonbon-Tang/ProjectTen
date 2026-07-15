@@ -16,7 +16,7 @@ DEFAULT_REMOTE_DIR = os.getenv(
 )
 DEFAULT_REMOTE_PYTHON = os.getenv(
     'DEEPLINK_OP_TEST_REMOTE_PYTHON',
-    '.venv/bin/python',
+    'python3',
 )
 DEFAULT_TIMEOUT = int(os.getenv('DEEPLINK_OP_TEST_TIMEOUT', '300'))
 
