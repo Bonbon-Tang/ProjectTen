@@ -36,16 +36,18 @@ cat result.json
 
 ## Remote execution mode (SSH)
 
-The platform controller runs on `10.201.6.19`. For the supported profile only
+The platform controller runs as `ailab@10.201.6.19`. For the supported profile only
 (`deeplink_op_test` + `huawei_910b` + `元素操作类`), it sends the payload to
-the runner on `10.201.21.35` over SSH. Other combinations are rejected as unsupported.
+`root@10.201.21.35` over SSH. The controller streams its local `main.py` source
+and task payload through stdin, so the node does not need a ProjectTen checkout
+or a persistent agent service. Other combinations are rejected as unsupported.
 
 Configure an SSH alias on `10.201.6.19`:
 
 ```sshconfig
 Host ascend910b-runner
     HostName 10.201.21.35
-    User <910B-SSH-USER>
+    User root
     IdentityFile ~/.ssh/projectten_910b
     IdentitiesOnly yes
     BatchMode yes
@@ -65,13 +67,13 @@ printf '%s\n' '{"tool_name":"deeplink_op_test","device":"huawei_910b","operator_
 ProjectTen reads these optional environment variables on `10.201.6.19`:
 
 ```bash
-export DEEPLINK_OP_TEST_SSH_TARGET=ascend910b-runner
-export DEEPLINK_OP_TEST_REMOTE_DIR=/data/tangyufeng/ProjectTen/deeplink_op_test
-export DEEPLINK_OP_TEST_REMOTE_PYTHON=/path/to/existing/python
+export DEEPLINK_OP_TEST_SSH_TARGET=root@10.201.21.35
+export DEEPLINK_OP_TEST_REMOTE_PYTHON=python3
 export DEEPLINK_OP_TEST_TIMEOUT=300
 ```
 
-The runner uses SSH stdin/stdout, keepalive, strict host-key checking, a
+The runner streams code and payload over SSH stdin/stdout and uses keepalive,
+strict host-key checking, a
 300-second timeout, and remote `flock` so only one benchmark occupies the
 execution server at a time. The current backend is `python_stdlib_cpu`; this
 must not be confused with native Ascend 910B execution.

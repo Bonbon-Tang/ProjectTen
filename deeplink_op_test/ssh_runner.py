@@ -6,27 +6,28 @@ import os
 import shlex
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 
-DEFAULT_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', '10.201.21.35')
-DEFAULT_REMOTE_DIR = os.getenv(
-    'DEEPLINK_OP_TEST_REMOTE_DIR',
-    '/data/tangyufeng/ProjectTen/deeplink_op_test',
-)
-DEFAULT_REMOTE_PYTHON = os.getenv(
-    'DEEPLINK_OP_TEST_REMOTE_PYTHON',
-    'python3',
-)
+DEFAULT_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'root@10.201.21.35')
+DEFAULT_REMOTE_PYTHON = os.getenv('DEEPLINK_OP_TEST_REMOTE_PYTHON', 'python3')
 DEFAULT_TIMEOUT = int(os.getenv('DEEPLINK_OP_TEST_TIMEOUT', '300'))
 
+REMOTE_BOOTSTRAP = """import json,sys
+bundle=json.load(sys.stdin)
+namespace={'__name__':'deeplink_remote'}
+exec(compile(bundle['source'],'deeplink_op_test/main.py','exec'),namespace)
+result=namespace['run'](bundle['payload'])
+print(json.dumps(result,ensure_ascii=False))
+"""
 
-def build_command(target: str, remote_dir: str, remote_python: str, timeout: int) -> list[str]:
-    remote_command = ' && '.join([
-        f'cd {shlex.quote(remote_dir)}',
+
+def build_command(target: str, remote_python: str, timeout: int) -> list[str]:
+    remote_command = (
         f'flock -w 10 /tmp/deeplink_op_test.lock timeout {int(timeout)}s '
-        f'{shlex.quote(remote_python)} main.py /dev/stdin',
-    ])
+        f'{shlex.quote(remote_python)} -c {shlex.quote(REMOTE_BOOTSTRAP)}'
+    )
     return [
         'ssh',
         '-o', 'BatchMode=yes',
@@ -35,7 +36,7 @@ def build_command(target: str, remote_dir: str, remote_python: str, timeout: int
         '-o', 'ServerAliveCountMax=3',
         '-o', 'StrictHostKeyChecking=yes',
         target,
-        f'bash -lc {shlex.quote(remote_command)}',
+        remote_command,
     ]
 
 
@@ -43,15 +44,16 @@ def run_remote(
     payload: dict[str, Any],
     *,
     target: str = DEFAULT_TARGET,
-    remote_dir: str = DEFAULT_REMOTE_DIR,
     remote_python: str = DEFAULT_REMOTE_PYTHON,
     timeout: int = DEFAULT_TIMEOUT,
 ) -> dict[str, Any]:
-    command = build_command(target, remote_dir, remote_python, timeout)
+    source = Path(__file__).with_name('main.py').read_text(encoding='utf-8')
+    bundle = {'source': source, 'payload': payload}
+    command = build_command(target, remote_python, timeout)
     try:
         completed = subprocess.run(
             command,
-            input=json.dumps(payload, ensure_ascii=False),
+            input=json.dumps(bundle, ensure_ascii=False),
             capture_output=True,
             text=True,
             timeout=timeout + 30,
@@ -75,16 +77,15 @@ def run_remote(
         ) from exc
     if not isinstance(result, dict):
         raise RuntimeError('SSH deeplink_op_test returned a non-object JSON result')
-    result['transport'] = 'ssh'
+    result['transport'] = 'ssh_stream'
     result['ssh_target'] = target
-    result['remote_dir'] = remote_dir
+    result['source_delivery'] = 'stdin'
     return result
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description='Run deeplink_op_test on a remote SSH executor')
+    parser = argparse.ArgumentParser(description='Stream and run deeplink_op_test on a remote SSH executor')
     parser.add_argument('--target', default=DEFAULT_TARGET)
-    parser.add_argument('--remote-dir', default=DEFAULT_REMOTE_DIR)
     parser.add_argument('--remote-python', default=DEFAULT_REMOTE_PYTHON)
     parser.add_argument('--timeout', type=int, default=DEFAULT_TIMEOUT)
     args = parser.parse_args()
@@ -93,7 +94,6 @@ def main() -> int:
         result = run_remote(
             payload,
             target=args.target,
-            remote_dir=args.remote_dir,
             remote_python=args.remote_python,
             timeout=args.timeout,
         )

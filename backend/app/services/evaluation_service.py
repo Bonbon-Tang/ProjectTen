@@ -41,11 +41,7 @@ class EvaluationService:
     CPU_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
     DEEPLINK_OP_TEST_DIR = PROJECT_ROOT / 'deeplink_op_test'
     # The controller is 10.201.6.19; deeplink_op_test owns the SSH transport.
-    DEEPLINK_OP_TEST_SSH_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', '10.201.21.35')
-    DEEPLINK_OP_TEST_REMOTE_DIR = os.getenv(
-        'DEEPLINK_OP_TEST_REMOTE_DIR',
-        '/data/tangyufeng/ProjectTen/deeplink_op_test',
-    )
+    DEEPLINK_OP_TEST_SSH_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'root@10.201.21.35')
     DEEPLINK_OP_TEST_REMOTE_PYTHON = os.getenv('DEEPLINK_OP_TEST_REMOTE_PYTHON', 'python3')
     DEEPLINK_OP_TEST_TIMEOUT = int(os.getenv('DEEPLINK_OP_TEST_TIMEOUT', '300'))
     DEEPLINK_OP_TEST_LOCAL_PYTHON = os.getenv('DEEPLINK_OP_TEST_LOCAL_PYTHON', sys.executable)
@@ -211,7 +207,6 @@ class EvaluationService:
             EvaluationService.DEEPLINK_OP_TEST_LOCAL_PYTHON,
             str(EvaluationService.DEEPLINK_OP_TEST_DIR / 'ssh_runner.py'),
             '--target', EvaluationService.DEEPLINK_OP_TEST_SSH_TARGET,
-            '--remote-dir', EvaluationService.DEEPLINK_OP_TEST_REMOTE_DIR,
             '--remote-python', EvaluationService.DEEPLINK_OP_TEST_REMOTE_PYTHON,
             '--timeout', str(EvaluationService.DEEPLINK_OP_TEST_TIMEOUT),
         ]
@@ -220,7 +215,7 @@ class EvaluationService:
             f"[deeplink_op_test] task_id={task.id}",
             "[mode] remote_ssh",
             f"[ssh_target] {EvaluationService.DEEPLINK_OP_TEST_SSH_TARGET}",
-            f"[remote_dir] {EvaluationService.DEEPLINK_OP_TEST_REMOTE_DIR}",
+            "[source_delivery] stdin",
             f"[command] {' '.join(command)}",
             f"[task_payload] {json.dumps(task_payload, ensure_ascii=False)}",
         ]
