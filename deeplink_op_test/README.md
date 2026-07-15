@@ -2,13 +2,13 @@
 
 `deeplink_op_test` is the standalone operator test runner used by ProjectTen for DeepLink operator evaluation.
 
-It keeps the platform payload protocol stable and executes the currently supported BW1000 elementwise operator set locally with PyTorch on CPU.
+It keeps the platform payload protocol stable and executes the currently supported BW1000 elementwise operator set with the Python standard library on CPU.
 
 ## Positioning
 
 - Tool name: `deeplink_op_test`
 - Current target chip from platform payload: `hygon_bw1000` / BW1000 deployment server
-- Execution backend in this standalone project: PyTorch CPU benchmark
+- Execution backend in this standalone project: Python standard-library CPU benchmark
 - Operator library: local default operator library, reported as `local_default`
 - Operator category: `元素操作类`
 - Supported operators: `Abs`, `Clamp`, `Add`, `Sub`, `Mul`, `Div`, `Pow`, `Exp`, `Log`, `Sqrt`
@@ -16,16 +16,16 @@ It keeps the platform payload protocol stable and executes the currently support
 
 ## Install
 
-Do **not** install or upgrade PyTorch from this project. Reuse the Python
-environment already validated on the BW1000 server:
+The CPU runner only uses the Python standard library. It does not install or
+import Torch or NumPy:
 
 ```bash
-python3 -c 'import sys, torch; print(sys.executable); print(torch.__version__)'
+python3 -c 'import sys; print(sys.executable); print(sys.version)'
 ```
 
 Set `DEEPLINK_OP_TEST_REMOTE_PYTHON` to the printed Python path when it is not
-the default `python3`. `requirements.txt` is intentionally empty so it cannot
-replace the server's existing Torch build.
+the default `python3`. `requirements.txt` is intentionally empty, so running
+the CPU benchmark cannot replace any server-side Torch or NumPy build.
 
 ## Run
 
@@ -73,7 +73,7 @@ export DEEPLINK_OP_TEST_TIMEOUT=300
 
 The runner uses SSH stdin/stdout, keepalive, strict host-key checking, a
 300-second timeout, and remote `flock` so only one benchmark occupies the
-execution server at a time. The current backend remains `pytorch_cpu`; this
+execution server at a time. The current backend is `python_stdlib_cpu`; this
 must not be confused with native BW1000 execution.
 
 The runner accepts the ProjectTen payload shape directly. The important fields are:
@@ -100,7 +100,7 @@ The runner accepts the ProjectTen payload shape directly. The important fields a
 The result contains both summary metrics and per-operator metrics:
 
 - `status`
-- `execution_mode`: `real_pytorch_cpu`
+- `execution_mode`: `real_python_cpu`
 - `device / chip_info / device_count`
 - `operator_category / operator_library`
 - `operators_tested`
@@ -119,4 +119,4 @@ Each operator result includes:
 
 ## Notes
 
-The current implementation intentionally benchmarks on CPU with PyTorch. When a native BW1000 runtime or DeepLink SDK entrypoint is ready, it can replace the PyTorch operator dispatch in `main.py` while keeping the same input and output JSON protocol.
+The current implementation intentionally benchmarks on CPU with the Python standard library. For large requested tensors it transparently benchmarks at most 65,536 elements and reports both `requested_elements` and `benchmark_elements`. When a native BW1000 runtime or DeepLink SDK entrypoint is ready, it can replace the standard-library operator dispatch in `main.py` while keeping the same input and output JSON protocol.

@@ -1,3 +1,4 @@
 # Intentionally empty.
-# deeplink_op_test must reuse the PyTorch already installed on the BW1000
-# execution server. Do not install or upgrade torch from this file.
+# deeplink_op_test uses only the Python standard library for the current CPU
+# benchmark. Do not add Torch or NumPy here; deployment must not download or
+# replace large/native compute packages.

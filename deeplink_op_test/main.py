@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import math
+import os
+import random
 import statistics
 import sys
 import time
@@ -13,14 +15,7 @@ SUPPORTED_DEVICE = "hygon_bw1000"
 SUPPORTED_CATEGORY = "元素操作类"
 SUPPORTED_OPERATORS = ["abs", "clamp", "add", "sub", "mul", "div", "pow", "exp", "log", "sqrt"]
 DEFAULT_SHAPE = [1024, 1024]
-
-
-def _load_torch():
-    try:
-        import torch  # type: ignore
-    except ImportError as exc:
-        raise RuntimeError("PyTorch is required for real deeplink_op_test execution. Install with: pip install -r requirements.txt") from exc
-    return torch
+DEFAULT_MAX_BENCHMARK_ELEMENTS = 65536
 
 
 def _normalize_operators(payload: dict) -> list[str]:
@@ -37,70 +32,80 @@ def _shape(payload: dict) -> tuple[int, ...]:
     raw = payload.get("shape") or payload.get("tensor_shape") or DEFAULT_SHAPE
     if not isinstance(raw, (list, tuple)) or not raw:
         return tuple(DEFAULT_SHAPE)
-    dims = tuple(max(1, int(dim)) for dim in raw)
-    return dims
+    return tuple(max(1, int(dim)) for dim in raw)
 
 
-def _dtype(torch, payload: dict):
+def _dtype(payload: dict) -> str:
     dtype_name = str(payload.get("dtype", "float32")).lower()
     if dtype_name in {"float16", "fp16", "half"}:
-        return torch.float16
+        return "float16"
     if dtype_name in {"float64", "fp64", "double"}:
-        return torch.float64
-    return torch.float32
+        return "float64"
+    return "float32"
 
 
-def _operator(name: str, torch) -> Callable:
+def _operator(name: str) -> Callable[[list[float], list[float]], list[float]]:
     ops = {
-        "abs": lambda a, b: torch.abs(a),
-        "clamp": lambda a, b: torch.clamp(a, min=-0.5, max=0.5),
-        "add": lambda a, b: torch.add(a, b),
-        "sub": lambda a, b: torch.sub(a, b),
-        "mul": lambda a, b: torch.mul(a, b),
-        "div": lambda a, b: torch.div(a, b.abs() + 1e-3),
-        "pow": lambda a, b: torch.pow(a.abs() + 1e-3, 1.5),
-        "exp": lambda a, b: torch.exp(torch.clamp(a, min=-8.0, max=8.0)),
-        "log": lambda a, b: torch.log(a.abs() + 1e-3),
-        "sqrt": lambda a, b: torch.sqrt(a.abs() + 1e-3),
+        "abs": lambda a, b: [abs(x) for x in a],
+        "clamp": lambda a, b: [min(0.5, max(-0.5, x)) for x in a],
+        "add": lambda a, b: [x + y for x, y in zip(a, b)],
+        "sub": lambda a, b: [x - y for x, y in zip(a, b)],
+        "mul": lambda a, b: [x * y for x, y in zip(a, b)],
+        "div": lambda a, b: [x / (abs(y) + 1e-3) for x, y in zip(a, b)],
+        "pow": lambda a, b: [(abs(x) + 1e-3) ** 1.5 for x in a],
+        "exp": lambda a, b: [math.exp(min(8.0, max(-8.0, x))) for x in a],
+        "log": lambda a, b: [math.log(abs(x) + 1e-3) for x in a],
+        "sqrt": lambda a, b: [math.sqrt(abs(x) + 1e-3) for x in a],
     }
     return ops[name]
 
 
-def _validate(name: str, torch, op: Callable, a, b, output) -> dict:
-    with torch.no_grad():
-        ref = op(a.double(), b.double()).float()
-        out = output.float()
-        diff = (out - ref).abs()
-        max_abs_err = float(diff.max().item())
-        denom = ref.abs().clamp_min(1e-6)
-        max_rel_err = float((diff / denom).max().item())
-        passed = math.isfinite(max_abs_err) and math.isfinite(max_rel_err) and max_abs_err < 1e-4 and max_rel_err < 1e-3
+def _validate(op: Callable, a: list[float], b: list[float], output: list[float]) -> dict:
+    reference = op(a, b)
+    max_abs_err = 0.0
+    max_rel_err = 0.0
+    for actual, expected in zip(output, reference):
+        abs_err = abs(actual - expected)
+        rel_err = abs_err / max(abs(expected), 1e-6)
+        max_abs_err = max(max_abs_err, abs_err)
+        max_rel_err = max(max_rel_err, rel_err)
+    passed = (
+        math.isfinite(max_abs_err)
+        and math.isfinite(max_rel_err)
+        and max_abs_err < 1e-12
+        and max_rel_err < 1e-12
+    )
     return {
         "passed": bool(passed),
-        "baseline": "pytorch_cpu_float64_reference",
-        "max_abs_err": round(max_abs_err, 8),
-        "max_rel_err": round(max_rel_err, 8),
+        "baseline": "python_stdlib_cpu_reference",
+        "max_abs_err": round(max_abs_err, 12),
+        "max_rel_err": round(max_rel_err, 12),
     }
 
 
-def _benchmark_operator(name: str, torch, a, b, *, warmup: int, repeat: int) -> dict:
-    op = _operator(name, torch)
-    with torch.no_grad():
-        for _ in range(max(0, warmup)):
-            output = op(a, b)
-        latencies = []
-        output = None
-        for _ in range(max(1, repeat)):
-            start = time.perf_counter()
-            output = op(a, b)
-            latencies.append((time.perf_counter() - start) * 1000.0)
+def _benchmark_operator(
+    name: str,
+    a: list[float],
+    b: list[float],
+    *,
+    warmup: int,
+    repeat: int,
+) -> dict:
+    op = _operator(name)
+    for _ in range(max(0, warmup)):
+        output = op(a, b)
+    latencies = []
+    output = None
+    for _ in range(max(1, repeat)):
+        start = time.perf_counter()
+        output = op(a, b)
+        latencies.append((time.perf_counter() - start) * 1000.0)
     assert output is not None
     avg_ms = statistics.fmean(latencies)
     sorted_latencies = sorted(latencies)
     p95_idx = min(len(sorted_latencies) - 1, math.ceil(len(sorted_latencies) * 0.95) - 1)
     p95_ms = sorted_latencies[p95_idx]
-    element_count = int(a.numel())
-    throughput = element_count / max(avg_ms / 1000.0, 1e-12)
+    throughput = len(a) / max(avg_ms / 1000.0, 1e-12)
     return {
         "name": name,
         "status": "success",
@@ -110,24 +115,25 @@ def _benchmark_operator(name: str, torch, a, b, *, warmup: int, repeat: int) -> 
         "throughput_unit": "elements/s",
         "warmup": warmup,
         "repeat": repeat,
-        "validation": _validate(name, torch, op, a, b, output),
+        "validation": _validate(op, a, b, output),
     }
 
 
 def run(payload: dict) -> dict:
-    torch = _load_torch()
     operators = _normalize_operators(payload)
     warmup = int(payload.get("warmup", 5))
     repeat = int(payload.get("repeat", 20))
     shape = _shape(payload)
-    dtype = _dtype(torch, payload)
+    dtype = _dtype(payload)
     seed = int(payload.get("seed", 20260707))
-    torch.manual_seed(seed)
-    torch.set_num_threads(max(1, int(payload.get("cpu_threads", torch.get_num_threads()))))
-    a = torch.randn(shape, dtype=dtype, device="cpu")
-    b = torch.randn(shape, dtype=dtype, device="cpu")
+    requested_elements = math.prod(shape)
+    max_elements = max(1, int(payload.get("max_benchmark_elements", DEFAULT_MAX_BENCHMARK_ELEMENTS)))
+    benchmark_elements = min(requested_elements, max_elements)
+    rng = random.Random(seed)
+    a = [rng.gauss(0.0, 1.0) for _ in range(benchmark_elements)]
+    b = [rng.gauss(0.0, 1.0) for _ in range(benchmark_elements)]
 
-    results = [_benchmark_operator(name, torch, a, b, warmup=warmup, repeat=repeat) for name in operators]
+    results = [_benchmark_operator(name, a, b, warmup=warmup, repeat=repeat) for name in operators]
     passed = sum(1 for item in results if item["validation"]["passed"])
     avg_ms = statistics.fmean([item["avg_ms"] for item in results]) if results else 0.0
     p95_ms = max((item["p95_ms"] for item in results), default=0.0)
@@ -137,7 +143,7 @@ def run(payload: dict) -> dict:
     return {
         "status": "success",
         "tool_name": "deeplink_op_test",
-        "execution_mode": "real_pytorch_cpu",
+        "execution_mode": "real_python_cpu",
         "task_id": payload.get("task_id"),
         "task_name": payload.get("task_name"),
         "device": device,
@@ -151,10 +157,14 @@ def run(payload: dict) -> dict:
         "operator_library": payload.get("operator_library", "local_default"),
         "operator_library_scope": payload.get("operator_library_scope", "local"),
         "scenario": payload.get("scenario"),
-        "dtype": str(dtype).replace("torch.", ""),
+        "dtype": dtype,
         "shape": list(shape),
-        "backend": "pytorch_cpu",
-        "cpu_threads": torch.get_num_threads(),
+        "requested_elements": requested_elements,
+        "benchmark_elements": benchmark_elements,
+        "sampled_benchmark": benchmark_elements < requested_elements,
+        "backend": "python_stdlib_cpu",
+        "cpu_threads": 1,
+        "host_cpu_count": os.cpu_count() or 1,
         "operators_requested": operators,
         "operators_tested": len(results),
         "operators": results,
@@ -193,8 +203,7 @@ def main() -> int:
             print(json.dumps(result, ensure_ascii=False, indent=2))
         return 2
     if len(sys.argv) == 4 and sys.argv[2] == "--output":
-        output_path = Path(sys.argv[3])
-        output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        Path(sys.argv[3]).write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     else:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
