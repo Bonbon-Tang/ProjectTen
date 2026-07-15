@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'root@10.201.21.35')
+DEFAULT_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'ascend910b-runner')
 DEFAULT_REMOTE_PYTHON = os.getenv('DEEPLINK_OP_TEST_REMOTE_PYTHON', 'python3')
 DEFAULT_TIMEOUT = int(os.getenv('DEEPLINK_OP_TEST_TIMEOUT', '300'))
 
@@ -89,6 +89,10 @@ def main() -> int:
     parser.add_argument('--remote-python', default=DEFAULT_REMOTE_PYTHON)
     parser.add_argument('--timeout', type=int, default=DEFAULT_TIMEOUT)
     args = parser.parse_args()
+    if sys.stdin.isatty():
+        parser.print_usage(sys.stderr)
+        print('error: task JSON must be provided through stdin', file=sys.stderr)
+        return 1
     try:
         payload = json.load(sys.stdin)
         result = run_remote(

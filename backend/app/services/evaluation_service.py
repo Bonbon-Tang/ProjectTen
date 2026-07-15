@@ -41,7 +41,7 @@ class EvaluationService:
     CPU_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
     DEEPLINK_OP_TEST_DIR = PROJECT_ROOT / 'deeplink_op_test'
     # The controller is 10.201.6.19; deeplink_op_test owns the SSH transport.
-    DEEPLINK_OP_TEST_SSH_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'root@10.201.21.35')
+    DEEPLINK_OP_TEST_SSH_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'ascend910b-runner')
     DEEPLINK_OP_TEST_REMOTE_PYTHON = os.getenv('DEEPLINK_OP_TEST_REMOTE_PYTHON', 'python3')
     DEEPLINK_OP_TEST_TIMEOUT = int(os.getenv('DEEPLINK_OP_TEST_TIMEOUT', '300'))
     DEEPLINK_OP_TEST_LOCAL_PYTHON = os.getenv('DEEPLINK_OP_TEST_LOCAL_PYTHON', sys.executable)
