@@ -38,6 +38,7 @@ import dayjs from 'dayjs';
 const { TextArea } = Input;
 
 const DEEPLINK_TOOL_NAME = 'deeplink_op_test';
+const AIBENCH_AGENT_TOOL_NAME = 'aibench_agent';
 const DEEPLINK_DEVICE_TYPE = 'huawei_910b';
 const DEEPLINK_OPERATOR_CATEGORY = '元素操作类';
 const DEEPLINK_OPERATOR_LIBRARY = 'local_default';
@@ -417,6 +418,9 @@ export default function EvalCreate() {
         defaults.device_count = 1;
         defaults.operator_categories = [DEEPLINK_OPERATOR_CATEGORY];
         defaults.operator_count = DEEPLINK_OPERATORS.length;
+      } else {
+        // 模型测试默认使用 aibench_agent 执行器
+        defaults.tool_name = AIBENCH_AGENT_TOOL_NAME;
       }
       form.setFieldsValue(defaults);
       setCurrent(2);
@@ -446,7 +450,12 @@ export default function EvalCreate() {
     const values = { ...cachedFormValues, ...formValues };
     const allToolsets = [...operatorToolsets, ...modelToolsets];
     const selectedToolset = allToolsets.find((t) => t.id === values.toolset_id);
-    const normalizedToolName = isDeeplinkToolName(selectedToolset?.name) ? DEEPLINK_TOOL_NAME : undefined;
+    const rawToolName = values.tool_name;
+    const normalizedToolName = isDeeplinkToolName(selectedToolset?.name)
+      ? DEEPLINK_TOOL_NAME
+      : rawToolName === AIBENCH_AGENT_TOOL_NAME
+        ? AIBENCH_AGENT_TOOL_NAME
+        : undefined;
     const effectiveDeviceType = normalizedToolName === DEEPLINK_TOOL_NAME ? DEEPLINK_DEVICE_TYPE : values.device_type;
     const chipNum = values.device_count ?? 1;
     const device = deviceList.find((d) => d.device_type === effectiveDeviceType);
