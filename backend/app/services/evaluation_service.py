@@ -8,14 +8,13 @@ import os
 import random
 import re
 import subprocess
+import sys
 import tempfile
 import threading
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
-from urllib.error import HTTPError, URLError
-from urllib.request import ProxyHandler, Request, build_opener
 
 from sqlalchemy import func as sa_func
 from sqlalchemy.orm import Session
@@ -41,9 +40,15 @@ class EvaluationService:
     CPU_TEST_RUNNER_PYTHON = CPU_TEST_RUNNER_DIR / '.venv' / 'bin' / 'python'
     CPU_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
     DEEPLINK_OP_TEST_DIR = PROJECT_ROOT / 'deeplink_op_test'
-    # The controller is 10.201.6.19; execution is always delegated to the runner host.
-    DEEPLINK_OP_TEST_URL = os.getenv('DEEPLINK_OP_TEST_URL', 'http://10.201.6.32:9100').rstrip('/')
-    DEEPLINK_OP_TEST_TOKEN = os.getenv('DEEPLINK_OP_TEST_TOKEN', '')
+    # The controller is 10.201.6.19; deeplink_op_test owns the SSH transport.
+    DEEPLINK_OP_TEST_SSH_TARGET = os.getenv('DEEPLINK_OP_TEST_SSH_TARGET', 'bw1000-runner')
+    DEEPLINK_OP_TEST_REMOTE_DIR = os.getenv(
+        'DEEPLINK_OP_TEST_REMOTE_DIR',
+        '/data/tangyufeng/ProjectTen/deeplink_op_test',
+    )
+    DEEPLINK_OP_TEST_REMOTE_PYTHON = os.getenv('DEEPLINK_OP_TEST_REMOTE_PYTHON', '.venv/bin/python')
+    DEEPLINK_OP_TEST_TIMEOUT = int(os.getenv('DEEPLINK_OP_TEST_TIMEOUT', '300'))
+    DEEPLINK_OP_TEST_LOCAL_PYTHON = os.getenv('DEEPLINK_OP_TEST_LOCAL_PYTHON', sys.executable)
     DEEPLINK_OP_TEST_REPORT_DIR = PROJECT_ROOT / 'backend' / 'data' / 'cpu_test_reports'
     DEEPLINK_SUPPORTED_DEVICE = 'hygon_bw1000'
     DEEPLINK_SUPPORTED_CATEGORY = '元素操作类'
@@ -202,44 +207,60 @@ class EvaluationService:
         log_file = EvaluationService.DEEPLINK_OP_TEST_REPORT_DIR / f'task_{task.id}_deeplink_op_test.log'
         task_json.write_text(json.dumps(task_payload, ensure_ascii=False, indent=2), encoding='utf-8')
 
-        endpoint = f"{EvaluationService.DEEPLINK_OP_TEST_URL}/v1/evaluations/run"
-        headers = {'Content-Type': 'application/json'}
-        if EvaluationService.DEEPLINK_OP_TEST_TOKEN:
-            headers['Authorization'] = f"Bearer {EvaluationService.DEEPLINK_OP_TEST_TOKEN}"
-        request = Request(
-            endpoint,
-            data=json.dumps(task_payload, ensure_ascii=False).encode('utf-8'),
-            headers=headers,
-            method='POST',
-        )
+        command = [
+            EvaluationService.DEEPLINK_OP_TEST_LOCAL_PYTHON,
+            str(EvaluationService.DEEPLINK_OP_TEST_DIR / 'ssh_runner.py'),
+            '--target', EvaluationService.DEEPLINK_OP_TEST_SSH_TARGET,
+            '--remote-dir', EvaluationService.DEEPLINK_OP_TEST_REMOTE_DIR,
+            '--remote-python', EvaluationService.DEEPLINK_OP_TEST_REMOTE_PYTHON,
+            '--timeout', str(EvaluationService.DEEPLINK_OP_TEST_TIMEOUT),
+        ]
 
         log_lines = [
             f"[deeplink_op_test] task_id={task.id}",
-            f"[mode] remote_http",
-            f"[endpoint] {endpoint}",
+            "[mode] remote_ssh",
+            f"[ssh_target] {EvaluationService.DEEPLINK_OP_TEST_SSH_TARGET}",
+            f"[remote_dir] {EvaluationService.DEEPLINK_OP_TEST_REMOTE_DIR}",
+            f"[command] {' '.join(command)}",
             f"[task_payload] {json.dumps(task_payload, ensure_ascii=False)}",
         ]
 
         try:
-            # Internal runner traffic must not be routed through HTTP(S)_PROXY.
-            opener = build_opener(ProxyHandler({}))
-            with opener.open(request, timeout=300) as response:
-                response_body = response.read().decode('utf-8')
-                runner_output = json.loads(response_body)
-                log_lines.extend([f"[http_status] {response.status}", f"[response] {response_body}"])
-        except HTTPError as ex:
-            error_body = ex.read().decode('utf-8', errors='replace')
-            log_lines.extend([f"[http_status] {ex.code}", f"[error] {error_body}"])
+            process = subprocess.run(
+                command,
+                input=json.dumps(task_payload, ensure_ascii=False),
+                capture_output=True,
+                text=True,
+                timeout=EvaluationService.DEEPLINK_OP_TEST_TIMEOUT + 45,
+            )
+        except subprocess.TimeoutExpired as ex:
+            log_lines.append(f"[error] local SSH runner timed out: {ex}")
             log_file.write_text('\n'.join(log_lines), encoding='utf-8')
-            raise RuntimeError(f"deeplink_op_test agent returned HTTP {ex.code}: {error_body}") from ex
-        except (URLError, TimeoutError, json.JSONDecodeError) as ex:
+            raise RuntimeError('deeplink_op_test SSH runner timed out') from ex
+        except OSError as ex:
             log_lines.append(f"[error] {type(ex).__name__}: {ex}")
             log_file.write_text('\n'.join(log_lines), encoding='utf-8')
-            raise RuntimeError(f"deeplink_op_test agent request failed: {ex}") from ex
+            raise RuntimeError(f"failed to start deeplink_op_test SSH runner: {ex}") from ex
 
+        log_lines.extend([
+            f"[returncode] {process.returncode}",
+            f"[stdout] {process.stdout}",
+            f"[stderr] {process.stderr}",
+        ])
         log_file.write_text('\n'.join(log_lines), encoding='utf-8')
+        if process.returncode != 0:
+            try:
+                error_payload = json.loads(process.stdout)
+                error_message = error_payload.get('error', process.stderr or process.stdout)
+            except json.JSONDecodeError:
+                error_message = process.stderr or process.stdout
+            raise RuntimeError(f"deeplink_op_test SSH execution failed: {error_message.strip()}")
+        try:
+            runner_output = json.loads(process.stdout)
+        except json.JSONDecodeError as ex:
+            raise RuntimeError('deeplink_op_test SSH runner returned invalid JSON') from ex
         if runner_output.get('status') != 'success':
-            raise RuntimeError(f"deeplink_op_test agent returned failure: {runner_output.get('error', runner_output)}")
+            raise RuntimeError(f"deeplink_op_test SSH runner returned failure: {runner_output.get('error', runner_output)}")
         result_json.write_text(json.dumps(runner_output, ensure_ascii=False, indent=2), encoding='utf-8')
         return runner_output
 

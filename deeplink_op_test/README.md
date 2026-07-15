@@ -31,32 +31,47 @@ python main.py examples/bw1000_payload.json --output result.json
 cat result.json
 ```
 
-## Remote execution mode
+## Remote execution mode (SSH)
 
 The platform controller runs on `10.201.6.19`. For the supported profile only
 (`deeplink_op_test` + `hygon_bw1000` + `元素操作类`), it sends the payload to
-the runner on `10.201.6.32`. Other combinations are rejected as unsupported.
+the runner on `10.201.6.32` over SSH. Other combinations are rejected as unsupported.
 
-On `10.201.6.32`:
+Configure an SSH alias on `10.201.6.19`:
 
-```bash
-cd ProjectTen/deeplink_op_test
-source .venv/bin/activate
-export DEEPLINK_EXECUTOR_IP=10.201.6.32
-export DEEPLINK_OP_TEST_TOKEN='replace-with-a-shared-token'
-uvicorn server:app --host 0.0.0.0 --port 9100
+```sshconfig
+Host bw1000-runner
+    HostName 10.201.6.32
+    User <BW1000-SSH-USER>
+    IdentityFile ~/.ssh/projectten_bw1000
+    IdentitiesOnly yes
+    BatchMode yes
+    ConnectTimeout 10
+    ServerAliveInterval 15
+    ServerAliveCountMax 3
+    StrictHostKeyChecking yes
 ```
 
-On `10.201.6.19`, configure the backend with the same token:
+Verify the remote runner directly:
 
 ```bash
-export DEEPLINK_OP_TEST_URL=http://10.201.6.32:9100
-export DEEPLINK_OP_TEST_TOKEN='replace-with-a-shared-token'
+printf '%s\n' '{"tool_name":"deeplink_op_test","device":"hygon_bw1000","operator_category":"元素操作类","operators":["abs"],"warmup":1,"repeat":1}' \
+  | python ssh_runner.py
 ```
 
-The current runner backend is intentionally `pytorch_cpu`; the executor metadata
-is returned with the result so that CPU simulation is not confused with native
-BW1000 execution.
+ProjectTen reads these optional environment variables on `10.201.6.19`:
+
+```bash
+export DEEPLINK_OP_TEST_SSH_TARGET=bw1000-runner
+export DEEPLINK_OP_TEST_REMOTE_DIR=/data/tangyufeng/ProjectTen/deeplink_op_test
+export DEEPLINK_OP_TEST_REMOTE_PYTHON=.venv/bin/python
+export DEEPLINK_OP_TEST_TIMEOUT=300
+```
+
+The runner uses SSH stdin/stdout, keepalive, strict host-key checking, a
+300-second timeout, and remote `flock` so only one benchmark occupies the
+execution server at a time. The current backend remains `pytorch_cpu`; this
+must not be confused with native BW1000 execution.
 
 The runner accepts the ProjectTen payload shape directly. The important fields are:
 
