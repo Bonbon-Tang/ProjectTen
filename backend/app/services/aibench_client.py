@@ -242,6 +242,10 @@ class AIBenchClient:
                 settings.AIBENCH_POLL_TIMEOUT_SECONDS,
             ),
             "cleanup_container": True,
+            "privileged": task_config.get("privileged", False),
+            "shm_size": task_config.get("shm_size"),
+            "extra_devices": task_config.get("extra_devices", []),
+            "extra_volumes": task_config.get("extra_volumes", []),
         }
 
         payload = {

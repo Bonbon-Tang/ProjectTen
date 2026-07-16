@@ -669,20 +669,21 @@ class EvaluationService:
                     TERMINAL_STATUSES as _AGENT_TERMINAL,
                     AGENT_TO_PROGRESS,
                 )
-                # 如果有 image_id，查镜像名（优先用 assets.local.json，否则用 DB name）
+                # 如果有 image_id，查镜像配置（优先用 assets.local.json，否则用 DB name）
                 if task.image_id:
                     import json as _json
                     from pathlib import Path
                     from app.models.asset import DigitalAsset
-                    image_name = None
-                    local_assets_path = Path(__file__).parent.parent.parent.parent / 'AIBenchAgent' / 'config' / 'projectten_assets.local.json'
+                    local_assets_path = Path(__file__).parent.parent / 'config' / 'projectten_assets.local.json'
+                    image_meta = None
                     if local_assets_path.exists():
                         with open(local_assets_path) as f:
                             local_assets = _json.load(f)
                         image_meta = local_assets.get('images', {}).get(str(task.image_id))
-                        if image_meta and image_meta.get('image_name'):
-                            image_name = image_meta['image_name']
-                    if not image_name:
+                    image_name = None
+                    if image_meta and image_meta.get('image_name'):
+                        image_name = image_meta['image_name']
+                    elif image_meta is None:
                         image_asset = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
                         if image_asset:
                             image_name = image_asset.name
@@ -690,6 +691,22 @@ class EvaluationService:
                         tc = task.config or {}
                         if isinstance(tc, dict):
                             tc['image_name'] = image_name
+                            # 从 assets.local.json 透传额外 docker 参数
+                            if image_meta:
+                                if image_meta.get('privileged'):
+                                    tc['privileged'] = image_meta['privileged']
+                                if image_meta.get('shm_size'):
+                                    tc['shm_size'] = image_meta['shm_size']
+                                if image_meta.get('extra_devices'):
+                                    tc['extra_devices'] = image_meta['extra_devices']
+                                if image_meta.get('extra_volumes'):
+                                    tc['extra_volumes'] = image_meta['extra_volumes']
+                                if image_meta.get('image_volumes'):
+                                    tc['image_volumes'] = image_meta['image_volumes']
+                                if image_meta.get('image_environment'):
+                                    tc['image_environment'] = image_meta['image_environment']
+                                if image_meta.get('task_command'):
+                                    tc['image_command'] = image_meta['task_command']
                             task.config = tc
                 client = AIBenchClient()
                 job_info = client.submit_job(task)
