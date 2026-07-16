@@ -669,7 +669,9 @@ class EvaluationService:
                     TERMINAL_STATUSES as _AGENT_TERMINAL,
                     AGENT_TO_PROGRESS,
                 )
-                # 如果有 image_id，查镜像配置（优先用 assets.local.json，否则用 DB name）
+                # 如果有 image_id，查镜像配置（优先 assets.local.json，否则 DB）
+                image_name = None
+                extra_cfg = {}
                 if task.image_id:
                     import json as _json
                     from pathlib import Path
@@ -680,36 +682,23 @@ class EvaluationService:
                         with open(local_assets_path) as f:
                             local_assets = _json.load(f)
                         image_meta = local_assets.get('images', {}).get(str(task.image_id))
-                    image_name = None
                     if image_meta and image_meta.get('image_name'):
                         image_name = image_meta['image_name']
-                    elif image_meta is None:
+                        extra_cfg = {
+                            'privileged': image_meta.get('privileged'),
+                            'shm_size': image_meta.get('shm_size'),
+                            'extra_devices': image_meta.get('extra_devices', []),
+                            'extra_volumes': image_meta.get('extra_volumes', []),
+                            'image_volumes': image_meta.get('volumes', []),
+                            'image_environment': image_meta.get('environment', {}),
+                            'image_command': image_meta.get('task_command'),
+                        }
+                    else:
                         image_asset = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
                         if image_asset:
                             image_name = image_asset.name
-                    if image_name:
-                        tc = task.config or {}
-                        if isinstance(tc, dict):
-                            tc['image_name'] = image_name
-                            # 从 assets.local.json 透传额外 docker 参数
-                            if image_meta:
-                                if image_meta.get('privileged'):
-                                    tc['privileged'] = image_meta['privileged']
-                                if image_meta.get('shm_size'):
-                                    tc['shm_size'] = image_meta['shm_size']
-                                if image_meta.get('extra_devices'):
-                                    tc['extra_devices'] = image_meta['extra_devices']
-                                if image_meta.get('extra_volumes'):
-                                    tc['extra_volumes'] = image_meta['extra_volumes']
-                                if image_meta.get('image_volumes'):
-                                    tc['image_volumes'] = image_meta['image_volumes']
-                                if image_meta.get('image_environment'):
-                                    tc['image_environment'] = image_meta['image_environment']
-                                if image_meta.get('task_command'):
-                                    tc['image_command'] = image_meta['task_command']
-                            task.config = tc
                 client = AIBenchClient()
-                job_info = client.submit_job(task)
+                job_info = client.submit_job(task, image_name=image_name, extra_cfg=extra_cfg)
                 job_id = job_info.get('job_id')
                 if not job_id:
                     raise RuntimeError(

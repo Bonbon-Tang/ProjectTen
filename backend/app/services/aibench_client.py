@@ -88,22 +88,19 @@ class AIBenchClient:
     # 公共 API
     # ------------------------------------------------------------------
 
-    def submit_job(self, task: Any) -> Dict[str, Any]:
+    def submit_job(self, task: Any, image_name: str = None, extra_cfg: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         将 ProjectTen 任务提交给 AIBenchAgent 910B 执行节点。
 
         Args:
-            task: EvaluationTask ORM 对象或其 config dict。
-                  必须包含 id、name、task_type、device_type、device_count
-                  以及 image_id（关联 DigitalAsset）信息。
+            task: EvaluationTask ORM 对象。
+            image_name: 直接指定的镜像名（来自 assets.local.json 或 DB），优先级最高。
+            extra_cfg: docker 额外参数 dict，包含 privileged/shm_size/extra_devices/extra_volumes/image_command 等。
 
         Returns:
             {"job_id": str, "external_task_id": str, "status": "queued", ...}
-            抛出 JobSubmissionError 则提交失败。
-
-        失败时不会抛出异常，只打印警告；调用方决定是否回退。
         """
-        payload = self._build_payload(task)
+        payload = self._build_payload(task, image_name=image_name, extra_cfg=extra_cfg or {})
         external_id = f"projectten-{task.id}"
         try:
             resp = self._post("/api/v1/jobs", json=payload)
@@ -176,25 +173,19 @@ class AIBenchClient:
     # 内部工具
     # ------------------------------------------------------------------
 
-    def _build_payload(self, task: Any) -> Dict[str, Any]:
+    def _build_payload(self, task: Any, image_name: str = None, extra_cfg: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         将 ProjectTen EvaluationTask 映射为 AIBenchAgent JobRequest schema。
 
-        字段映射：
-            task.id                 → external_task_id
-            task.task_type          → task_type（固定 model_deployment）
-            task.device_type        → chip（huawei_910b → Ascend_910B）
-            task.device_count       → chip_count
-            task.config['benchmark']→ benchmark
-            DigitalAsset (image)    → image（name / volumes / environment）
+        image_name 和 extra_cfg 由调用方从 assets.local.json 直接传入，
+        不依赖 task.config（避免 ORM session 刷新问题）。
         """
-        # 统一取 config dict
+        extra_cfg = extra_cfg or {}
         task_config: Dict[str, Any] = {}
         if hasattr(task, "config"):
             v = task.config
             task_config = v if isinstance(v, dict) else {}
 
-        # 解析设备
         raw_chip = str(task.device_type or "huawei_910b").lower().replace("-", "_")
         chip_map = {
             "huawei_910b": "Ascend_910B",
@@ -203,25 +194,16 @@ class AIBenchClient:
         }
         chip = chip_map.get(raw_chip, "Ascend_910B")
 
-        # 解析 image asset
-        image_name = task_config.get("image_name", "REPLACE_WITH_ASCEND_MODEL_IMAGE")
-        image_volumes = task_config.get("image_volumes", [])
-        image_env = task_config.get("image_environment", {})
-        image_command = task_config.get(
+        # image_name 优先用调用方传入的值，否则 fallback
+        resolved_image_name = image_name or task_config.get("image_name", "REPLACE_WITH_ASCEND_MODEL_IMAGE")
+        image_volumes = extra_cfg.get("image_volumes") or task_config.get("image_volumes", [])
+        image_env = extra_cfg.get("image_environment") or task_config.get("image_environment", {})
+        image_command = extra_cfg.get("image_command") or task_config.get(
             "image_command",
             "python3 /workspace/benchmark.py --output /workspace/results/result.json",
         )
-        # 如果 task 有 image_id，从 DB 查（调用方已保证 db session 可用）
-        image_id = getattr(task, "image_id", None)
-        if image_id:
-            # 延迟导入避免循环
-            from app.models.asset import DigitalAsset
-            # 注意：外部调用方需要传入 db session，这里先保留字段
-            task_config["_image_id"] = image_id
 
-        # benchmark 参数
         benchmark_cfg = task_config.get("benchmark", {})
-        # defaults
         benchmark = {
             "warmup": benchmark_cfg.get("warmup", 3),
             "repeat": benchmark_cfg.get("repeat", 10),
@@ -229,23 +211,17 @@ class AIBenchClient:
             "max_tokens": benchmark_cfg.get("max_tokens", 128),
         }
 
-        # resources
         resources = {
-            "device_ids": list(
-                range(getattr(task, "device_count", 1))
-            ),
-            "gpus": None,  # Ascend 不需要 --gpus all
+            "device_ids": list(range(getattr(task, "device_count", 1))),
+            "gpus": None,
             "network_mode": "host",
             "ipc_mode": "host",
-            "timeout_seconds": benchmark_cfg.get(
-                "timeout_seconds",
-                settings.AIBENCH_POLL_TIMEOUT_SECONDS,
-            ),
+            "timeout_seconds": benchmark_cfg.get("timeout_seconds", settings.AIBENCH_POLL_TIMEOUT_SECONDS),
             "cleanup_container": True,
-            "privileged": task_config.get("privileged", False),
-            "shm_size": task_config.get("shm_size"),
-            "extra_devices": task_config.get("extra_devices", []),
-            "extra_volumes": task_config.get("extra_volumes", []),
+            "privileged": extra_cfg.get("privileged", False),
+            "shm_size": extra_cfg.get("shm_size"),
+            "extra_devices": extra_cfg.get("extra_devices", []),
+            "extra_volumes": extra_cfg.get("extra_volumes", []),
         }
 
         payload = {
