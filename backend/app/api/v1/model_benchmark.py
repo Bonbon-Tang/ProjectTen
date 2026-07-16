@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from app.services.aibench_assets import load_aibench_image_catalog
+
 SCENARIO_TAGS = {
     "llm",
     "multimodal",
@@ -273,6 +275,7 @@ def get_model_benchmark_summary(
 def get_available_images(
     scenario: Optional[str] = None,
     chips: Optional[str] = None,
+    executor: Optional[str] = None,
     task_type: Optional[str] = None,
     device_type: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -281,6 +284,7 @@ def get_available_images(
     resolved_scenario = scenario or task_type
     resolved_chips = chips or device_type
     target_chip_tags = set(DEVICE_TAG_MAP.get(resolved_chips, [])) if resolved_chips else set()
+    aibench_catalog = load_aibench_image_catalog() if executor == "aibench_agent" else None
 
     q = db.query(DigitalAsset).filter(
         DigitalAsset.asset_type == "image",
@@ -290,6 +294,9 @@ def get_available_images(
 
     grouped = {}
     for img in images:
+        image_meta = aibench_catalog.get(str(img.id)) if aibench_catalog is not None else None
+        if aibench_catalog is not None and not image_meta:
+            continue
         tags = _ensure_list_tags(img.tags)
         if resolved_scenario and resolved_scenario not in tags:
             continue
@@ -316,6 +323,10 @@ def get_available_images(
             "middleware_name": tag_middleware,
             "model_name": final_model,
             "scenario_tags": scenario_tags,
+            "executor": executor,
+            "skill_name": image_meta.get("skill_name") if image_meta else None,
+            "supported_model": image_meta.get("supported_model") if image_meta else None,
+            "skill_source": image_meta.get("skill_source") if image_meta else None,
         }
         group_key = (tag_chip, tag_middleware, scenario_tags[0], final_model)
         existing = grouped.get(group_key)

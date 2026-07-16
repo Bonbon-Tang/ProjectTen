@@ -20,8 +20,8 @@ export function getModelBenchmarkSummary() {
   return api.get('/model-benchmark/summary');
 }
 
-export function getAvailableImages(scenario?: string, chips?: string) {
-  return api.get('/model-benchmark/images', { params: { scenario, chips } });
+export function getAvailableImages(scenario?: string, chips?: string, executor?: string) {
+  return api.get('/model-benchmark/images', { params: { scenario, chips, executor } });
 }
 
 export function getAvailableToolsets(scenario?: string) {

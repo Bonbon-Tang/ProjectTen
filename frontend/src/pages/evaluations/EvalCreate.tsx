@@ -69,6 +69,9 @@ type ModelImageInfo = {
   framework_name?: string;
   middleware_name?: string;
   scenario_tags?: string[];
+  skill_name?: string;
+  supported_model?: string;
+  skill_source?: string;
 };
 
 type OpCategoryInfo = {
@@ -290,7 +293,7 @@ export default function EvalCreate() {
 
   const fetchModelImages = (scenarioType?: string, chips?: string) => {
     setModelImagesLoading(true);
-    getAvailableImages(scenarioType, chips)
+    getAvailableImages(scenarioType, chips, AIBENCH_AGENT_TOOL_NAME)
       .then((res: any) => {
         const list = res?.data || res || [];
         if (Array.isArray(list)) {
@@ -305,6 +308,9 @@ export default function EvalCreate() {
             middleware_name: item.middleware_name,
             model_name: item.model_name,
             scenario_tags: item.scenario_tags,
+            skill_name: item.skill_name,
+            supported_model: item.supported_model,
+            skill_source: item.skill_source,
           }));
           setModelImages(mapped);
         }
@@ -315,19 +321,9 @@ export default function EvalCreate() {
 
   const fetchAllModelImages = useCallback(async () => {
     try {
-      const allItems: any[] = [];
-      let page = 1;
-      const pageSize = 100;
-      let total = Number.POSITIVE_INFINITY;
-      while (allItems.length < total) {
-        const res: any = await getAssets({ asset_type: 'image', page, page_size: pageSize });
-        const payload = res?.data?.data || res?.data || res || {};
-        const items = Array.isArray(payload?.items) ? payload.items : [];
-        total = Number(payload?.total ?? items.length);
-        allItems.push(...items);
-        if (items.length === 0 || items.length < pageSize) break;
-        page += 1;
-      }
+      const res: any = await getAvailableImages(undefined, undefined, AIBENCH_AGENT_TOOL_NAME);
+      const payload = res?.data || res || [];
+      const allItems: any[] = Array.isArray(payload) ? payload : [];
       setAllModelImages(
         allItems.map((item: any) => ({
           id: item.id,
@@ -344,6 +340,9 @@ export default function EvalCreate() {
           middleware_name: item.middleware_name,
           model_name: item.model_name,
           scenario_tags: item.scenario_tags,
+          skill_name: item.skill_name,
+          supported_model: item.supported_model,
+          skill_source: item.skill_source,
         })),
       );
     } catch {
@@ -365,6 +364,13 @@ export default function EvalCreate() {
       fetchToolsets();
     }
   }, [taskKind, scenario]);
+
+  useEffect(() => {
+    if (taskKind !== 'model_deployment_test' || !modelToolsets[0]) return;
+    if (!form.getFieldValue('toolset_id')) {
+      form.setFieldValue('toolset_id', modelToolsets[0].id);
+    }
+  }, [form, modelToolsets, taskKind]);
 
   const steps = [
     { title: '选择评测大类' },
@@ -421,6 +427,7 @@ export default function EvalCreate() {
       } else {
         // 模型测试默认使用 aibench_agent 执行器
         defaults.tool_name = AIBENCH_AGENT_TOOL_NAME;
+        if (modelToolsets[0]) defaults.toolset_id = modelToolsets[0].id;
       }
       form.setFieldsValue(defaults);
       setCurrent(2);
@@ -719,10 +726,10 @@ export default function EvalCreate() {
 
     const imageItems: VisualStageInfo[] = imageCandidatesByVisual.map((img) => ({
       key: String(img.id),
-      title: img.model_name || img.name,
+      title: img.supported_model || img.model_name || img.name,
       subtitle: `${middlewareLabelFromImage(img)} · ${img.chip_name || img.tags?.[0] || chipTagFromDevice(selectedDevice) || chipLabelFromDevice(selectedDevice) || '未知芯片'}`,
-      description: img.description || img.name,
-      meta: (img.tags || []).filter((tag) => scenarioTagSet.has(tag)).map((tag) => getSubTypeLabel(tag)).join(' / ') || undefined,
+      description: img.skill_name ? `${img.skill_name} · ${img.description || img.name}` : (img.description || img.name),
+      meta: img.skill_name || (img.tags || []).filter((tag) => scenarioTagSet.has(tag)).map((tag) => getSubTypeLabel(tag)).join(' / ') || undefined,
       selected: img.id === selectedImageId,
       faded: Boolean(selectedImageId) && img.id !== selectedImageId,
       disabled: !visualFramework,
@@ -810,15 +817,25 @@ export default function EvalCreate() {
           })()} style={{ width: '100%', ...selectFieldStyle }} placeholder="选择设备数量" />
         </Form.Item>
 
-        <Form.Item name="toolset_id" label={isOperatorTest ? '算子评测工具' : '模型部署测试工具'} rules={isOperatorTest ? [{ required: true, message: '算子测试必须选择评测工具' }] : []}>
-          <Select placeholder={isOperatorTest ? '选择算子评测工具' : '选择模型部署测试工具'} allowClear={!isOperatorTest} loading={toolsetsLoading} style={selectFieldStyle} options={(isOperatorTest ? operatorToolsets : modelToolsets).map((t) => ({ label: t.name, value: t.id }))} notFoundContent={isOperatorTest ? '暂无算子评测工具' : '暂无模型部署测试工具'} />
-        </Form.Item>
-
-        {/* 隐藏字段：确保 aibench_agent 能传递到后端 */}
-        {!isOperatorTest && (
-          <Form.Item name="tool_name" hidden>
-            <Input />
+        {isOperatorTest ? (
+          <Form.Item name="toolset_id" label="算子评测工具" rules={[{ required: true, message: '算子测试必须选择评测工具' }]}>
+            <Select placeholder="选择算子评测工具" loading={toolsetsLoading} style={selectFieldStyle} options={operatorToolsets.map((t) => ({ label: t.name, value: t.id }))} notFoundContent="暂无算子评测工具" />
           </Form.Item>
+        ) : (
+          <>
+            <Form.Item name="tool_name" label="模型部署测试工具" rules={[{ required: true, message: '请选择模型部署测试工具' }]}>
+              <Select
+                style={selectFieldStyle}
+                options={[{
+                  label: 'AIBenchAgent（DeepEval-Skills）',
+                  value: AIBENCH_AGENT_TOOL_NAME,
+                }]}
+              />
+            </Form.Item>
+            <Form.Item name="toolset_id" hidden>
+              <Input />
+            </Form.Item>
+          </>
         )}
 
         {isOperatorTest && (
@@ -844,7 +861,7 @@ export default function EvalCreate() {
               options={imageCandidatesByVisual.map((img) => {
                 const scenarioTags = (img.tags || []).filter((tag) => scenarioTagSet.has(tag));
                 return {
-                  label: `${img.name} - ${img.model_name || '模型'} (${middlewareLabelFromImage(img)})`,
+                  label: `${img.supported_model || img.model_name || img.name} · ${img.skill_name || 'AIBenchAgent'}`,
                   value: img.id,
                   searchText: `${img.name} ${img.model_name || ''} ${middlewareLabelFromImage(img)} ${scenarioTags.join(' ')}`,
                   chip_name: img.chip_name,
@@ -852,14 +869,16 @@ export default function EvalCreate() {
                   framework_name: img.framework_name,
                   middleware_name: middlewareLabelFromImage(img),
                   scenarioTags,
+                  skill_name: img.skill_name,
+                  supported_model: img.supported_model,
                 };
               })}
               optionRender={(option) => {
-                const data = option.data as DefaultOptionType & { chip_name?: string; model_name?: string; framework_name?: string; middleware_name?: string; scenarioTags?: string[] };
+                const data = option.data as DefaultOptionType & { chip_name?: string; model_name?: string; framework_name?: string; middleware_name?: string; scenarioTags?: string[]; skill_name?: string; supported_model?: string };
                 return (
                   <div style={{ padding: '4px 0' }}>
                     <div style={{ fontWeight: 600, color: '#102a4f', marginBottom: 4 }}>{String(data.label)}</div>
-                    <div style={{ fontSize: 12, color: '#60738f', marginBottom: data.scenarioTags?.length ? 6 : 0 }}>{data.chip_name || '芯片'} · {data.middleware_name || data.framework_name || '中间层'} · {data.model_name || '模型'}</div>
+                    <div style={{ fontSize: 12, color: '#60738f', marginBottom: data.scenarioTags?.length ? 6 : 0 }}>{data.chip_name || '芯片'} · {data.middleware_name || data.framework_name || '中间层'} · {data.supported_model || data.model_name || '模型'} · {data.skill_name || 'AIBenchAgent'}</div>
                     {data.scenarioTags?.length ? <Space size={[4, 4]} wrap>{data.scenarioTags.map((tag) => <Tag key={tag} color={tag === scenario ? 'blue' : 'default'} style={{ marginInlineEnd: 0 }}>{getSubTypeLabel(tag)}</Tag>)}</Space> : null}
                   </div>
                 );

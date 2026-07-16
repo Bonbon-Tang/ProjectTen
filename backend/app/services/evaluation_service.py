@@ -677,8 +677,9 @@ class EvaluationService:
                     from pathlib import Path
                     from app.models.asset import DigitalAsset
                     local_assets_path = Path(__file__).parent.parent.parent / 'config' / 'projectten_assets.local.json'
-                    image_meta = None
-                    if local_assets_path.exists():
+                    from app.services.aibench_assets import load_aibench_image_catalog
+                    image_meta = load_aibench_image_catalog().get(str(task.image_id))
+                    if image_meta is None and local_assets_path.exists():
                         with open(local_assets_path) as f:
                             local_assets = _json.load(f)
                         image_meta = local_assets.get('images', {}).get(str(task.image_id))
