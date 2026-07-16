@@ -676,7 +676,7 @@ class EvaluationService:
                     import json as _json
                     from pathlib import Path
                     from app.models.asset import DigitalAsset
-                    local_assets_path = Path(__file__).parent.parent / 'config' / 'projectten_assets.local.json'
+                    local_assets_path = Path(__file__).parent.parent.parent / 'config' / 'projectten_assets.local.json'
                     image_meta = None
                     if local_assets_path.exists():
                         with open(local_assets_path) as f:
