@@ -669,14 +669,27 @@ class EvaluationService:
                     TERMINAL_STATUSES as _AGENT_TERMINAL,
                     AGENT_TO_PROGRESS,
                 )
-                # 如果有 image_id，从 DB 查镜像名，存入 config 供 AIBenchClient 使用
+                # 如果有 image_id，查镜像名（优先用 assets.local.json，否则用 DB name）
                 if task.image_id:
+                    import json as _json
+                    from pathlib import Path
                     from app.models.asset import DigitalAsset
-                    image_asset = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
-                    if image_asset:
+                    image_name = None
+                    local_assets_path = Path(__file__).parent.parent.parent.parent / 'AIBenchAgent' / 'config' / 'projectten_assets.local.json'
+                    if local_assets_path.exists():
+                        with open(local_assets_path) as f:
+                            local_assets = _json.load(f)
+                        image_meta = local_assets.get('images', {}).get(str(task.image_id))
+                        if image_meta and image_meta.get('image_name'):
+                            image_name = image_meta['image_name']
+                    if not image_name:
+                        image_asset = db.query(DigitalAsset).filter(DigitalAsset.id == task.image_id).first()
+                        if image_asset:
+                            image_name = image_asset.name
+                    if image_name:
                         tc = task.config or {}
                         if isinstance(tc, dict):
-                            tc['image_name'] = image_asset.name
+                            tc['image_name'] = image_name
                             task.config = tc
                 client = AIBenchClient()
                 job_info = client.submit_job(task)
