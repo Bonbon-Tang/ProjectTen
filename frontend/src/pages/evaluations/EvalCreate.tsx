@@ -814,6 +814,13 @@ export default function EvalCreate() {
           <Select placeholder={isOperatorTest ? '选择算子评测工具' : '选择模型部署测试工具'} allowClear={!isOperatorTest} loading={toolsetsLoading} style={selectFieldStyle} options={(isOperatorTest ? operatorToolsets : modelToolsets).map((t) => ({ label: t.name, value: t.id }))} notFoundContent={isOperatorTest ? '暂无算子评测工具' : '暂无模型部署测试工具'} />
         </Form.Item>
 
+        {/* 隐藏字段：确保 aibench_agent 能传递到后端 */}
+        {!isOperatorTest && (
+          <Form.Item name="tool_name" hidden>
+            <Input />
+          </Form.Item>
+        )}
+
         {isOperatorTest && (
           <Form.Item name="operator_lib_id" label="选择算子库" extra={isDeeplinkSelected ? 'deeplink_op_test 当前默认使用部署服务器本地算子库，结果会以 local_default 回传平台' : '选择算子的来源库，不同算子库实现可能影响测试结果'} rules={isDeeplinkSelected ? [] : [{ required: true, message: '算子测试必须选择算子库' }]}>
             <Select disabled={isDeeplinkSelected} placeholder={isDeeplinkSelected ? DEEPLINK_OPERATOR_LIBRARY_LABEL : '选择算子库来源'} loading={operatorLibsLoading} style={selectFieldStyle} options={operatorLibs.map((lib) => ({ label: `${lib.name}${lib.description ? ` — ${lib.description.substring(0, 40)}...` : ''}`, value: lib.id }))} />
